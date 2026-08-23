@@ -1,0 +1,11 @@
+{
+  "item.coloniesunbound.worksite_marker": "Worksite Marker",
+  "message.coloniesunbound.marker.area_selected": "Selected %sx%sx%s area (%s blocks)",
+  "message.coloniesunbound.marker.cleared": "Marker selection cleared",
+  "message.coloniesunbound.marker.first_corner": "First corner: %s, %s, %s",
+  "message.coloniesunbound.marker.too_large": "Each side may be at most %s blocks",
+  "tooltip.coloniesunbound.worksite_marker.area": "Area: %sx%sx%s",
+  "tooltip.coloniesunbound.worksite_marker.clear": "Sneak-use on a block to clear",
+  "tooltip.coloniesunbound.worksite_marker.pending": "Select the opposite corner",
+  "tooltip.coloniesunbound.worksite_marker.use": "Use on two blocks to select an area"
+}

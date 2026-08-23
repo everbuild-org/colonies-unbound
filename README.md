@@ -21,6 +21,19 @@ MineColonies integration will intentionally be version-pinned because some requi
 4. Survival Residence integration
 5. Reusable inspection rules and workplace adapters
 
+## Current prototype
+
+The Worksite Marker provides the first area-selection vertical slice:
+
+- Obtain it from the Tools & Utilities creative tab (or `/give @s coloniesunbound:worksite_marker`).
+- Use it on two blocks to select the inclusive corners of a volume.
+- Hold it to see a live cyan preview and the finalized gold outline in-world.
+- Sneak-use it on a block to clear the current selection.
+
+Selection data is mutated by the server and synchronized as item data. The current item-local
+representation is intentionally small; world-level marker collections and MineColonies ownership
+links will be introduced with the Residence integration.
+
 ## Development
 
 ```sh
