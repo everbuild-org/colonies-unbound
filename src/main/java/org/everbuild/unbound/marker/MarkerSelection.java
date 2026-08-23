@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import org.jetbrains.annotations.Nullable;
+import java.util.UUID;
 
 /**
  * The selection carried by a Worksite Marker stack.
@@ -15,11 +16,13 @@ import org.jetbrains.annotations.Nullable;
  * client without introducing a custom packet before marker collections need their own storage.</p>
  */
 public record MarkerSelection(
+        UUID markerId,
         ResourceLocation dimension,
         BlockPos firstCorner,
         @Nullable BlockPos secondCorner) {
     private static final String ROOT_KEY = "coloniesunbound_selection";
     private static final String DIMENSION_KEY = "dimension";
+    private static final String ID_KEY = "marker_id";
     private static final String FIRST_KEY = "first";
     private static final String SECOND_KEY = "second";
 
@@ -39,11 +42,13 @@ public record MarkerSelection(
         final BlockPos second = tag.contains(SECOND_KEY, CompoundTag.TAG_LONG)
                 ? BlockPos.of(tag.getLong(SECOND_KEY))
                 : null;
-        return new MarkerSelection(dimension, first, second);
+        final UUID markerId = tag.hasUUID(ID_KEY) ? tag.getUUID(ID_KEY) : UUID.randomUUID();
+        return new MarkerSelection(markerId, dimension, first, second);
     }
 
     public static void write(final ItemStack stack, final MarkerSelection selection) {
         final CompoundTag selectionTag = new CompoundTag();
+        selectionTag.putUUID(ID_KEY, selection.markerId());
         selectionTag.putString(DIMENSION_KEY, selection.dimension().toString());
         selectionTag.putLong(FIRST_KEY, selection.firstCorner().asLong());
         if (selection.secondCorner() != null) {

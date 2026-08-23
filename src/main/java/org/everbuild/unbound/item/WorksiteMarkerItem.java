@@ -5,6 +5,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +16,8 @@ import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.MarkerSelection;
 import org.everbuild.unbound.residence.ResidenceInspection;
 import org.everbuild.unbound.residence.ResidenceInspector;
+import org.everbuild.unbound.residence.ResidenceMarkerService;
+import java.util.UUID;
 
 /** Selects an inclusive survival-building volume using two block clicks. */
 public final class WorksiteMarkerItem extends Item {
@@ -50,7 +54,7 @@ public final class WorksiteMarkerItem extends Item {
         final MarkerSelection existing = MarkerSelection.read(stack);
 
         if (existing == null || existing.isComplete() || !existing.dimension().equals(dimension)) {
-            MarkerSelection.write(stack, new MarkerSelection(dimension, clicked, null));
+            MarkerSelection.write(stack, new MarkerSelection(UUID.randomUUID(), dimension, clicked, null));
             context.getPlayer().displayClientMessage(
                     Component.translatable(
                             "message.coloniesunbound.marker.first_corner",
@@ -69,13 +73,12 @@ public final class WorksiteMarkerItem extends Item {
             return;
         }
 
-        MarkerSelection.write(stack, new MarkerSelection(dimension, existing.firstCorner(), clicked));
+        final MarkerSelection completed = new MarkerSelection(
+                existing.markerId(), dimension, existing.firstCorner(), clicked);
+        MarkerSelection.write(stack, completed);
         final ResidenceInspection inspection = ResidenceInspector.inspect(context.getLevel(), bounds);
         final Component report = switch (inspection.status()) {
-            case VALID -> Component.translatable(
-                            "message.coloniesunbound.inspection.valid",
-                            bounds.sizeX(), bounds.sizeY(), bounds.sizeZ(), inspection.capacity())
-                    .withStyle(ChatFormatting.GREEN);
+            case VALID -> registrationReport(context, completed, inspection, bounds);
             case NO_BEDS -> Component.translatable("message.coloniesunbound.inspection.no_beds")
                     .withStyle(ChatFormatting.RED);
             case AREA_NOT_LOADED -> Component.translatable("message.coloniesunbound.inspection.not_loaded")
@@ -86,6 +89,29 @@ public final class WorksiteMarkerItem extends Item {
                     .withStyle(ChatFormatting.RED);
         };
         context.getPlayer().displayClientMessage(report, true);
+    }
+
+    private static Component registrationReport(
+            final UseOnContext context,
+            final MarkerSelection selection,
+            final ResidenceInspection inspection,
+            final AreaBounds bounds) {
+        if (!(context.getLevel() instanceof ServerLevel serverLevel)
+                || !(context.getPlayer() instanceof ServerPlayer serverPlayer)) {
+            return Component.empty();
+        }
+        return switch (ResidenceMarkerService.register(serverLevel, serverPlayer, selection, inspection)) {
+            case SAVED -> Component.translatable(
+                            "message.coloniesunbound.inspection.saved",
+                            bounds.sizeX(), bounds.sizeY(), bounds.sizeZ(), inspection.capacity())
+                    .withStyle(ChatFormatting.GREEN);
+            case OUTSIDE_COLONY -> Component.translatable("message.coloniesunbound.inspection.outside_colony")
+                    .withStyle(ChatFormatting.RED);
+            case CROSSES_COLONY_BORDER -> Component.translatable("message.coloniesunbound.inspection.crosses_border")
+                    .withStyle(ChatFormatting.RED);
+            case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
+                    .withStyle(ChatFormatting.RED);
+        };
     }
 
     @Override
