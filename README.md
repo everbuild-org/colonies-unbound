@@ -28,6 +28,7 @@ The Worksite Marker provides the first area-selection vertical slice:
 - Obtain it from the Tools & Utilities creative tab (or `/give @s coloniesunbound:worksite_marker`).
 - Use it on two blocks to select the inclusive corners of a volume.
 - Hold it to see a live cyan preview and the finalized gold outline in-world.
+- Completing an area inspects loaded blocks and reports the number of bed heads found.
 - Sneak-use it on a block to clear the current selection.
 
 Selection data is mutated by the server and synchronized as item data. The current item-local
@@ -40,3 +41,5 @@ links will be introduced with the Residence integration.
 ./gradlew build
 ./gradlew runClient
 ```
+
+`build` also runs the focused bounds and Residence inspection unit tests.

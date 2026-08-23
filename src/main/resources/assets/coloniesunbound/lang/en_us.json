@@ -1,5 +1,9 @@
 {
   "item.coloniesunbound.worksite_marker": "Worksite Marker",
+  "message.coloniesunbound.inspection.no_beds": "Invalid residence: no beds found",
+  "message.coloniesunbound.inspection.not_loaded": "Cannot inspect: part of the area is not loaded",
+  "message.coloniesunbound.inspection.too_large": "Cannot inspect more than %s blocks at once",
+  "message.coloniesunbound.inspection.valid": "Residence %sx%sx%s: %s beds found",
   "message.coloniesunbound.marker.area_selected": "Selected %sx%sx%s area (%s blocks)",
   "message.coloniesunbound.marker.cleared": "Marker selection cleared",
   "message.coloniesunbound.marker.first_corner": "First corner: %s, %s, %s",

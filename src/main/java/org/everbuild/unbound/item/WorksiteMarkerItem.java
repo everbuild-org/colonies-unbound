@@ -12,6 +12,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.MarkerSelection;
+import org.everbuild.unbound.residence.ResidenceInspection;
+import org.everbuild.unbound.residence.ResidenceInspector;
 
 /** Selects an inclusive survival-building volume using two block clicks. */
 public final class WorksiteMarkerItem extends Item {
@@ -24,7 +26,10 @@ public final class WorksiteMarkerItem extends Item {
     @Override
     public InteractionResult useOn(final UseOnContext context) {
         final ItemStack stack = context.getItemInHand();
-        if (context.getPlayer() != null && context.getPlayer().isShiftKeyDown()) {
+        if (context.getPlayer() == null) {
+            return InteractionResult.PASS;
+        }
+        if (context.getPlayer().isShiftKeyDown()) {
             if (!context.getLevel().isClientSide) {
                 MarkerSelection.clear(stack);
                 context.getPlayer().displayClientMessage(
@@ -65,11 +70,22 @@ public final class WorksiteMarkerItem extends Item {
         }
 
         MarkerSelection.write(stack, new MarkerSelection(dimension, existing.firstCorner(), clicked));
-        context.getPlayer().displayClientMessage(
-                Component.translatable(
-                        "message.coloniesunbound.marker.area_selected",
-                        bounds.sizeX(), bounds.sizeY(), bounds.sizeZ(), bounds.volume()),
-                true);
+        final ResidenceInspection inspection = ResidenceInspector.inspect(context.getLevel(), bounds);
+        final Component report = switch (inspection.status()) {
+            case VALID -> Component.translatable(
+                            "message.coloniesunbound.inspection.valid",
+                            bounds.sizeX(), bounds.sizeY(), bounds.sizeZ(), inspection.capacity())
+                    .withStyle(ChatFormatting.GREEN);
+            case NO_BEDS -> Component.translatable("message.coloniesunbound.inspection.no_beds")
+                    .withStyle(ChatFormatting.RED);
+            case AREA_NOT_LOADED -> Component.translatable("message.coloniesunbound.inspection.not_loaded")
+                    .withStyle(ChatFormatting.RED);
+            case AREA_TOO_LARGE -> Component.translatable(
+                            "message.coloniesunbound.inspection.too_large",
+                            ResidenceInspector.MAXIMUM_INSPECTION_VOLUME)
+                    .withStyle(ChatFormatting.RED);
+        };
+        context.getPlayer().displayClientMessage(report, true);
     }
 
     @Override

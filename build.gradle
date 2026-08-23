@@ -60,6 +60,11 @@ neoForge {
             sourceSet sourceSets.main
         }
     }
+
+    unitTest {
+        enable()
+        testedMod = mods."${mod_id}"
+    }
 }
 
 configurations {
@@ -75,6 +80,10 @@ dependencies {
     implementation("com.ldtteam:blockui:${blockui_version}") { transitive = false }
     implementation("com.ldtteam:domum-ornamentum:${domum_ornamentum_version}") { transitive = false }
     implementation("com.ldtteam:multipiston:${multipiston_version}") { transitive = false }
+
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
@@ -100,6 +109,10 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
@@ -107,4 +120,3 @@ publishing {
         }
     }
 }
-
