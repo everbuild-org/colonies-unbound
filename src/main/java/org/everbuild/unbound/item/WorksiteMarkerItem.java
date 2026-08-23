@@ -87,6 +87,10 @@ public final class WorksiteMarkerItem extends Item {
                             "message.coloniesunbound.inspection.too_large",
                             ResidenceInspector.MAXIMUM_INSPECTION_VOLUME)
                     .withStyle(ChatFormatting.RED);
+            case NO_PLAQUE -> Component.translatable("message.coloniesunbound.inspection.no_plaque")
+                    .withStyle(ChatFormatting.RED);
+            case MULTIPLE_PLAQUES -> Component.translatable("message.coloniesunbound.inspection.multiple_plaques")
+                    .withStyle(ChatFormatting.RED);
         };
         context.getPlayer().displayClientMessage(report, true);
     }
@@ -110,6 +114,8 @@ public final class WorksiteMarkerItem extends Item {
             case CROSSES_COLONY_BORDER -> Component.translatable("message.coloniesunbound.inspection.crosses_border")
                     .withStyle(ChatFormatting.RED);
             case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
+                    .withStyle(ChatFormatting.RED);
+            case PLAQUE_NOT_REGISTERED -> Component.translatable("message.coloniesunbound.inspection.plaque_not_registered")
                     .withStyle(ChatFormatting.RED);
         };
     }

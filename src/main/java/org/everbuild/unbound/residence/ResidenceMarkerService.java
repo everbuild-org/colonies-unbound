@@ -3,12 +3,16 @@ package org.everbuild.unbound.residence;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.IColonyManager;
 import com.minecolonies.api.colony.permissions.Action;
+import com.minecolonies.api.colony.buildings.IBuilding;
+import com.minecolonies.core.colony.buildings.modules.BedHandlingModule;
+import com.minecolonies.core.colony.buildings.modules.BuildingModules;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.MarkerSelection;
+import org.everbuild.unbound.minecolonies.SurvivalResidenceBuilding;
 
 /** Validates MineColonies ownership before committing a Residence marker to world data. */
 public final class ResidenceMarkerService {
@@ -31,6 +35,24 @@ public final class ResidenceMarkerService {
         if (!cornersBelongTo(level, bounds, colony)) {
             return Result.CROSSES_COLONY_BORDER;
         }
+
+        final BlockPos plaque = inspection.plaquePositions().getFirst();
+        final IBuilding building = IColonyManager.getInstance().getBuilding(level, plaque);
+        if (!(building instanceof SurvivalResidenceBuilding)) {
+            return Result.PLAQUE_NOT_REGISTERED;
+        }
+
+        building.setCorners(bounds.min(), bounds.max());
+        building.setBuildingLevel(1);
+        final BedHandlingModule bedModule = building.getModule(BuildingModules.BED);
+        for (final BlockPos oldBed : List.copyOf(bedModule.getRegisteredBlocks())) {
+            bedModule.removeBed(oldBed);
+        }
+        for (final BlockPos bed : inspection.bedHeads()) {
+            bedModule.onBlockPlacedInBuilding(level.getBlockState(bed), bed, level);
+        }
+        building.markDirty();
+        colony.markDirty();
 
         ResidenceMarkerData.get(level).put(new SurvivalResidenceMarker(
                 selection.markerId(),
@@ -64,6 +86,7 @@ public final class ResidenceMarkerService {
         SAVED,
         OUTSIDE_COLONY,
         CROSSES_COLONY_BORDER,
-        NO_PERMISSION
+        NO_PERMISSION,
+        PLAQUE_NOT_REGISTERED
     }
 }

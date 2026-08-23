@@ -18,7 +18,8 @@ class ResidenceInspectorTest {
         final Set<BlockPos> beds = Set.of(firstBed, secondBed);
         final AreaBounds bounds = AreaBounds.between(BlockPos.ZERO, new BlockPos(3, 2, 3));
 
-        final ResidenceInspection inspection = ResidenceInspector.inspect(bounds, true, beds::contains);
+        final ResidenceInspection inspection = ResidenceInspector.inspect(
+                bounds, true, beds::contains, BlockPos.ZERO::equals);
 
         assertEquals(ResidenceInspection.Status.VALID, inspection.status());
         assertEquals(2, inspection.capacity());
@@ -30,7 +31,8 @@ class ResidenceInspectorTest {
     void reportsMissingBeds() {
         final AreaBounds bounds = AreaBounds.between(BlockPos.ZERO, new BlockPos(2, 2, 2));
 
-        final ResidenceInspection inspection = ResidenceInspector.inspect(bounds, true, ignored -> false);
+        final ResidenceInspection inspection = ResidenceInspector.inspect(
+                bounds, true, ignored -> false, BlockPos.ZERO::equals);
 
         assertEquals(ResidenceInspection.Status.NO_BEDS, inspection.status());
         assertEquals(0, inspection.capacity());
@@ -45,7 +47,7 @@ class ResidenceInspectorTest {
         final ResidenceInspection inspection = ResidenceInspector.inspect(bounds, false, ignored -> {
             accessed.set(true);
             return false;
-        });
+        }, ignored -> false);
 
         assertEquals(ResidenceInspection.Status.AREA_NOT_LOADED, inspection.status());
         assertFalse(accessed.get());
@@ -59,9 +61,25 @@ class ResidenceInspectorTest {
         final ResidenceInspection inspection = ResidenceInspector.inspect(bounds, true, ignored -> {
             accessed.set(true);
             return false;
-        });
+        }, ignored -> false);
 
         assertEquals(ResidenceInspection.Status.AREA_TOO_LARGE, inspection.status());
         assertFalse(accessed.get());
+    }
+
+    @Test
+    void requiresExactlyOneResidencePlaque() {
+        final AreaBounds bounds = AreaBounds.between(BlockPos.ZERO, new BlockPos(2, 2, 2));
+
+        final ResidenceInspection missing = ResidenceInspector.inspect(
+                bounds, true, BlockPos.ZERO::equals, ignored -> false);
+        final ResidenceInspection multiple = ResidenceInspector.inspect(
+                bounds,
+                true,
+                BlockPos.ZERO::equals,
+                Set.of(BlockPos.ZERO, new BlockPos(1, 0, 0))::contains);
+
+        assertEquals(ResidenceInspection.Status.NO_PLAQUE, missing.status());
+        assertEquals(ResidenceInspection.Status.MULTIPLE_PLAQUES, multiple.status());
     }
 }

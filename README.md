@@ -26,10 +26,12 @@ MineColonies integration will intentionally be version-pinned because some requi
 The Worksite Marker provides the first area-selection vertical slice:
 
 - Obtain it from the Tools & Utilities creative tab (or `/give @s coloniesunbound:worksite_marker`).
+- Place one Survival Residence Plaque inside the candidate house from the Functional Blocks tab.
 - Use it on two blocks to select the inclusive corners of a volume.
 - Hold it to see a live cyan preview and the finalized gold outline in-world.
 - Completing an area inspects loaded blocks and reports the number of bed heads found.
-- Valid residences are stored per dimension and associated with their MineColonies colony ID.
+- Valid residences configure a dedicated MineColonies building whose capacity is its registered bed count.
+- Residence bounds, beds, ownership, and inspection time are also stored per dimension.
 - Saving requires MineColonies' `MANAGE_HUTS` permission and an area wholly inside one colony.
 - Sneak-use it on a block to clear the current selection.
 

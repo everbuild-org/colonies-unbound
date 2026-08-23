@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import org.everbuild.unbound.registry.ModItems;
+import org.everbuild.unbound.minecolonies.MineColoniesIntegration;
 import org.slf4j.Logger;
 
 /**
@@ -16,6 +17,7 @@ public final class ColoniesUnbound {
 
     public ColoniesUnbound(final IEventBus modBus) {
         ModItems.register(modBus);
+        MineColoniesIntegration.register(modBus);
         LOGGER.info("Colonies Unbound is loading");
     }
 }
