@@ -30,5 +30,20 @@ public final class ClientModEvents {
         event.registerBlockEntityRenderer(
                 MineColoniesIntegration.SURVIVAL_SHEEP_PEN_TILE.get(),
                 SurvivalResidenceRenderer::new);
+        event.registerBlockEntityRenderer(
+                MineColoniesIntegration.SURVIVAL_CHICKEN_PEN_TILE.get(),
+                SurvivalResidenceRenderer::new);
+        event.registerBlockEntityRenderer(
+                MineColoniesIntegration.SURVIVAL_PIG_PEN_TILE.get(),
+                SurvivalResidenceRenderer::new);
+        event.registerBlockEntityRenderer(
+                MineColoniesIntegration.SURVIVAL_RABBIT_HUTCH_TILE.get(),
+                SurvivalResidenceRenderer::new);
+        event.registerBlockEntityRenderer(
+                MineColoniesIntegration.SURVIVAL_STABLE_TILE.get(),
+                SurvivalResidenceRenderer::new);
+        event.registerBlockEntityRenderer(
+                MineColoniesIntegration.SURVIVAL_APIARY_TILE.get(),
+                SurvivalResidenceRenderer::new);
     }
 }

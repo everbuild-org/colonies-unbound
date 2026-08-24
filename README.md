@@ -52,6 +52,12 @@ The Worksite Marker provides the first area-selection vertical slice:
   deactivates hiring until the pen becomes valid again, without deleting its committed volume.
 - A Survival Sheep Pen Plaque uses the same scanned pen requirements but activates MineColonies'
   native Shepherd, including breeding, shearing, dyeing settings, and sheep-specific production.
+- Chicken Pen, Pig Pen, and Rabbit Hutch plaques compose the same gate/pasture/storage workflow with
+  MineColonies' native Chicken Herder, Swine Herder, and Rabbit Herder modules.
+- A Survival Stable adds an authored Stall point to the livestock requirements and exposes it as the
+  native `stall` positioned tag used by the Stable Master and cavalry systems.
+- A Survival Apiary scans vanilla beehives and bee nests, while storage remains player-authored. Hive
+  changes reconcile into MineColonies' native Beekeeper building after block changes and chunk loads.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.

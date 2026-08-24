@@ -93,6 +93,29 @@ class PlaqueHudModelTest {
         assertEquals(3, model.requiredCount());
     }
 
+    @Test
+    void stableAlsoRequiresAnAuthoredStall() {
+        final PlaqueHudModel model = PlaqueHudModel.from(MarkerType.STABLE, mark(
+                MarkerType.STABLE,
+                new WorksitePoi(WorksitePoiType.STORAGE, BlockPos.ZERO),
+                new WorksitePoi(WorksitePoiType.ENTRANCE, BlockPos.ZERO.offset(1, 0, 0)),
+                new WorksitePoi(WorksitePoiType.PASTURE, BlockPos.ZERO.offset(2, 0, 0))));
+
+        assertEquals(PlaqueHudModel.State.DRAFT, model.state());
+        assertEquals(4, model.requiredCount());
+    }
+
+    @Test
+    void apiaryRequiresStorageAndAScannedHive() {
+        final PlaqueHudModel model = PlaqueHudModel.from(MarkerType.APIARY, mark(
+                MarkerType.APIARY,
+                new WorksitePoi(WorksitePoiType.STORAGE, BlockPos.ZERO),
+                new WorksitePoi(WorksitePoiType.HIVE, BlockPos.ZERO.offset(1, 0, 0))));
+
+        assertEquals(PlaqueHudModel.State.ACTIVE, model.state());
+        assertEquals(2, model.requiredCount());
+    }
+
     private static CommittedWorksiteMark mark(final MarkerType type, final WorksitePoi... points) {
         return new CommittedWorksiteMark(UUID.randomUUID(), type, BOUNDS, List.of(points));
     }

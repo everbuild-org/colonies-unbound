@@ -7,6 +7,7 @@ import com.minecolonies.core.colony.buildings.moduleviews.LivingBuildingModuleVi
 import com.minecolonies.core.colony.buildings.workerbuildings.BuildingCook;
 import com.minecolonies.core.colony.buildings.views.EmptyView;
 import com.minecolonies.core.colony.buildings.workerbuildings.BuildingGuardTower;
+import com.minecolonies.core.colony.buildings.workerbuildings.BuildingBeekeeper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -106,6 +107,61 @@ public final class MineColoniesIntegration {
                                     SURVIVAL_SHEEP_PEN_BLOCK.get())
                             .build(null));
 
+    public static final DeferredBlock<SurvivalChickenPenBlock> SURVIVAL_CHICKEN_PEN_BLOCK = BLOCKS.registerBlock(
+            "survival_chicken_pen_plaque", SurvivalChickenPenBlock::new,
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_CHICKEN_PEN_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_CHICKEN_PEN_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalChickenPenTileEntity>>
+            SURVIVAL_CHICKEN_PEN_TILE = BLOCK_ENTITIES.register(
+                    "survival_chicken_pen_plaque",
+                    () -> BlockEntityType.Builder.of(SurvivalChickenPenTileEntity::new, SURVIVAL_CHICKEN_PEN_BLOCK.get())
+                            .build(null));
+
+    public static final DeferredBlock<SurvivalPigPenBlock> SURVIVAL_PIG_PEN_BLOCK = BLOCKS.registerBlock(
+            "survival_pig_pen_plaque", SurvivalPigPenBlock::new,
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_PIG_PEN_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_PIG_PEN_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalPigPenTileEntity>>
+            SURVIVAL_PIG_PEN_TILE = BLOCK_ENTITIES.register(
+                    "survival_pig_pen_plaque",
+                    () -> BlockEntityType.Builder.of(SurvivalPigPenTileEntity::new, SURVIVAL_PIG_PEN_BLOCK.get())
+                            .build(null));
+
+    public static final DeferredBlock<SurvivalRabbitHutchBlock> SURVIVAL_RABBIT_HUTCH_BLOCK = BLOCKS.registerBlock(
+            "survival_rabbit_hutch_plaque", SurvivalRabbitHutchBlock::new,
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_RABBIT_HUTCH_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_RABBIT_HUTCH_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalRabbitHutchTileEntity>>
+            SURVIVAL_RABBIT_HUTCH_TILE = BLOCK_ENTITIES.register(
+                    "survival_rabbit_hutch_plaque",
+                    () -> BlockEntityType.Builder.of(SurvivalRabbitHutchTileEntity::new, SURVIVAL_RABBIT_HUTCH_BLOCK.get())
+                            .build(null));
+
+    public static final DeferredBlock<SurvivalStableBlock> SURVIVAL_STABLE_BLOCK = BLOCKS.registerBlock(
+            "survival_stable_plaque", SurvivalStableBlock::new,
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_STABLE_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_STABLE_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalStableTileEntity>>
+            SURVIVAL_STABLE_TILE = BLOCK_ENTITIES.register(
+                    "survival_stable_plaque",
+                    () -> BlockEntityType.Builder.of(SurvivalStableTileEntity::new, SURVIVAL_STABLE_BLOCK.get())
+                            .build(null));
+
+    public static final DeferredBlock<SurvivalApiaryBlock> SURVIVAL_APIARY_BLOCK = BLOCKS.registerBlock(
+            "survival_apiary_plaque", SurvivalApiaryBlock::new,
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_APIARY_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_APIARY_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalApiaryTileEntity>>
+            SURVIVAL_APIARY_TILE = BLOCK_ENTITIES.register(
+                    "survival_apiary_plaque",
+                    () -> BlockEntityType.Builder.of(SurvivalApiaryTileEntity::new, SURVIVAL_APIARY_BLOCK.get())
+                            .build(null));
+
     public static final BuildingEntry.ModuleProducer<SurvivalLivingBuildingModule, LivingBuildingModuleView>
             SURVIVAL_LIVING = new BuildingEntry.ModuleProducer<>(
                     ColoniesUnbound.MOD_ID + ":survival_living",
@@ -190,6 +246,80 @@ public final class MineColoniesIntegration {
                     .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
                     .createBuildingEntry());
 
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_CHICKEN_PEN = BUILDINGS.register(
+            "survival_chicken_pen",
+            () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_chicken_pen"))
+                    .setBuildingBlock(SURVIVAL_CHICKEN_PEN_BLOCK.get())
+                    .setBuildingProducer(SurvivalChickenPenBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.CHICKENHERDER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.CHICKENHERDER_HERDING)
+                    .addBuildingModuleProducer(BuildingModules.CHICKENHERDER_SETTINGS_BREEDING)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_PIG_PEN = BUILDINGS.register(
+            "survival_pig_pen",
+            () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_pig_pen"))
+                    .setBuildingBlock(SURVIVAL_PIG_PEN_BLOCK.get())
+                    .setBuildingProducer(SurvivalPigPenBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.SWINEHERDER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.SWINEHERDER_HERDING)
+                    .addBuildingModuleProducer(BuildingModules.SWINEHERDER_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_RABBIT_HUTCH = BUILDINGS.register(
+            "survival_rabbit_hutch",
+            () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_rabbit_hutch"))
+                    .setBuildingBlock(SURVIVAL_RABBIT_HUTCH_BLOCK.get())
+                    .setBuildingProducer(SurvivalRabbitHutchBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.RABBITHERDER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.RABBITHERDER_HERDING)
+                    .addBuildingModuleProducer(BuildingModules.RABBITHERDER_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_STABLE = BUILDINGS.register(
+            "survival_stable",
+            () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_stable"))
+                    .setBuildingBlock(SURVIVAL_STABLE_BLOCK.get())
+                    .setBuildingProducer(SurvivalStableBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.CAVALRY_STABLE_WORK)
+                    .addBuildingModuleProducer(BuildingModules.STABLEMASTER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.STABLEMASTER_HERDING)
+                    .addBuildingModuleProducer(BuildingModules.GUARD_ENTITY_LIST)
+                    .addBuildingModuleProducer(BuildingModules.STABLE_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_APIARY = BUILDINGS.register(
+            "survival_apiary",
+            () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_apiary"))
+                    .setBuildingBlock(SURVIVAL_APIARY_BLOCK.get())
+                    .setBuildingProducer(SurvivalApiaryBuilding::new)
+                    .setBuildingViewProducer(() -> BuildingBeekeeper.View::new)
+                    .addBuildingModuleProducer(BuildingModules.BEEKEEPER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.BEEKEEPER_TOOL)
+                    .addBuildingModuleProducer(BuildingModules.BEEKEEPER_HERDING)
+                    .addBuildingModuleProducer(BuildingModules.BEEKEEPER_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.ITEMLIST_FLOWER)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+
     private MineColoniesIntegration() {
     }
 
@@ -212,6 +342,11 @@ public final class MineColoniesIntegration {
             event.accept(SURVIVAL_GUARD_ITEM);
             event.accept(SURVIVAL_COW_PEN_ITEM);
             event.accept(SURVIVAL_SHEEP_PEN_ITEM);
+            event.accept(SURVIVAL_CHICKEN_PEN_ITEM);
+            event.accept(SURVIVAL_PIG_PEN_ITEM);
+            event.accept(SURVIVAL_RABBIT_HUTCH_ITEM);
+            event.accept(SURVIVAL_STABLE_ITEM);
+            event.accept(SURVIVAL_APIARY_ITEM);
         }
     }
 }

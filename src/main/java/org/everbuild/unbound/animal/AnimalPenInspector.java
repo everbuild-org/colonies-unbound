@@ -1,6 +1,7 @@
 package org.everbuild.unbound.animal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
@@ -25,6 +26,18 @@ public final class AnimalPenInspector {
                 bounds,
                 chunksAreLoaded(level, bounds),
                 position -> level.getBlockState(position).is(expectedPlaque),
+                position -> level.getBlockState(position).getBlock() instanceof FenceGateBlock,
+                position -> level.getBlockState(position).is(BlockTags.DIRT));
+    }
+
+    public static AnimalPenInspection inspect(
+            final Level level,
+            final AreaBounds bounds,
+            final Collection<? extends Block> expectedPlaques) {
+        return inspect(
+                bounds,
+                chunksAreLoaded(level, bounds),
+                position -> expectedPlaques.contains(level.getBlockState(position).getBlock()),
                 position -> level.getBlockState(position).getBlock() instanceof FenceGateBlock,
                 position -> level.getBlockState(position).is(BlockTags.DIRT));
     }

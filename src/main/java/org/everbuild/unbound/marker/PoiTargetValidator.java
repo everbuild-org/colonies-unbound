@@ -22,7 +22,7 @@ public final class PoiTargetValidator {
             final WorksitePoiType poiType) {
         final BlockState state = level.getBlockState(position);
         return switch (poiType) {
-            case BED, PASTURE -> Result.SCANNER_OWNED;
+            case BED, PASTURE, HIVE -> Result.SCANNER_OWNED;
             case STORAGE -> isStorage(level, position, state)
                     ? Result.VALID
                     : Result.INVALID_STORAGE;
@@ -36,6 +36,9 @@ public final class PoiTargetValidator {
                     ? Result.INVALID_INTERACTION
                     : Result.VALID;
             case PATROL -> state.isAir()
+                    ? Result.INVALID_INTERACTION
+                    : Result.VALID;
+            case STALL -> state.isAir()
                     ? Result.INVALID_INTERACTION
                     : Result.VALID;
         };

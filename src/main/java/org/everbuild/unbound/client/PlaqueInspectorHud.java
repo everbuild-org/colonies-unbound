@@ -16,6 +16,11 @@ import org.everbuild.unbound.minecolonies.MarkedBuildingTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalCookTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalCowPenTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalSheepPenTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalChickenPenTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalPigPenTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalRabbitHutchTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalStableTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalApiaryTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalGuardTileEntity;
 
 /** Compact contextual inspector shown while the crosshair rests on a survival plaque. */
@@ -58,6 +63,16 @@ public final class PlaqueInspectorHud {
                                 ? MarkerType.ANIMAL_PEN
                                 : plaque instanceof SurvivalSheepPenTileEntity
                                         ? MarkerType.SHEEP_PEN
+                                        : plaque instanceof SurvivalChickenPenTileEntity
+                                                ? MarkerType.CHICKEN_PEN
+                                                : plaque instanceof SurvivalPigPenTileEntity
+                                                        ? MarkerType.PIG_PEN
+                                                        : plaque instanceof SurvivalRabbitHutchTileEntity
+                                                                ? MarkerType.RABBIT_HUTCH
+                                                                : plaque instanceof SurvivalStableTileEntity
+                                                                        ? MarkerType.STABLE
+                                                                        : plaque instanceof SurvivalApiaryTileEntity
+                                                                                ? MarkerType.APIARY
                                 : MarkerType.RESIDENCE;
         renderPanel(event.getGuiGraphics(), minecraft.font, PlaqueHudModel.from(plaqueType, plaque.committedMark()));
     }
@@ -75,6 +90,11 @@ public final class PlaqueInspectorHud {
             case GUARD -> 0xFFD24242;
             case ANIMAL_PEN -> 0xFF5BB048;
             case SHEEP_PEN -> 0xFF78B96A;
+            case CHICKEN_PEN -> 0xFFE4C95A;
+            case PIG_PEN -> 0xFFE58D98;
+            case RABBIT_HUTCH -> 0xFFB79578;
+            case STABLE -> 0xFF9B6C42;
+            case APIARY -> 0xFFE1A72D;
             case RESIDENCE -> 0xFF4E83EE;
         };
 
@@ -145,6 +165,11 @@ public final class PlaqueInspectorHud {
             case GUARD -> "hud.coloniesunbound.plaque.guard_tower";
             case ANIMAL_PEN -> "hud.coloniesunbound.plaque.cow_pen";
             case SHEEP_PEN -> "hud.coloniesunbound.plaque.sheep_pen";
+            case CHICKEN_PEN -> "hud.coloniesunbound.plaque.chicken_pen";
+            case PIG_PEN -> "hud.coloniesunbound.plaque.pig_pen";
+            case RABBIT_HUTCH -> "hud.coloniesunbound.plaque.rabbit_hutch";
+            case STABLE -> "hud.coloniesunbound.plaque.stable";
+            case APIARY -> "hud.coloniesunbound.plaque.apiary";
             case RESIDENCE -> "hud.coloniesunbound.plaque.residence";
         });
     }

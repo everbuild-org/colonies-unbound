@@ -18,23 +18,20 @@ import org.everbuild.unbound.marker.MarkerType;
 import org.everbuild.unbound.marker.PoiTargetValidator;
 import org.everbuild.unbound.marker.WorksitePoi;
 import org.everbuild.unbound.marker.WorksitePoiType;
-import org.everbuild.unbound.minecolonies.MarkedBuildingTileEntity;
-import org.everbuild.unbound.minecolonies.SurvivalAnimalPenBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalApiaryBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalApiaryTileEntity;
 import org.everbuild.unbound.residence.ResidenceMarkerService;
 
-/** Activates a species-specific native MineColonies herder inside an inspected survival pen. */
-public final class SurvivalAnimalPenMarkerService {
-    private SurvivalAnimalPenMarkerService() {
+/** Registers scanner-owned vanilla hives with MineColonies' native Beekeeper. */
+public final class SurvivalApiaryMarkerService {
+    private SurvivalApiaryMarkerService() {
     }
 
     public static RegistrationResult register(
             final ServerLevel level,
             final ServerPlayer player,
             final MarkerSelection selection,
-            final AnimalPenInspection inspection,
-            final MarkerType markerType,
-            final Class<? extends SurvivalAnimalPenBuilding> buildingType,
-            final Class<? extends MarkedBuildingTileEntity> tileType) {
+            final ApiaryInspection inspection) {
         final AreaBounds bounds = inspection.bounds();
         final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, bounds.min());
         if (colony == null) {
@@ -48,20 +45,16 @@ public final class SurvivalAnimalPenMarkerService {
         }
         final BlockPos plaque = inspection.plaquePositions().getFirst();
         final IBuilding nativeBuilding = IColonyManager.getInstance().getBuilding(level, plaque);
-        if (!buildingType.isInstance(nativeBuilding)
-                || !tileType.isInstance(level.getBlockEntity(plaque))) {
+        if (!(nativeBuilding instanceof SurvivalApiaryBuilding building)
+                || !(level.getBlockEntity(plaque) instanceof SurvivalApiaryTileEntity tile)) {
             return RegistrationResult.PLAQUE_NOT_REGISTERED;
         }
-        final SurvivalAnimalPenBuilding building = buildingType.cast(nativeBuilding);
-        final MarkedBuildingTileEntity tile = tileType.cast(level.getBlockEntity(plaque));
 
-        final UUID markerId = tile.committedMark() == null
-                ? selection.markerId()
-                : tile.committedMark().id();
+        final UUID markerId = tile.committedMark() == null ? selection.markerId() : tile.committedMark().id();
         final List<WorksitePoi> retained = tile.committedMark() == null
                 ? List.of()
                 : tile.committedMark().pois().stream()
-                        .filter(poi -> bounds.contains(poi.position()))
+                        .filter(point -> bounds.contains(point.position()))
                         .toList();
         synchronize(
                 colony,
@@ -70,9 +63,9 @@ public final class SurvivalAnimalPenMarkerService {
                 tile.committedMark() == null ? List.of() : tile.committedMark().pois(),
                 new CommittedWorksiteMark(
                         markerId,
-                        markerType,
+                        MarkerType.APIARY,
                         bounds,
-                        mergeScannedPois(retained, inspection)));
+                        mergeHivePois(retained, inspection.hivePositions())));
         return RegistrationResult.SAVED;
     }
 
@@ -87,9 +80,9 @@ public final class SurvivalAnimalPenMarkerService {
             return outcome(ResidenceMarkerService.PointEditResult.NO_COMMITTED_VOLUME);
         }
         final List<Owner> owners = colony.getServerBuildingManager().getBuildings().values().stream()
-                .filter(SurvivalAnimalPenBuilding.class::isInstance)
-                .map(SurvivalAnimalPenBuilding.class::cast)
-                .map(building -> owner(building, level))
+                .filter(SurvivalApiaryBuilding.class::isInstance)
+                .map(SurvivalApiaryBuilding.class::cast)
+                .map(building -> owner(level, building))
                 .filter(java.util.Objects::nonNull)
                 .filter(owner -> owner.tile().committedMark().bounds().contains(position))
                 .toList();
@@ -102,14 +95,13 @@ public final class SurvivalAnimalPenMarkerService {
         if (!colony.getPermissions().hasPermission(player, Action.MANAGE_HUTS)) {
             return outcome(ResidenceMarkerService.PointEditResult.NO_PERMISSION);
         }
-        final Owner owner = owners.getFirst();
-        final CommittedWorksiteMark current = owner.tile().committedMark();
-        final boolean editable = poiType == WorksitePoiType.STORAGE
-                || current.type() == MarkerType.STABLE && poiType == WorksitePoiType.STALL;
-        if (!editable) {
+        if (poiType != WorksitePoiType.STORAGE) {
             return outcome(ResidenceMarkerService.PointEditResult.SCANNER_OWNED);
         }
-        final WorksitePoi edited = new WorksitePoi(poiType, position);
+
+        final Owner owner = owners.getFirst();
+        final CommittedWorksiteMark current = owner.tile().committedMark();
+        final WorksitePoi edited = new WorksitePoi(WorksitePoiType.STORAGE, position);
         final List<WorksitePoi> points = new ArrayList<>(current.pois());
         if (remove) {
             if (!points.remove(edited)) {
@@ -117,11 +109,9 @@ public final class SurvivalAnimalPenMarkerService {
             }
         } else if (points.contains(edited)) {
             return outcome(ResidenceMarkerService.PointEditResult.ALREADY_PRESENT);
-        } else if (PoiTargetValidator.validate(level, position, poiType)
+        } else if (PoiTargetValidator.validate(level, position, WorksitePoiType.STORAGE)
                 != PoiTargetValidator.Result.VALID) {
-            return outcome(poiType == WorksitePoiType.STORAGE
-                    ? ResidenceMarkerService.PointEditResult.INVALID_STORAGE_TARGET
-                    : ResidenceMarkerService.PointEditResult.INVALID_INTERACTION_TARGET);
+            return outcome(ResidenceMarkerService.PointEditResult.INVALID_STORAGE_TARGET);
         } else {
             points.add(edited);
         }
@@ -138,23 +128,22 @@ public final class SurvivalAnimalPenMarkerService {
 
     public static ReconcileResult reconcilePois(
             final ServerLevel level,
-            final SurvivalAnimalPenBuilding building,
-            final MarkedBuildingTileEntity tile) {
+            final SurvivalApiaryBuilding building,
+            final SurvivalApiaryTileEntity tile) {
         final CommittedWorksiteMark current = tile.committedMark();
         if (current == null) {
             return ReconcileResult.MARK_UNAVAILABLE;
         }
-        final AnimalPenInspection inspection = AnimalPenInspector.inspect(
-                level, current.bounds(), tile.getBlockState().getBlock());
-        if (inspection.status() == AnimalPenInspection.Status.AREA_NOT_LOADED) {
+        final ApiaryInspection inspection = ApiaryInspector.inspect(level, current.bounds());
+        if (inspection.status() == ApiaryInspection.Status.AREA_NOT_LOADED) {
             return ReconcileResult.AREA_NOT_LOADED;
         }
         if (inspection.plaquePositions().size() != 1
                 || !inspection.plaquePositions().getFirst().equals(tile.getBlockPos())) {
             return ReconcileResult.MARK_UNAVAILABLE;
         }
-        final List<WorksitePoi> updated = mergeScannedPois(current.pois(), inspection);
-        final int desiredLevel = isReady(updated, current.type()) ? 1 : 0;
+        final List<WorksitePoi> updated = mergeHivePois(current.pois(), inspection.hivePositions());
+        final int desiredLevel = isReady(updated) ? 1 : 0;
         if (Set.copyOf(updated).equals(Set.copyOf(current.pois()))
                 && building.getBuildingLevel() == desiredLevel) {
             return ReconcileResult.UNCHANGED;
@@ -172,28 +161,19 @@ public final class SurvivalAnimalPenMarkerService {
         return ReconcileResult.UPDATED;
     }
 
-    static List<WorksitePoi> mergeScannedPois(
+    static List<WorksitePoi> mergeHivePois(
             final List<WorksitePoi> existing,
-            final AnimalPenInspection inspection) {
+            final List<BlockPos> hives) {
         final List<WorksitePoi> merged = new ArrayList<>();
-        existing.stream()
-                .filter(poi -> poi.type() != WorksitePoiType.ENTRANCE
-                        && poi.type() != WorksitePoiType.PASTURE)
-                .forEach(merged::add);
-        inspection.gatePositions().stream()
-                .map(position -> new WorksitePoi(WorksitePoiType.ENTRANCE, position))
-                .forEach(merged::add);
-        inspection.pasturePositions().stream()
-                .findFirst()
-                .map(position -> new WorksitePoi(WorksitePoiType.PASTURE, position))
-                .ifPresent(merged::add);
+        existing.stream().filter(point -> point.type() != WorksitePoiType.HIVE).forEach(merged::add);
+        hives.stream().map(position -> new WorksitePoi(WorksitePoiType.HIVE, position)).forEach(merged::add);
         return List.copyOf(merged);
     }
 
     public static ResidenceMarkerService.RemovalResult removeCommittedMark(
             final ServerLevel level,
             final ServerPlayer player,
-            final MarkedBuildingTileEntity tile) {
+            final SurvivalApiaryTileEntity tile) {
         if (tile.committedMark() == null) {
             return ResidenceMarkerService.RemovalResult.NO_MARK;
         }
@@ -204,7 +184,7 @@ public final class SurvivalAnimalPenMarkerService {
         if (!colony.getPermissions().hasPermission(player, Action.MANAGE_HUTS)) {
             return ResidenceMarkerService.RemovalResult.NO_PERMISSION;
         }
-        if (tile.getBuilding() instanceof SurvivalAnimalPenBuilding building) {
+        if (tile.getBuilding() instanceof SurvivalApiaryBuilding building) {
             synchronize(colony, building, tile, tile.committedMark().pois(), null);
         } else {
             tile.clearCommittedMark();
@@ -214,12 +194,16 @@ public final class SurvivalAnimalPenMarkerService {
 
     private static void synchronize(
             final IColony colony,
-            final SurvivalAnimalPenBuilding building,
-            final MarkedBuildingTileEntity tile,
+            final SurvivalApiaryBuilding building,
+            final SurvivalApiaryTileEntity tile,
             final List<WorksitePoi> previous,
             final CommittedWorksiteMark updated) {
         previous.stream()
-                .filter(poi -> poi.type() == WorksitePoiType.STORAGE)
+                .filter(point -> point.type() == WorksitePoiType.HIVE)
+                .map(WorksitePoi::position)
+                .forEach(building::removeHive);
+        previous.stream()
+                .filter(point -> point.type() == WorksitePoiType.STORAGE)
                 .map(WorksitePoi::position)
                 .forEach(building::removeContainerPosition);
         if (updated == null) {
@@ -229,28 +213,26 @@ public final class SurvivalAnimalPenMarkerService {
             tile.setCommittedMark(updated);
             building.setCorners(updated.bounds().min(), updated.bounds().max());
             updated.pois().stream()
-                    .filter(poi -> poi.type() == WorksitePoiType.STORAGE)
+                    .filter(point -> point.type() == WorksitePoiType.HIVE)
+                    .map(WorksitePoi::position)
+                    .forEach(building::addHive);
+            updated.pois().stream()
+                    .filter(point -> point.type() == WorksitePoiType.STORAGE)
                     .map(WorksitePoi::position)
                     .forEach(building::addContainerPosition);
-            building.setBuildingLevel(isReady(updated.pois(), updated.type()) ? 1 : 0);
+            building.setBuildingLevel(isReady(updated.pois()) ? 1 : 0);
         }
         building.markDirty();
         colony.markDirty();
     }
 
-    private static boolean isReady(final List<WorksitePoi> points, final MarkerType markerType) {
-        return contains(points, WorksitePoiType.STORAGE)
-                && contains(points, WorksitePoiType.ENTRANCE)
-                && contains(points, WorksitePoiType.PASTURE)
-                && (markerType != MarkerType.STABLE || contains(points, WorksitePoiType.STALL));
+    private static boolean isReady(final List<WorksitePoi> points) {
+        return points.stream().anyMatch(point -> point.type() == WorksitePoiType.STORAGE)
+                && points.stream().anyMatch(point -> point.type() == WorksitePoiType.HIVE);
     }
 
-    private static boolean contains(final List<WorksitePoi> points, final WorksitePoiType type) {
-        return points.stream().anyMatch(point -> point.type() == type);
-    }
-
-    private static Owner owner(final SurvivalAnimalPenBuilding building, final ServerLevel level) {
-        return level.getBlockEntity(building.getPosition()) instanceof MarkedBuildingTileEntity tile
+    private static Owner owner(final ServerLevel level, final SurvivalApiaryBuilding building) {
+        return level.getBlockEntity(building.getPosition()) instanceof SurvivalApiaryTileEntity tile
                         && tile.committedMark() != null
                 ? new Owner(building, tile)
                 : null;
@@ -280,7 +262,7 @@ public final class SurvivalAnimalPenMarkerService {
                 });
     }
 
-    private record Owner(SurvivalAnimalPenBuilding building, MarkedBuildingTileEntity tile) {
+    private record Owner(SurvivalApiaryBuilding building, SurvivalApiaryTileEntity tile) {
     }
 
     public enum RegistrationResult {

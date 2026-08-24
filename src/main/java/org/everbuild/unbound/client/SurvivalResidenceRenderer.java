@@ -161,7 +161,11 @@ public final class SurvivalResidenceRenderer<T extends MarkedBuildingTileEntity>
             final double z,
             final float scale) {
         final Minecraft minecraft = Minecraft.getInstance();
-        final String textureIconId = iconId.equals("sheep_pen") ? "animal_pen" : iconId;
+        final String textureIconId = switch (iconId) {
+            case "sheep_pen", "chicken_pen", "pig_pen", "rabbit_hutch", "stable", "stall" -> "animal_pen";
+            case "apiary", "hive" -> "farm";
+            default -> iconId;
+        };
         final ResourceLocation iconTexture = ResourceLocation.fromNamespaceAndPath(
                 ColoniesUnbound.MOD_ID,
                 "textures/marker/icons/" + textureIconId + ".png");
@@ -229,6 +233,11 @@ public final class SurvivalResidenceRenderer<T extends MarkedBuildingTileEntity>
                 case "worksite", "furnace" -> new FlagColor(240, 122, 43);
                 case "farm", "animal_pen" -> new FlagColor(91, 176, 72);
                 case "sheep_pen" -> new FlagColor(120, 185, 106);
+                case "chicken_pen" -> new FlagColor(228, 201, 90);
+                case "pig_pen" -> new FlagColor(229, 141, 152);
+                case "rabbit_hutch" -> new FlagColor(183, 149, 120);
+                case "stable", "stall" -> new FlagColor(155, 108, 66);
+                case "apiary", "hive" -> new FlagColor(225, 167, 45);
                 case "restaurant", "interaction" -> new FlagColor(180, 96, 210);
                 case "guard", "patrol", "target" -> new FlagColor(210, 66, 66);
                 case "entrance" -> new FlagColor(64, 190, 170);

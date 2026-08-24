@@ -52,10 +52,23 @@ public record PlaqueHudModel(
             requirements.add(new Requirement("hud.coloniesunbound.plaque.patrol_nodes", count(points, WorksitePoiType.PATROL), 0, true));
             return requirements;
         }
-        if (type == MarkerType.ANIMAL_PEN || type == MarkerType.SHEEP_PEN) {
+        if (type == MarkerType.APIARY) {
+            requirements.add(new Requirement("hud.coloniesunbound.plaque.storage", count(points, WorksitePoiType.STORAGE), 1, false));
+            requirements.add(new Requirement("hud.coloniesunbound.plaque.hives", count(points, WorksitePoiType.HIVE), 1, false));
+            return requirements;
+        }
+        if (type == MarkerType.ANIMAL_PEN
+                || type == MarkerType.SHEEP_PEN
+                || type == MarkerType.CHICKEN_PEN
+                || type == MarkerType.PIG_PEN
+                || type == MarkerType.RABBIT_HUTCH
+                || type == MarkerType.STABLE) {
             requirements.add(new Requirement("hud.coloniesunbound.plaque.storage", count(points, WorksitePoiType.STORAGE), 1, false));
             requirements.add(new Requirement("hud.coloniesunbound.plaque.gates", count(points, WorksitePoiType.ENTRANCE), 1, false));
             requirements.add(new Requirement("hud.coloniesunbound.plaque.pasture", count(points, WorksitePoiType.PASTURE), 1, false));
+            if (type == MarkerType.STABLE) {
+                requirements.add(new Requirement("hud.coloniesunbound.plaque.stalls", count(points, WorksitePoiType.STALL), 1, false));
+            }
             return requirements;
         }
 

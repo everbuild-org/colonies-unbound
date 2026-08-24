@@ -5,6 +5,9 @@ import java.util.UUID;
 import org.everbuild.unbound.animal.AnimalPenInspection;
 import org.everbuild.unbound.animal.AnimalPenInspector;
 import org.everbuild.unbound.animal.SurvivalAnimalPenMarkerService;
+import org.everbuild.unbound.animal.ApiaryInspection;
+import org.everbuild.unbound.animal.ApiaryInspector;
+import org.everbuild.unbound.animal.SurvivalApiaryMarkerService;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -21,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.MarkerSelection;
 import org.everbuild.unbound.marker.MarkerType;
@@ -37,8 +41,17 @@ import org.everbuild.unbound.minecolonies.MineColoniesIntegration;
 import org.everbuild.unbound.minecolonies.SurvivalAnimalPenBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalCowPenBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalCowPenTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalChickenPenBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalChickenPenTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalPigPenBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalPigPenTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalRabbitHutchBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalRabbitHutchTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalSheepPenBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalSheepPenTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalStableBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalStableTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalApiaryTileEntity;
 import org.everbuild.unbound.residence.ResidenceInspection;
 import org.everbuild.unbound.residence.ResidenceInspector;
 import org.everbuild.unbound.residence.ResidenceMarkerService;
@@ -88,12 +101,20 @@ public final class WorksiteMarkerItem extends Item {
             if (!context.getLevel().isClientSide
                     && context.getLevel() instanceof ServerLevel serverLevel
                     && context.getPlayer() instanceof ServerPlayer serverPlayer) {
-                ResidenceMarkerService.PointEditOutcome outcome = SurvivalAnimalPenMarkerService.editPoint(
+                ResidenceMarkerService.PointEditOutcome outcome = SurvivalApiaryMarkerService.editPoint(
                         serverLevel,
                         serverPlayer,
                         context.getClickedPos(),
                         mode.poiType(),
                         context.getPlayer().isShiftKeyDown());
+                if (outcome.result() == ResidenceMarkerService.PointEditResult.NO_COMMITTED_VOLUME) {
+                    outcome = SurvivalAnimalPenMarkerService.editPoint(
+                            serverLevel,
+                            serverPlayer,
+                            context.getClickedPos(),
+                            mode.poiType(),
+                            context.getPlayer().isShiftKeyDown());
+                }
                 if (outcome.result() == ResidenceMarkerService.PointEditResult.NO_COMMITTED_VOLUME) {
                     outcome = SurvivalCookMarkerService.editPoint(
                             serverLevel,
@@ -116,6 +137,17 @@ public final class WorksiteMarkerItem extends Item {
         }
         if (context.getPlayer().isShiftKeyDown()) {
             if (!context.getLevel().isClientSide) {
+                if (context.getLevel() instanceof ServerLevel serverLevel
+                        && context.getPlayer() instanceof ServerPlayer serverPlayer
+                        && context.getLevel().getBlockEntity(context.getClickedPos())
+                                instanceof SurvivalApiaryTileEntity apiaryTile
+                        && apiaryTile.committedMark() != null) {
+                    context.getPlayer().displayClientMessage(
+                            removalReport(SurvivalApiaryMarkerService.removeCommittedMark(
+                                    serverLevel, serverPlayer, apiaryTile)),
+                            true);
+                    return InteractionResult.SUCCESS;
+                }
                 if (context.getLevel() instanceof ServerLevel serverLevel
                         && context.getPlayer() instanceof ServerPlayer serverPlayer
                         && context.getLevel().getBlockEntity(context.getClickedPos())
@@ -205,28 +237,37 @@ public final class WorksiteMarkerItem extends Item {
         final ResidenceInspection inspection = ResidenceInspector.inspect(context.getLevel(), bounds);
         final CookInspection cookInspection = CookInspector.inspect(context.getLevel(), bounds);
         final GuardInspection guardInspection = GuardInspector.inspect(context.getLevel(), bounds);
-        final AnimalPenInspection cowPenInspection = AnimalPenInspector.inspect(
-                context.getLevel(), bounds, MineColoniesIntegration.SURVIVAL_COW_PEN_BLOCK.get());
-        final AnimalPenInspection sheepPenInspection = AnimalPenInspector.inspect(
-                context.getLevel(), bounds, MineColoniesIntegration.SURVIVAL_SHEEP_PEN_BLOCK.get());
-        if (!cowPenInspection.plaquePositions().isEmpty()) {
+        final ApiaryInspection apiaryInspection = ApiaryInspector.inspect(context.getLevel(), bounds);
+        final List<AnimalPenDefinition> penDefinitions = animalPenDefinitions();
+        final AnimalPenInspection animalPenInspection = AnimalPenInspector.inspect(
+                context.getLevel(), bounds, penDefinitions.stream().map(AnimalPenDefinition::block).toList());
+        if (!animalPenInspection.plaquePositions().isEmpty()) {
             final Component report = !inspection.plaquePositions().isEmpty()
                             || !cookInspection.plaquePositions().isEmpty()
                             || !guardInspection.plaquePositions().isEmpty()
-                            || !sheepPenInspection.plaquePositions().isEmpty()
-                            || cowPenInspection.status() == AnimalPenInspection.Status.MULTIPLE_PLAQUES
+                            || !apiaryInspection.plaquePositions().isEmpty()
+                            || animalPenInspection.status() == AnimalPenInspection.Status.MULTIPLE_PLAQUES
                     ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
                             .withStyle(ChatFormatting.RED)
-                    : switch (cowPenInspection.status()) {
-                        case VALID -> animalPenRegistrationReport(
-                                context,
-                                stack,
-                                completed,
-                                cowPenInspection,
-                                MarkerType.ANIMAL_PEN,
-                                SurvivalCowPenBuilding.class,
-                                SurvivalCowPenTileEntity.class,
-                                "message.coloniesunbound.cow_pen.saved");
+                    : switch (animalPenInspection.status()) {
+                        case VALID -> {
+                            final Block plaqueBlock = context.getLevel()
+                                    .getBlockState(animalPenInspection.plaquePositions().getFirst())
+                                    .getBlock();
+                            final AnimalPenDefinition definition = penDefinitions.stream()
+                                    .filter(candidate -> candidate.block() == plaqueBlock)
+                                    .findFirst()
+                                    .orElseThrow();
+                            yield animalPenRegistrationReport(
+                                    context,
+                                    stack,
+                                    completed,
+                                    animalPenInspection,
+                                    definition.markerType(),
+                                    definition.buildingType(),
+                                    definition.tileType(),
+                                    definition.savedMessageKey());
+                        }
                         case NO_GATE -> Component.translatable("message.coloniesunbound.cow_pen.no_gate")
                                 .withStyle(ChatFormatting.RED);
                         case NO_PASTURE -> Component.translatable("message.coloniesunbound.cow_pen.no_pasture")
@@ -237,26 +278,17 @@ public final class WorksiteMarkerItem extends Item {
             context.getPlayer().displayClientMessage(report, true);
             return;
         }
-        if (!sheepPenInspection.plaquePositions().isEmpty()) {
+        if (!apiaryInspection.plaquePositions().isEmpty()) {
             final Component report = !inspection.plaquePositions().isEmpty()
                             || !cookInspection.plaquePositions().isEmpty()
                             || !guardInspection.plaquePositions().isEmpty()
-                            || sheepPenInspection.status() == AnimalPenInspection.Status.MULTIPLE_PLAQUES
+                            || !animalPenInspection.plaquePositions().isEmpty()
+                            || apiaryInspection.status() == ApiaryInspection.Status.MULTIPLE_PLAQUES
                     ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
                             .withStyle(ChatFormatting.RED)
-                    : switch (sheepPenInspection.status()) {
-                        case VALID -> animalPenRegistrationReport(
-                                context,
-                                stack,
-                                completed,
-                                sheepPenInspection,
-                                MarkerType.SHEEP_PEN,
-                                SurvivalSheepPenBuilding.class,
-                                SurvivalSheepPenTileEntity.class,
-                                "message.coloniesunbound.sheep_pen.saved");
-                        case NO_GATE -> Component.translatable("message.coloniesunbound.cow_pen.no_gate")
-                                .withStyle(ChatFormatting.RED);
-                        case NO_PASTURE -> Component.translatable("message.coloniesunbound.cow_pen.no_pasture")
+                    : switch (apiaryInspection.status()) {
+                        case VALID -> apiaryRegistrationReport(context, stack, completed, apiaryInspection);
+                        case NO_HIVES -> Component.translatable("message.coloniesunbound.apiary.no_hives")
                                 .withStyle(ChatFormatting.RED);
                         default -> Component.translatable("message.coloniesunbound.inspection.no_plaque")
                                 .withStyle(ChatFormatting.RED);
@@ -267,8 +299,8 @@ public final class WorksiteMarkerItem extends Item {
         if (!guardInspection.plaquePositions().isEmpty()) {
             final Component report = !inspection.plaquePositions().isEmpty()
                             || !cookInspection.plaquePositions().isEmpty()
-                            || !cowPenInspection.plaquePositions().isEmpty()
-                            || !sheepPenInspection.plaquePositions().isEmpty()
+                            || !animalPenInspection.plaquePositions().isEmpty()
+                            || !apiaryInspection.plaquePositions().isEmpty()
                             || guardInspection.status() == GuardInspection.Status.MULTIPLE_PLAQUES
                     ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
                             .withStyle(ChatFormatting.RED)
@@ -282,8 +314,8 @@ public final class WorksiteMarkerItem extends Item {
         if (!cookInspection.plaquePositions().isEmpty()) {
             final Component report = !inspection.plaquePositions().isEmpty()
                             || !guardInspection.plaquePositions().isEmpty()
-                            || !cowPenInspection.plaquePositions().isEmpty()
-                            || !sheepPenInspection.plaquePositions().isEmpty()
+                            || !animalPenInspection.plaquePositions().isEmpty()
+                            || !apiaryInspection.plaquePositions().isEmpty()
                             || cookInspection.status() == CookInspection.Status.MULTIPLE_PLAQUES
                     ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
                             .withStyle(ChatFormatting.RED)
@@ -489,6 +521,37 @@ public final class WorksiteMarkerItem extends Item {
         };
     }
 
+    private static Component apiaryRegistrationReport(
+            final UseOnContext context,
+            final ItemStack stack,
+            final MarkerSelection selection,
+            final ApiaryInspection inspection) {
+        if (!(context.getLevel() instanceof ServerLevel serverLevel)
+                || !(context.getPlayer() instanceof ServerPlayer serverPlayer)) {
+            return Component.empty();
+        }
+        final SurvivalApiaryMarkerService.RegistrationResult result = SurvivalApiaryMarkerService.register(
+                serverLevel, serverPlayer, selection, inspection);
+        if (result == SurvivalApiaryMarkerService.RegistrationResult.SAVED) {
+            MarkerSelection.clear(stack);
+        }
+        return switch (result) {
+            case SAVED -> Component.translatable(
+                            "message.coloniesunbound.apiary.saved",
+                            inspection.bounds().sizeX(), inspection.bounds().sizeY(),
+                            inspection.bounds().sizeZ(), inspection.hivePositions().size())
+                    .withStyle(ChatFormatting.GREEN);
+            case OUTSIDE_COLONY -> Component.translatable("message.coloniesunbound.inspection.outside_colony")
+                    .withStyle(ChatFormatting.RED);
+            case CROSSES_COLONY_BORDER -> Component.translatable("message.coloniesunbound.inspection.crosses_border")
+                    .withStyle(ChatFormatting.RED);
+            case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
+                    .withStyle(ChatFormatting.RED);
+            case PLAQUE_NOT_REGISTERED -> Component.translatable("message.coloniesunbound.inspection.plaque_not_registered")
+                    .withStyle(ChatFormatting.RED);
+        };
+    }
+
     private static Component registrationReport(
             final UseOnContext context,
             final ItemStack stack,
@@ -580,6 +643,54 @@ public final class WorksiteMarkerItem extends Item {
 
     private static String modeTranslationKey(final MarkerToolMode mode) {
         return "mode.coloniesunbound.marker." + mode.id();
+    }
+
+    private static List<AnimalPenDefinition> animalPenDefinitions() {
+        return List.of(
+                new AnimalPenDefinition(
+                        MineColoniesIntegration.SURVIVAL_COW_PEN_BLOCK.get(),
+                        MarkerType.ANIMAL_PEN,
+                        SurvivalCowPenBuilding.class,
+                        SurvivalCowPenTileEntity.class,
+                        "message.coloniesunbound.cow_pen.saved"),
+                new AnimalPenDefinition(
+                        MineColoniesIntegration.SURVIVAL_SHEEP_PEN_BLOCK.get(),
+                        MarkerType.SHEEP_PEN,
+                        SurvivalSheepPenBuilding.class,
+                        SurvivalSheepPenTileEntity.class,
+                        "message.coloniesunbound.sheep_pen.saved"),
+                new AnimalPenDefinition(
+                        MineColoniesIntegration.SURVIVAL_CHICKEN_PEN_BLOCK.get(),
+                        MarkerType.CHICKEN_PEN,
+                        SurvivalChickenPenBuilding.class,
+                        SurvivalChickenPenTileEntity.class,
+                        "message.coloniesunbound.chicken_pen.saved"),
+                new AnimalPenDefinition(
+                        MineColoniesIntegration.SURVIVAL_PIG_PEN_BLOCK.get(),
+                        MarkerType.PIG_PEN,
+                        SurvivalPigPenBuilding.class,
+                        SurvivalPigPenTileEntity.class,
+                        "message.coloniesunbound.pig_pen.saved"),
+                new AnimalPenDefinition(
+                        MineColoniesIntegration.SURVIVAL_RABBIT_HUTCH_BLOCK.get(),
+                        MarkerType.RABBIT_HUTCH,
+                        SurvivalRabbitHutchBuilding.class,
+                        SurvivalRabbitHutchTileEntity.class,
+                        "message.coloniesunbound.rabbit_hutch.saved"),
+                new AnimalPenDefinition(
+                        MineColoniesIntegration.SURVIVAL_STABLE_BLOCK.get(),
+                        MarkerType.STABLE,
+                        SurvivalStableBuilding.class,
+                        SurvivalStableTileEntity.class,
+                        "message.coloniesunbound.stable.saved"));
+    }
+
+    private record AnimalPenDefinition(
+            Block block,
+            MarkerType markerType,
+            Class<? extends SurvivalAnimalPenBuilding> buildingType,
+            Class<? extends MarkedBuildingTileEntity> tileType,
+            String savedMessageKey) {
     }
 
     @Override
