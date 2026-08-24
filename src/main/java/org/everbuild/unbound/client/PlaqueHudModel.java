@@ -57,6 +57,14 @@ public record PlaqueHudModel(
             requirements.add(new Requirement("hud.coloniesunbound.plaque.hives", count(points, WorksitePoiType.HIVE), 1, false));
             return requirements;
         }
+        if (type == MarkerType.BLACKSMITH || type == MarkerType.SAWMILL
+                || type == MarkerType.STONEMASON || type == MarkerType.FLETCHER
+                || type == MarkerType.MECHANIC || type == MarkerType.CONCRETE_MIXER
+                || type == MarkerType.CRUSHER || type == MarkerType.SIFTER) {
+            requirements.add(new Requirement("hud.coloniesunbound.plaque.storage", count(points, WorksitePoiType.STORAGE), 1, false));
+            requirements.add(new Requirement("hud.coloniesunbound.plaque.workstations", count(points, WorksitePoiType.WORKSITE), 1, false));
+            return requirements;
+        }
         if (type == MarkerType.ANIMAL_PEN
                 || type == MarkerType.SHEEP_PEN
                 || type == MarkerType.CHICKEN_PEN

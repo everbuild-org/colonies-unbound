@@ -1,0 +1,63 @@
+package org.everbuild.unbound.workplace;
+
+import java.util.List;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AnvilBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
+import org.everbuild.unbound.marker.MarkerType;
+import org.everbuild.unbound.minecolonies.MineColoniesIntegration;
+import org.everbuild.unbound.minecolonies.SurvivalBlacksmithBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalConcreteMixerBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalCraftingBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalCrusherBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalFletcherBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalMechanicBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalSawmillBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalSifterBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalStonemasonBuilding;
+
+/** Declarative physical and native bindings for one crafting workplace. */
+public record CraftingWorkplaceDefinition(
+        String id,
+        MarkerType markerType,
+        Supplier<? extends Block> plaque,
+        Class<? extends SurvivalCraftingBuilding> buildingType,
+        BiPredicate<Level, BlockPos> isWorkstation) {
+
+    public static List<CraftingWorkplaceDefinition> all() {
+        return List.of(
+                definition("blacksmith", MarkerType.BLACKSMITH, MineColoniesIntegration.SURVIVAL_BLACKSMITH_BLOCK,
+                        SurvivalBlacksmithBuilding.class, (level, pos) -> level.getBlockState(pos).getBlock() instanceof AnvilBlock
+                                || level.getBlockState(pos).is(Blocks.SMITHING_TABLE)),
+                definition("sawmill", MarkerType.SAWMILL, MineColoniesIntegration.SURVIVAL_SAWMILL_BLOCK,
+                        SurvivalSawmillBuilding.class, (level, pos) -> level.getBlockState(pos).is(Blocks.CRAFTING_TABLE)
+                                || level.getBlockState(pos).is(Blocks.STONECUTTER)),
+                definition("stonemason", MarkerType.STONEMASON, MineColoniesIntegration.SURVIVAL_STONEMASON_BLOCK,
+                        SurvivalStonemasonBuilding.class, (level, pos) -> level.getBlockState(pos).is(Blocks.STONECUTTER)),
+                definition("fletcher", MarkerType.FLETCHER, MineColoniesIntegration.SURVIVAL_FLETCHER_BLOCK,
+                        SurvivalFletcherBuilding.class, (level, pos) -> level.getBlockState(pos).is(Blocks.FLETCHING_TABLE)),
+                definition("mechanic", MarkerType.MECHANIC, MineColoniesIntegration.SURVIVAL_MECHANIC_BLOCK,
+                        SurvivalMechanicBuilding.class, (level, pos) -> level.getBlockState(pos).is(Blocks.CRAFTING_TABLE)),
+                definition("concrete_mixer", MarkerType.CONCRETE_MIXER, MineColoniesIntegration.SURVIVAL_CONCRETE_MIXER_BLOCK,
+                        SurvivalConcreteMixerBuilding.class, (level, pos) -> {
+                            final var fluid = level.getBlockState(pos).getFluidState();
+                            return fluid.getType() == Fluids.FLOWING_WATER && fluid.getAmount() <= 5;
+                        }),
+                definition("crusher", MarkerType.CRUSHER, MineColoniesIntegration.SURVIVAL_CRUSHER_BLOCK,
+                        SurvivalCrusherBuilding.class, (level, pos) -> level.getBlockState(pos).getBlock() instanceof AnvilBlock),
+                definition("sifter", MarkerType.SIFTER, MineColoniesIntegration.SURVIVAL_SIFTER_BLOCK,
+                        SurvivalSifterBuilding.class, (level, pos) -> level.getBlockState(pos).is(Blocks.SCAFFOLDING)));
+    }
+
+    private static CraftingWorkplaceDefinition definition(
+            final String id, final MarkerType type, final Supplier<? extends Block> plaque,
+            final Class<? extends SurvivalCraftingBuilding> buildingType,
+            final BiPredicate<Level, BlockPos> workstation) {
+        return new CraftingWorkplaceDefinition(id, type, plaque, buildingType, workstation);
+    }
+}

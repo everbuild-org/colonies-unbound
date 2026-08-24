@@ -21,6 +21,7 @@ import org.everbuild.unbound.minecolonies.SurvivalPigPenTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalRabbitHutchTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalStableTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalApiaryTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalCraftingTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalGuardTileEntity;
 
 /** Compact contextual inspector shown while the crosshair rests on a survival plaque. */
@@ -55,7 +56,9 @@ public final class PlaqueInspectorHud {
             return;
         }
 
-        final MarkerType plaqueType = plaque instanceof SurvivalCookTileEntity
+        final MarkerType plaqueType = plaque instanceof SurvivalCraftingTileEntity && plaque.committedMark() != null
+                ? plaque.committedMark().type()
+                : plaque instanceof SurvivalCookTileEntity
                 ? MarkerType.RESTAURANT
                 : plaque instanceof SurvivalGuardTileEntity
                         ? MarkerType.GUARD
@@ -95,6 +98,11 @@ public final class PlaqueInspectorHud {
             case RABBIT_HUTCH -> 0xFFB79578;
             case STABLE -> 0xFF9B6C42;
             case APIARY -> 0xFFE1A72D;
+            case BLACKSMITH, CRUSHER -> 0xFF7D8794;
+            case SAWMILL, FLETCHER -> 0xFFB17A45;
+            case STONEMASON, CONCRETE_MIXER -> 0xFF9B9387;
+            case MECHANIC -> 0xFF6F93A8;
+            case SIFTER -> 0xFFC5A96A;
             case RESIDENCE -> 0xFF4E83EE;
         };
 
@@ -170,6 +178,14 @@ public final class PlaqueInspectorHud {
             case RABBIT_HUTCH -> "hud.coloniesunbound.plaque.rabbit_hutch";
             case STABLE -> "hud.coloniesunbound.plaque.stable";
             case APIARY -> "hud.coloniesunbound.plaque.apiary";
+            case BLACKSMITH -> "hud.coloniesunbound.plaque.blacksmith";
+            case SAWMILL -> "hud.coloniesunbound.plaque.sawmill";
+            case STONEMASON -> "hud.coloniesunbound.plaque.stonemason";
+            case FLETCHER -> "hud.coloniesunbound.plaque.fletcher";
+            case MECHANIC -> "hud.coloniesunbound.plaque.mechanic";
+            case CONCRETE_MIXER -> "hud.coloniesunbound.plaque.concrete_mixer";
+            case CRUSHER -> "hud.coloniesunbound.plaque.crusher";
+            case SIFTER -> "hud.coloniesunbound.plaque.sifter";
             case RESIDENCE -> "hud.coloniesunbound.plaque.residence";
         });
     }

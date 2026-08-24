@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "coloniesunbound:block/survival_sawmill_plaque" },
+    "facing=east": { "model": "coloniesunbound:block/survival_sawmill_plaque", "y": 90 },
+    "facing=south": { "model": "coloniesunbound:block/survival_sawmill_plaque", "y": 180 },
+    "facing=west": { "model": "coloniesunbound:block/survival_sawmill_plaque", "y": 270 }
+  }
+}

@@ -164,6 +164,8 @@ public final class SurvivalResidenceRenderer<T extends MarkedBuildingTileEntity>
         final String textureIconId = switch (iconId) {
             case "sheep_pen", "chicken_pen", "pig_pen", "rabbit_hutch", "stable", "stall" -> "animal_pen";
             case "apiary", "hive" -> "farm";
+            case "blacksmith", "sawmill", "stonemason", "fletcher", "mechanic",
+                    "concrete_mixer", "crusher", "sifter" -> "worksite";
             default -> iconId;
         };
         final ResourceLocation iconTexture = ResourceLocation.fromNamespaceAndPath(

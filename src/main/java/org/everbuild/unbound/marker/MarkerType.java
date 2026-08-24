@@ -13,7 +13,15 @@ public enum MarkerType {
     PIG_PEN("pig_pen"),
     RABBIT_HUTCH("rabbit_hutch"),
     STABLE("stable"),
-    APIARY("apiary");
+    APIARY("apiary"),
+    BLACKSMITH("blacksmith"),
+    SAWMILL("sawmill"),
+    STONEMASON("stonemason"),
+    FLETCHER("fletcher"),
+    MECHANIC("mechanic"),
+    CONCRETE_MIXER("concrete_mixer"),
+    CRUSHER("crusher"),
+    SIFTER("sifter");
 
     private final String id;
 

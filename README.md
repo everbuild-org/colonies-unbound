@@ -58,6 +58,10 @@ The Worksite Marker provides the first area-selection vertical slice:
   native `stall` positioned tag used by the Stable Master and cavalry systems.
 - A Survival Apiary scans vanilla beehives and bee nests, while storage remains player-authored. Hive
   changes reconcile into MineColonies' native Beekeeper building after block changes and chunk loads.
+- Wave 2 crafting plaques cover Blacksmith, Sawmill, Stonemason, Fletcher, Mechanic, Concrete Mixer,
+  Crusher, and Sifter. Compatible workstation blocks are scanner-owned; storage is player-authored.
+- Crafting station placement/removal reconciles automatically. Concrete Mixer additionally registers
+  shallow flowing-water cells into MineColonies' native mixer topology for real placement/harvesting.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.

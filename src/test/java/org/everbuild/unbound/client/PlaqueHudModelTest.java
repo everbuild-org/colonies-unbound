@@ -116,6 +116,21 @@ class PlaqueHudModelTest {
         assertEquals(2, model.requiredCount());
     }
 
+    @Test
+    void craftingWorkplaceRequiresStorageAndScannedWorkstation() {
+        final PlaqueHudModel draft = PlaqueHudModel.from(MarkerType.BLACKSMITH, mark(
+                MarkerType.BLACKSMITH,
+                new WorksitePoi(WorksitePoiType.WORKSITE, BlockPos.ZERO)));
+        final PlaqueHudModel active = PlaqueHudModel.from(MarkerType.SIFTER, mark(
+                MarkerType.SIFTER,
+                new WorksitePoi(WorksitePoiType.WORKSITE, BlockPos.ZERO),
+                new WorksitePoi(WorksitePoiType.STORAGE, new BlockPos(1, 0, 0))));
+
+        assertEquals(PlaqueHudModel.State.DRAFT, draft.state());
+        assertEquals(2, draft.requiredCount());
+        assertEquals(PlaqueHudModel.State.ACTIVE, active.state());
+    }
+
     private static CommittedWorksiteMark mark(final MarkerType type, final WorksitePoi... points) {
         return new CommittedWorksiteMark(UUID.randomUUID(), type, BOUNDS, List.of(points));
     }
