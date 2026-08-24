@@ -46,7 +46,9 @@ The POI reconciliation path is intentionally event-driven and debounced, ready f
 assignable MineColonies POIs as survival workplace adapters are added.
 
 Billboard marker art is layered from `textures/marker/flag_base.png` and a typed icon such as
-`textures/marker/icons/residence.png`; transparent 32x32 textures are recommended.
+`textures/marker/icons/residence.png`; transparent 32x32 textures are recommended. Supplying a
+white `textures/marker/flag_tint_mask.png` enables semantic runtime colors while `flag_base.png`
+remains the authored-color fallback. Both layers use true alpha blending.
 
 ## Development
 

@@ -25,6 +25,8 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
     private static final float BLUE = 0.08F;
     private static final ResourceLocation FLAG_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             ColoniesUnbound.MOD_ID, "textures/marker/flag_base.png");
+    private static final ResourceLocation FLAG_TINT_MASK_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            ColoniesUnbound.MOD_ID, "textures/marker/flag_tint_mask.png");
 
     public SurvivalResidenceRenderer(final BlockEntityRendererProvider.Context context) {
     }
@@ -79,20 +81,28 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
 
         poseStack.pushPose();
         poseStack.translate(x, y, z);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-minecraft.gameRenderer.getMainCamera().getYRot()));
+        poseStack.mulPose(Axis.YP.rotationDegrees(
+                180.0F - minecraft.gameRenderer.getMainCamera().getYRot()));
         poseStack.scale(scale, scale, scale);
 
-        if (minecraft.getResourceManager().getResource(FLAG_TEXTURE).isPresent()) {
+        final boolean hasTintMask = minecraft.getResourceManager()
+                .getResource(FLAG_TINT_MASK_TEXTURE)
+                .isPresent();
+        final ResourceLocation flagTexture = hasTintMask ? FLAG_TINT_MASK_TEXTURE : FLAG_TEXTURE;
+        if (minecraft.getResourceManager().getResource(flagTexture).isPresent()) {
+            final FlagColor color = hasTintMask ? FlagColor.forIcon(iconId) : FlagColor.WHITE;
             renderTexturedQuad(
                     poseStack,
-                    buffers.getBuffer(RenderType.entityCutoutNoCull(FLAG_TEXTURE)),
-                    0.0F);
+                    buffers.getBuffer(RenderType.entityTranslucent(flagTexture)),
+                    0.0F,
+                    color);
         }
         if (minecraft.getResourceManager().getResource(iconTexture).isPresent()) {
             renderTexturedQuad(
                     poseStack,
-                    buffers.getBuffer(RenderType.entityCutoutNoCull(iconTexture)),
-                    0.002F);
+                    buffers.getBuffer(RenderType.entityTranslucent(iconTexture)),
+                    0.004F,
+                    FlagColor.WHITE);
         }
         poseStack.popPose();
     }
@@ -100,12 +110,13 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
     private static void renderTexturedQuad(
             final PoseStack poseStack,
             final VertexConsumer consumer,
-            final float depth) {
+            final float depth,
+            final FlagColor color) {
         final PoseStack.Pose pose = poseStack.last();
-        vertex(consumer, pose, -0.5F, -0.5F, depth, 0.0F, 1.0F);
-        vertex(consumer, pose, 0.5F, -0.5F, depth, 1.0F, 1.0F);
-        vertex(consumer, pose, 0.5F, 0.5F, depth, 1.0F, 0.0F);
-        vertex(consumer, pose, -0.5F, 0.5F, depth, 0.0F, 0.0F);
+        vertex(consumer, pose, -0.5F, -0.5F, depth, 0.0F, 1.0F, color);
+        vertex(consumer, pose, 0.5F, -0.5F, depth, 1.0F, 1.0F, color);
+        vertex(consumer, pose, 0.5F, 0.5F, depth, 1.0F, 0.0F, color);
+        vertex(consumer, pose, -0.5F, 0.5F, depth, 0.0F, 0.0F, color);
     }
 
     private static void vertex(
@@ -115,13 +126,33 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
             final float y,
             final float z,
             final float u,
-            final float v) {
+            final float v,
+            final FlagColor color) {
         consumer.addVertex(pose, x, y, z)
-                .setColor(255, 255, 255, 255)
+                .setColor(color.red(), color.green(), color.blue(), 255)
                 .setUv(u, v)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setLight(LightTexture.FULL_BRIGHT)
                 .setNormal(pose, 0.0F, 0.0F, 1.0F);
+    }
+
+    private record FlagColor(int red, int green, int blue) {
+        private static final FlagColor WHITE = new FlagColor(255, 255, 255);
+
+        private static FlagColor forIcon(final String iconId) {
+            return switch (iconId) {
+                case "residence" -> new FlagColor(63, 115, 230);
+                case "bed" -> new FlagColor(77, 184, 255);
+                case "storage" -> new FlagColor(227, 166, 47);
+                case "worksite", "furnace" -> new FlagColor(240, 122, 43);
+                case "farm", "animal_pen" -> new FlagColor(91, 176, 72);
+                case "restaurant", "interaction" -> new FlagColor(180, 96, 210);
+                case "guard", "patrol", "target" -> new FlagColor(210, 66, 66);
+                case "entrance" -> new FlagColor(64, 190, 170);
+                case "invalid" -> new FlagColor(235, 48, 48);
+                default -> new FlagColor(150, 160, 175);
+            };
+        }
     }
 
     @Override
