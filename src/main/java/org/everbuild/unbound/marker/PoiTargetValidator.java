@@ -1,5 +1,6 @@
 package org.everbuild.unbound.marker;
 
+import com.minecolonies.api.blocks.AbstractColonyBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -42,6 +43,7 @@ public final class PoiTargetValidator {
             final BlockPos position,
             final BlockState state) {
         return !(state.getBlock() instanceof AbstractFurnaceBlock)
+                && !(state.getBlock() instanceof AbstractColonyBlock<?>)
                 && level.getCapability(
                         Capabilities.ItemHandler.BLOCK,
                         position,

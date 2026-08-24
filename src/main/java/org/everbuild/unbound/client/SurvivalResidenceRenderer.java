@@ -17,10 +17,11 @@ import net.minecraft.world.phys.AABB;
 import org.everbuild.unbound.ColoniesUnbound;
 import org.everbuild.unbound.marker.CommittedWorksiteMark;
 import org.everbuild.unbound.marker.WorksitePoi;
-import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
+import org.everbuild.unbound.minecolonies.MarkedBuildingTileEntity;
 
 /** Renders a committed residence volume and its type flag while a marker is held. */
-public final class SurvivalResidenceRenderer implements BlockEntityRenderer<SurvivalResidenceTileEntity> {
+public final class SurvivalResidenceRenderer<T extends MarkedBuildingTileEntity>
+        implements BlockEntityRenderer<T> {
     private static final float RED = 1.00F;
     private static final float GREEN = 0.48F;
     private static final float BLUE = 0.08F;
@@ -32,7 +33,7 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
 
     @Override
     public void render(
-            final SurvivalResidenceTileEntity tile,
+            final T tile,
             final float partialTick,
             final PoseStack poseStack,
             final MultiBufferSource buffers,
@@ -150,12 +151,12 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
     }
 
     @Override
-    public boolean shouldRenderOffScreen(final SurvivalResidenceTileEntity tile) {
+    public boolean shouldRenderOffScreen(final T tile) {
         return true;
     }
 
     @Override
-    public AABB getRenderBoundingBox(final SurvivalResidenceTileEntity tile) {
+    public AABB getRenderBoundingBox(final T tile) {
         final AABB anchorBounds = new AABB(tile.getBlockPos()).inflate(2.0);
         final CommittedWorksiteMark mark = tile.committedMark();
         if (mark == null) {

@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 /** Semantic type of a committed worksite volume. */
 public enum MarkerType {
-    RESIDENCE("residence");
+    RESIDENCE("residence"),
+    RESTAURANT("restaurant");
 
     private final String id;
 

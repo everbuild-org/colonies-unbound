@@ -40,6 +40,8 @@ The Worksite Marker provides the first area-selection vertical slice:
 - In a point mode, use inside a committed volume to add a point and sneak-use the same block to remove it.
 - Point-mode clicks take priority over block menus; storage, furnace worksite, and entrance targets are validated.
 - A minimal workplace draft becomes ready once it has at least one Storage, Worksite, and Entrance point.
+- A Survival Dining Hall Plaque turns that draft into a native MineColonies Cook building: readiness
+  activates level 1, registers marked furnaces and containers, and exposes work/entrance/sit tags.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.

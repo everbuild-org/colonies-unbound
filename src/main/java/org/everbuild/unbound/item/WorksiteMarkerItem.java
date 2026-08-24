@@ -22,9 +22,13 @@ import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.MarkerSelection;
 import org.everbuild.unbound.marker.MarkerToolMode;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalCookTileEntity;
 import org.everbuild.unbound.residence.ResidenceInspection;
 import org.everbuild.unbound.residence.ResidenceInspector;
 import org.everbuild.unbound.residence.ResidenceMarkerService;
+import org.everbuild.unbound.workplace.CookInspection;
+import org.everbuild.unbound.workplace.CookInspector;
+import org.everbuild.unbound.workplace.SurvivalCookMarkerService;
 
 /** Selects residence volumes and edits typed semantic points with one marker tool. */
 public final class WorksiteMarkerItem extends Item {
@@ -64,21 +68,37 @@ public final class WorksiteMarkerItem extends Item {
             if (!context.getLevel().isClientSide
                     && context.getLevel() instanceof ServerLevel serverLevel
                     && context.getPlayer() instanceof ServerPlayer serverPlayer) {
-                context.getPlayer().displayClientMessage(
-                        pointEditReport(
-                                ResidenceMarkerService.editPoint(
-                                        serverLevel,
-                                        serverPlayer,
-                                        context.getClickedPos(),
-                                        mode.poiType(),
-                                        context.getPlayer().isShiftKeyDown()),
-                                mode),
-                        true);
+                ResidenceMarkerService.PointEditOutcome outcome = SurvivalCookMarkerService.editPoint(
+                        serverLevel,
+                        serverPlayer,
+                        context.getClickedPos(),
+                        mode.poiType(),
+                        context.getPlayer().isShiftKeyDown());
+                if (outcome.result() == ResidenceMarkerService.PointEditResult.NO_COMMITTED_VOLUME) {
+                    outcome = ResidenceMarkerService.editPoint(
+                            serverLevel,
+                            serverPlayer,
+                            context.getClickedPos(),
+                            mode.poiType(),
+                            context.getPlayer().isShiftKeyDown());
+                }
+                context.getPlayer().displayClientMessage(pointEditReport(outcome, mode), true);
             }
             return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
         }
         if (context.getPlayer().isShiftKeyDown()) {
             if (!context.getLevel().isClientSide) {
+                if (context.getLevel() instanceof ServerLevel serverLevel
+                        && context.getPlayer() instanceof ServerPlayer serverPlayer
+                        && context.getLevel().getBlockEntity(context.getClickedPos())
+                                instanceof SurvivalCookTileEntity cookTile
+                        && cookTile.committedMark() != null) {
+                    context.getPlayer().displayClientMessage(
+                            removalReport(SurvivalCookMarkerService.removeCommittedMark(
+                                    serverLevel, serverPlayer, cookTile)),
+                            true);
+                    return InteractionResult.SUCCESS;
+                }
                 if (context.getLevel() instanceof ServerLevel serverLevel
                         && context.getPlayer() instanceof ServerPlayer serverPlayer
                         && context.getLevel().getBlockEntity(context.getClickedPos())
@@ -132,6 +152,19 @@ public final class WorksiteMarkerItem extends Item {
                 existing.markerId(), dimension, existing.firstCorner(), clicked);
         MarkerSelection.write(stack, completed);
         final ResidenceInspection inspection = ResidenceInspector.inspect(context.getLevel(), bounds);
+        final CookInspection cookInspection = CookInspector.inspect(context.getLevel(), bounds);
+        if (!cookInspection.plaquePositions().isEmpty()) {
+            final Component report = !inspection.plaquePositions().isEmpty()
+                            || cookInspection.status() == CookInspection.Status.MULTIPLE_PLAQUES
+                    ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
+                            .withStyle(ChatFormatting.RED)
+                    : cookInspection.status() == CookInspection.Status.VALID
+                            ? cookRegistrationReport(context, stack, completed, bounds, cookInspection)
+                            : Component.translatable("message.coloniesunbound.inspection.no_plaque")
+                                    .withStyle(ChatFormatting.RED);
+            context.getPlayer().displayClientMessage(report, true);
+            return;
+        }
         final Component report = switch (inspection.status()) {
             case VALID -> registrationReport(context, stack, completed, inspection, bounds);
             case NO_BEDS -> Component.translatable("message.coloniesunbound.inspection.no_beds")
@@ -148,6 +181,41 @@ public final class WorksiteMarkerItem extends Item {
                     .withStyle(ChatFormatting.RED);
         };
         context.getPlayer().displayClientMessage(report, true);
+    }
+
+    private static Component cookRegistrationReport(
+            final UseOnContext context,
+            final ItemStack stack,
+            final MarkerSelection selection,
+            final AreaBounds bounds,
+            final CookInspection inspection) {
+        if (!(context.getLevel() instanceof ServerLevel serverLevel)
+                || !(context.getPlayer() instanceof ServerPlayer serverPlayer)) {
+            return Component.empty();
+        }
+        final SurvivalCookMarkerService.RegistrationResult result = SurvivalCookMarkerService.register(
+                serverLevel,
+                serverPlayer,
+                selection,
+                bounds,
+                inspection.plaquePositions().getFirst());
+        if (result == SurvivalCookMarkerService.RegistrationResult.SAVED) {
+            MarkerSelection.clear(stack);
+        }
+        return switch (result) {
+            case SAVED -> Component.translatable(
+                            "message.coloniesunbound.cook.saved",
+                            bounds.sizeX(), bounds.sizeY(), bounds.sizeZ())
+                    .withStyle(ChatFormatting.GREEN);
+            case OUTSIDE_COLONY -> Component.translatable("message.coloniesunbound.inspection.outside_colony")
+                    .withStyle(ChatFormatting.RED);
+            case CROSSES_COLONY_BORDER -> Component.translatable("message.coloniesunbound.inspection.crosses_border")
+                    .withStyle(ChatFormatting.RED);
+            case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
+                    .withStyle(ChatFormatting.RED);
+            case PLAQUE_NOT_REGISTERED -> Component.translatable("message.coloniesunbound.inspection.plaque_not_registered")
+                    .withStyle(ChatFormatting.RED);
+        };
     }
 
     private static Component registrationReport(

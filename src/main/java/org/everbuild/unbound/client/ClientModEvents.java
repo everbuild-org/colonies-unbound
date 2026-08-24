@@ -18,5 +18,8 @@ public final class ClientModEvents {
         event.registerBlockEntityRenderer(
                 MineColoniesIntegration.SURVIVAL_RESIDENCE_TILE.get(),
                 SurvivalResidenceRenderer::new);
+        event.registerBlockEntityRenderer(
+                MineColoniesIntegration.SURVIVAL_COOK_TILE.get(),
+                SurvivalResidenceRenderer::new);
     }
 }

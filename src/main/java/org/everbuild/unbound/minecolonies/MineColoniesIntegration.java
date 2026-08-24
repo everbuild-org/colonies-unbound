@@ -4,6 +4,7 @@ import com.minecolonies.api.colony.buildings.registry.BuildingEntry;
 import com.minecolonies.core.colony.buildings.modules.BuildingModules;
 import com.minecolonies.core.colony.buildings.modules.HomeBuildingModule;
 import com.minecolonies.core.colony.buildings.moduleviews.LivingBuildingModuleView;
+import com.minecolonies.core.colony.buildings.workerbuildings.BuildingCook;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -47,6 +48,20 @@ public final class MineColoniesIntegration {
                                     SURVIVAL_RESIDENCE_BLOCK.get())
                             .build(null));
 
+    public static final DeferredBlock<SurvivalCookBlock> SURVIVAL_COOK_BLOCK = BLOCKS.registerBlock(
+            "survival_cook_plaque",
+            SurvivalCookBlock::new,
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_COOK_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_COOK_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalCookTileEntity>>
+            SURVIVAL_COOK_TILE = BLOCK_ENTITIES.register(
+                    "survival_cook_plaque",
+                    () -> BlockEntityType.Builder.of(
+                                    SurvivalCookTileEntity::new,
+                                    SURVIVAL_COOK_BLOCK.get())
+                            .build(null));
+
     public static final BuildingEntry.ModuleProducer<SurvivalLivingBuildingModule, LivingBuildingModuleView>
             SURVIVAL_LIVING = new BuildingEntry.ModuleProducer<>(
                     ColoniesUnbound.MOD_ID + ":survival_living",
@@ -64,6 +79,21 @@ public final class MineColoniesIntegration {
                     .addBuildingModuleProducer(BuildingModules.HOME)
                     .addBuildingModuleProducer(SURVIVAL_LIVING)
                     .addBuildingModuleProducer(BuildingModules.BED)
+                    .createBuildingEntry());
+
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_COOK = BUILDINGS.register(
+            "survival_cook",
+            () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(
+                            ColoniesUnbound.MOD_ID, "survival_cook"))
+                    .setBuildingBlock(SURVIVAL_COOK_BLOCK.get())
+                    .setBuildingProducer(SurvivalCookBuilding::new)
+                    .setBuildingViewProducer(() -> BuildingCook.View::new)
+                    .addBuildingModuleProducer(BuildingModules.COOK_WORK)
+                    .addBuildingModuleProducer(BuildingModules.FURNACE)
+                    .addBuildingModuleProducer(BuildingModules.ITEMLIST_FUEL)
+                    .addBuildingModuleProducer(BuildingModules.RESTAURANT_MENU)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
                     .createBuildingEntry());
 
     private MineColoniesIntegration() {
@@ -84,6 +114,7 @@ public final class MineColoniesIntegration {
     private static void addToCreativeTabs(final BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             event.accept(SURVIVAL_RESIDENCE_ITEM);
+            event.accept(SURVIVAL_COOK_ITEM);
         }
     }
 }
