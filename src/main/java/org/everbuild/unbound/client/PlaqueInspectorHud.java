@@ -14,6 +14,7 @@ import org.everbuild.unbound.ColoniesUnbound;
 import org.everbuild.unbound.marker.MarkerType;
 import org.everbuild.unbound.minecolonies.MarkedBuildingTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalCookTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalGuardTileEntity;
 
 /** Compact contextual inspector shown while the crosshair rests on a survival plaque. */
 @EventBusSubscriber(modid = ColoniesUnbound.MOD_ID, value = Dist.CLIENT)
@@ -49,7 +50,7 @@ public final class PlaqueInspectorHud {
 
         final MarkerType plaqueType = plaque instanceof SurvivalCookTileEntity
                 ? MarkerType.RESTAURANT
-                : MarkerType.RESIDENCE;
+                : plaque instanceof SurvivalGuardTileEntity ? MarkerType.GUARD : MarkerType.RESIDENCE;
         renderPanel(event.getGuiGraphics(), minecraft.font, PlaqueHudModel.from(plaqueType, plaque.committedMark()));
     }
 
@@ -61,7 +62,11 @@ public final class PlaqueInspectorHud {
         final int panelHeight = HEADER_HEIGHT + 39 + requirementRows * ROW_HEIGHT + 17;
         final int x = Math.max(8, graphics.guiWidth() - PANEL_WIDTH - 12);
         final int y = Mth.clamp((graphics.guiHeight() - panelHeight) / 2, 8, Math.max(8, graphics.guiHeight() - panelHeight - 8));
-        final int accent = model.type() == MarkerType.RESTAURANT ? 0xFFB460D2 : 0xFF4E83EE;
+        final int accent = switch (model.type()) {
+            case RESTAURANT -> 0xFFB460D2;
+            case GUARD -> 0xFFD24242;
+            case RESIDENCE -> 0xFF4E83EE;
+        };
 
         graphics.fill(x + 3, y + 3, x + PANEL_WIDTH + 3, y + panelHeight + 3, SHADOW);
         graphics.fill(x, y, x + PANEL_WIDTH, y + panelHeight, accent);
@@ -119,15 +124,17 @@ public final class PlaqueInspectorHud {
         final int barWidth = PANEL_WIDTH - PADDING * 2;
         graphics.fill(barX, barY, barX + barWidth, barY + 3, 0xFF303A48);
         final float progress = model.requiredCount() == 0
-                ? 0.0F
+                ? model.state() == PlaqueHudModel.State.ACTIVE ? 1.0F : 0.0F
                 : (float) model.satisfiedRequiredCount() / model.requiredCount();
         graphics.fill(barX, barY, barX + Mth.floor(barWidth * progress), barY + 3, stateColor);
     }
 
     private static Component title(final MarkerType type) {
-        return Component.translatable(type == MarkerType.RESTAURANT
-                ? "hud.coloniesunbound.plaque.dining_hall"
-                : "hud.coloniesunbound.plaque.residence");
+        return Component.translatable(switch (type) {
+            case RESTAURANT -> "hud.coloniesunbound.plaque.dining_hall";
+            case GUARD -> "hud.coloniesunbound.plaque.guard_tower";
+            case RESIDENCE -> "hud.coloniesunbound.plaque.residence";
+        });
     }
 
     private static Component stateLabel(final PlaqueHudModel.State state) {

@@ -48,6 +48,10 @@ public record PlaqueHudModel(
             requirements.add(new Requirement("hud.coloniesunbound.plaque.beds", count(points, WorksitePoiType.BED), 1, false));
             return requirements;
         }
+        if (type == MarkerType.GUARD) {
+            requirements.add(new Requirement("hud.coloniesunbound.plaque.patrol_nodes", count(points, WorksitePoiType.PATROL), 0, true));
+            return requirements;
+        }
 
         requirements.add(new Requirement("hud.coloniesunbound.plaque.storage", count(points, WorksitePoiType.STORAGE), 1, false));
         requirements.add(new Requirement("hud.coloniesunbound.plaque.furnace", count(points, WorksitePoiType.WORKSITE), 1, false));

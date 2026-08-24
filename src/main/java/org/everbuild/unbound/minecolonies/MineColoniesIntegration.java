@@ -5,6 +5,7 @@ import com.minecolonies.core.colony.buildings.modules.BuildingModules;
 import com.minecolonies.core.colony.buildings.modules.HomeBuildingModule;
 import com.minecolonies.core.colony.buildings.moduleviews.LivingBuildingModuleView;
 import com.minecolonies.core.colony.buildings.workerbuildings.BuildingCook;
+import com.minecolonies.core.colony.buildings.workerbuildings.BuildingGuardTower;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -62,6 +63,20 @@ public final class MineColoniesIntegration {
                                     SURVIVAL_COOK_BLOCK.get())
                             .build(null));
 
+    public static final DeferredBlock<SurvivalGuardBlock> SURVIVAL_GUARD_BLOCK = BLOCKS.registerBlock(
+            "survival_guard_plaque",
+            SurvivalGuardBlock::new,
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_GUARD_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_GUARD_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalGuardTileEntity>>
+            SURVIVAL_GUARD_TILE = BLOCK_ENTITIES.register(
+                    "survival_guard_plaque",
+                    () -> BlockEntityType.Builder.of(
+                                    SurvivalGuardTileEntity::new,
+                                    SURVIVAL_GUARD_BLOCK.get())
+                            .build(null));
+
     public static final BuildingEntry.ModuleProducer<SurvivalLivingBuildingModule, LivingBuildingModuleView>
             SURVIVAL_LIVING = new BuildingEntry.ModuleProducer<>(
                     ColoniesUnbound.MOD_ID + ":survival_living",
@@ -96,6 +111,26 @@ public final class MineColoniesIntegration {
                     .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
                     .createBuildingEntry());
 
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_GUARD = BUILDINGS.register(
+            "survival_guard",
+            () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(
+                            ColoniesUnbound.MOD_ID, "survival_guard"))
+                    .setBuildingBlock(SURVIVAL_GUARD_BLOCK.get())
+                    .setBuildingProducer(SurvivalGuardBuilding::new)
+                    .setBuildingViewProducer(() -> BuildingGuardTower.View::new)
+                    .addBuildingModuleProducer(BuildingModules.KNIGHT_TOWER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.RANGER_TOWER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.MARKSMAN_TOWER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.HUSCARL_TOWER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.GUARD_TOOL)
+                    .addBuildingModuleProducer(BuildingModules.GUARD_ENTITY_LIST)
+                    .addBuildingModuleProducer(BuildingModules.GUARD_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.BED)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+
     private MineColoniesIntegration() {
     }
 
@@ -115,6 +150,7 @@ public final class MineColoniesIntegration {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             event.accept(SURVIVAL_RESIDENCE_ITEM);
             event.accept(SURVIVAL_COOK_ITEM);
+            event.accept(SURVIVAL_GUARD_ITEM);
         }
     }
 }

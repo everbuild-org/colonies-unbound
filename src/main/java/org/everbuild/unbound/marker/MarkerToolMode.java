@@ -13,7 +13,8 @@ public enum MarkerToolMode {
     STORAGE("storage", WorksitePoiType.STORAGE),
     WORKSITE("worksite", WorksitePoiType.WORKSITE),
     ENTRANCE("entrance", WorksitePoiType.ENTRANCE),
-    INTERACTION("interaction", WorksitePoiType.INTERACTION);
+    INTERACTION("interaction", WorksitePoiType.INTERACTION),
+    PATROL_ROUTE("patrol_route", WorksitePoiType.PATROL);
 
     private static final String MODE_KEY = "coloniesunbound_tool_mode";
 

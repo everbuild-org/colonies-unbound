@@ -20,8 +20,13 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.MarkerSelection;
+import org.everbuild.unbound.marker.PatrolRouteSelection;
 import org.everbuild.unbound.marker.MarkerToolMode;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalGuardTileEntity;
+import org.everbuild.unbound.guard.GuardInspection;
+import org.everbuild.unbound.guard.GuardInspector;
+import org.everbuild.unbound.guard.SurvivalGuardMarkerService;
 import org.everbuild.unbound.minecolonies.SurvivalCookTileEntity;
 import org.everbuild.unbound.residence.ResidenceInspection;
 import org.everbuild.unbound.residence.ResidenceInspector;
@@ -48,6 +53,7 @@ public final class WorksiteMarkerItem extends Item {
             final MarkerToolMode nextMode = MarkerToolMode.read(stack).next();
             MarkerToolMode.write(stack, nextMode);
             MarkerSelection.clear(stack);
+            PatrolRouteSelection.clear(stack);
             player.displayClientMessage(
                     Component.translatable(
                             "message.coloniesunbound.marker.mode_changed",
@@ -64,6 +70,9 @@ public final class WorksiteMarkerItem extends Item {
             return InteractionResult.PASS;
         }
         final MarkerToolMode mode = MarkerToolMode.read(stack);
+        if (mode == MarkerToolMode.PATROL_ROUTE) {
+            return usePatrolMode(context, stack);
+        }
         if (!mode.isAreaMode()) {
             if (!context.getLevel().isClientSide
                     && context.getLevel() instanceof ServerLevel serverLevel
@@ -88,6 +97,17 @@ public final class WorksiteMarkerItem extends Item {
         }
         if (context.getPlayer().isShiftKeyDown()) {
             if (!context.getLevel().isClientSide) {
+                if (context.getLevel() instanceof ServerLevel serverLevel
+                        && context.getPlayer() instanceof ServerPlayer serverPlayer
+                        && context.getLevel().getBlockEntity(context.getClickedPos())
+                                instanceof SurvivalGuardTileEntity guardTile
+                        && guardTile.committedMark() != null) {
+                    context.getPlayer().displayClientMessage(
+                            removalReport(SurvivalGuardMarkerService.removeCommittedMark(
+                                    serverLevel, serverPlayer, guardTile)),
+                            true);
+                    return InteractionResult.SUCCESS;
+                }
                 if (context.getLevel() instanceof ServerLevel serverLevel
                         && context.getPlayer() instanceof ServerPlayer serverPlayer
                         && context.getLevel().getBlockEntity(context.getClickedPos())
@@ -153,8 +173,23 @@ public final class WorksiteMarkerItem extends Item {
         MarkerSelection.write(stack, completed);
         final ResidenceInspection inspection = ResidenceInspector.inspect(context.getLevel(), bounds);
         final CookInspection cookInspection = CookInspector.inspect(context.getLevel(), bounds);
+        final GuardInspection guardInspection = GuardInspector.inspect(context.getLevel(), bounds);
+        if (!guardInspection.plaquePositions().isEmpty()) {
+            final Component report = !inspection.plaquePositions().isEmpty()
+                            || !cookInspection.plaquePositions().isEmpty()
+                            || guardInspection.status() == GuardInspection.Status.MULTIPLE_PLAQUES
+                    ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
+                            .withStyle(ChatFormatting.RED)
+                    : guardInspection.status() == GuardInspection.Status.VALID
+                            ? guardRegistrationReport(context, stack, completed, bounds, guardInspection)
+                            : Component.translatable("message.coloniesunbound.inspection.no_plaque")
+                                    .withStyle(ChatFormatting.RED);
+            context.getPlayer().displayClientMessage(report, true);
+            return;
+        }
         if (!cookInspection.plaquePositions().isEmpty()) {
             final Component report = !inspection.plaquePositions().isEmpty()
+                            || !guardInspection.plaquePositions().isEmpty()
                             || cookInspection.status() == CookInspection.Status.MULTIPLE_PLAQUES
                     ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
                             .withStyle(ChatFormatting.RED)
@@ -181,6 +216,110 @@ public final class WorksiteMarkerItem extends Item {
                     .withStyle(ChatFormatting.RED);
         };
         context.getPlayer().displayClientMessage(report, true);
+    }
+
+    private static InteractionResult usePatrolMode(
+            final UseOnContext context,
+            final ItemStack stack) {
+        if (context.getLevel().isClientSide
+                || !(context.getLevel() instanceof ServerLevel serverLevel)
+                || !(context.getPlayer() instanceof ServerPlayer serverPlayer)) {
+            return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
+        }
+        if (context.getLevel().getBlockEntity(context.getClickedPos())
+                instanceof SurvivalGuardTileEntity guardTile) {
+            final SurvivalGuardMarkerService.RouteEditResult result =
+                    SurvivalGuardMarkerService.selectRouteOwner(serverLevel, serverPlayer, guardTile);
+            if (result == SurvivalGuardMarkerService.RouteEditResult.OWNER_SELECTED) {
+                PatrolRouteSelection.write(stack, new PatrolRouteSelection(
+                        serverLevel.dimension().location(), guardTile.getBlockPos()));
+            }
+            serverPlayer.displayClientMessage(patrolReport(result, 0), true);
+            return InteractionResult.SUCCESS;
+        }
+
+        final PatrolRouteSelection selection = PatrolRouteSelection.read(stack);
+        if (selection == null) {
+            serverPlayer.displayClientMessage(
+                    Component.translatable("message.coloniesunbound.patrol.select_owner")
+                            .withStyle(ChatFormatting.RED),
+                    true);
+            return InteractionResult.SUCCESS;
+        }
+        final SurvivalGuardMarkerService.RouteEditOutcome outcome =
+                SurvivalGuardMarkerService.editPatrolNode(
+                        serverLevel,
+                        serverPlayer,
+                        selection,
+                        context.getClickedPos(),
+                        context.getPlayer().isShiftKeyDown());
+        serverPlayer.displayClientMessage(patrolReport(outcome.result(), outcome.nodeCount()), true);
+        return InteractionResult.SUCCESS;
+    }
+
+    private static Component patrolReport(
+            final SurvivalGuardMarkerService.RouteEditResult result,
+            final int nodeCount) {
+        return switch (result) {
+            case OWNER_SELECTED -> Component.translatable("message.coloniesunbound.patrol.owner_selected")
+                    .withStyle(ChatFormatting.GREEN);
+            case NODE_ADDED -> Component.translatable("message.coloniesunbound.patrol.node_added", nodeCount)
+                    .withStyle(ChatFormatting.GREEN);
+            case NODE_REMOVED -> Component.translatable("message.coloniesunbound.patrol.node_removed", nodeCount)
+                    .withStyle(ChatFormatting.GREEN);
+            case NODE_EXISTS -> Component.translatable("message.coloniesunbound.patrol.node_exists")
+                    .withStyle(ChatFormatting.YELLOW);
+            case NODE_NOT_FOUND -> Component.translatable("message.coloniesunbound.patrol.node_not_found")
+                    .withStyle(ChatFormatting.RED);
+            case TOO_MANY_NODES -> Component.translatable(
+                            "message.coloniesunbound.patrol.too_many", SurvivalGuardMarkerService.MAXIMUM_PATROL_NODES)
+                    .withStyle(ChatFormatting.RED);
+            case TOO_FAR -> Component.translatable("message.coloniesunbound.patrol.too_far")
+                    .withStyle(ChatFormatting.RED);
+            case WRONG_DIMENSION -> Component.translatable("message.coloniesunbound.patrol.wrong_dimension")
+                    .withStyle(ChatFormatting.RED);
+            case OUTSIDE_COLONY -> Component.translatable("message.coloniesunbound.patrol.outside_colony")
+                    .withStyle(ChatFormatting.RED);
+            case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
+                    .withStyle(ChatFormatting.RED);
+            case MARK_UNAVAILABLE -> Component.translatable("message.coloniesunbound.marker.mark_unavailable")
+                    .withStyle(ChatFormatting.RED);
+        };
+    }
+
+    private static Component guardRegistrationReport(
+            final UseOnContext context,
+            final ItemStack stack,
+            final MarkerSelection selection,
+            final AreaBounds bounds,
+            final GuardInspection inspection) {
+        if (!(context.getLevel() instanceof ServerLevel serverLevel)
+                || !(context.getPlayer() instanceof ServerPlayer serverPlayer)) {
+            return Component.empty();
+        }
+        final SurvivalGuardMarkerService.RegistrationResult result = SurvivalGuardMarkerService.register(
+                serverLevel,
+                serverPlayer,
+                selection,
+                bounds,
+                inspection.plaquePositions().getFirst());
+        if (result == SurvivalGuardMarkerService.RegistrationResult.SAVED) {
+            MarkerSelection.clear(stack);
+        }
+        return switch (result) {
+            case SAVED -> Component.translatable(
+                            "message.coloniesunbound.guard.saved",
+                            bounds.sizeX(), bounds.sizeY(), bounds.sizeZ())
+                    .withStyle(ChatFormatting.GREEN);
+            case OUTSIDE_COLONY -> Component.translatable("message.coloniesunbound.inspection.outside_colony")
+                    .withStyle(ChatFormatting.RED);
+            case CROSSES_COLONY_BORDER -> Component.translatable("message.coloniesunbound.inspection.crosses_border")
+                    .withStyle(ChatFormatting.RED);
+            case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
+                    .withStyle(ChatFormatting.RED);
+            case PLAQUE_NOT_REGISTERED -> Component.translatable("message.coloniesunbound.inspection.plaque_not_registered")
+                    .withStyle(ChatFormatting.RED);
+        };
     }
 
     private static Component cookRegistrationReport(

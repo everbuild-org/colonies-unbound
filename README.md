@@ -44,6 +44,8 @@ The Worksite Marker provides the first area-selection vertical slice:
   activates level 1, registers marked furnaces and containers, and exposes work/entrance/sit tags.
 - Dining Hall furnaces, smokers, and blast furnaces are scanner-owned and reconcile automatically
   after block changes and chunk loads without disturbing manual storage, entrance, or seating points.
+- A Survival Guard Tower Plaque activates MineColonies' native Guard Tower modules. Patrol Route mode
+  selects a committed tower, then authors up to 32 ordered, colony-contained native patrol targets.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.

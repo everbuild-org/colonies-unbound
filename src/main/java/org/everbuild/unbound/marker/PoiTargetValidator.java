@@ -35,6 +35,9 @@ public final class PoiTargetValidator {
             case INTERACTION -> state.isAir()
                     ? Result.INVALID_INTERACTION
                     : Result.VALID;
+            case PATROL -> state.isAir()
+                    ? Result.INVALID_INTERACTION
+                    : Result.VALID;
         };
     }
 

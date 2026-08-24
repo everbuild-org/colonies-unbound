@@ -8,7 +8,8 @@ public enum WorksitePoiType {
     STORAGE("storage"),
     WORKSITE("worksite"),
     ENTRANCE("entrance"),
-    INTERACTION("interaction");
+    INTERACTION("interaction"),
+    PATROL("patrol");
 
     private final String id;
 

@@ -65,6 +65,7 @@ public abstract class MarkedBuildingTileEntity extends TileEntityColonyBuilding 
             case WORKSITE -> "work";
             case ENTRANCE -> "entrance";
             case INTERACTION -> "sit";
+            case PATROL -> null;
             default -> null;
         };
     }

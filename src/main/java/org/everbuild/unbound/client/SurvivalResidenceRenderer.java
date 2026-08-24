@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,6 +18,7 @@ import net.minecraft.world.phys.AABB;
 import org.everbuild.unbound.ColoniesUnbound;
 import org.everbuild.unbound.marker.CommittedWorksiteMark;
 import org.everbuild.unbound.marker.WorksitePoi;
+import org.everbuild.unbound.marker.WorksitePoiType;
 import org.everbuild.unbound.minecolonies.MarkedBuildingTileEntity;
 
 /** Renders a committed residence volume and its type flag while a marker is held. */
@@ -54,16 +56,100 @@ public final class SurvivalResidenceRenderer<T extends MarkedBuildingTileEntity>
 
         renderFlag(
                 poseStack, buffers, mark.type().id(), 0.5, 2.0, 0.5, 1.25F);
+        final java.util.List<WorksitePoi> patrolNodes = mark.pois().stream()
+                .filter(point -> point.type() == WorksitePoiType.PATROL)
+                .toList();
+        renderPatrolRoute(poseStack, buffers, origin, patrolNodes);
+        int patrolIndex = 0;
         for (final WorksitePoi poi : mark.pois()) {
+            final double flagX = poi.position().getX() - origin.getX() + 0.5;
+            final double flagY = poi.position().getY() - origin.getY() + 1.6;
+            final double flagZ = poi.position().getZ() - origin.getZ() + 0.5;
             renderFlag(
                     poseStack,
                     buffers,
                     poi.type().id(),
-                    poi.position().getX() - origin.getX() + 0.5,
-                    poi.position().getY() - origin.getY() + 1.6,
-                    poi.position().getZ() - origin.getZ() + 0.5,
+                    flagX,
+                    flagY,
+                    flagZ,
                     0.75F);
+            if (poi.type() == WorksitePoiType.PATROL) {
+                renderRouteNumber(poseStack, buffers, ++patrolIndex, flagX, flagY + 0.34, flagZ);
+            }
         }
+    }
+
+    private static void renderPatrolRoute(
+            final PoseStack poseStack,
+            final MultiBufferSource buffers,
+            final BlockPos origin,
+            final java.util.List<WorksitePoi> nodes) {
+        if (nodes.size() < 2) {
+            return;
+        }
+        final VertexConsumer lines = buffers.getBuffer(RenderType.lines());
+        for (int index = 1; index < nodes.size(); index++) {
+            renderRouteSegment(poseStack, lines, origin, nodes.get(index - 1), nodes.get(index));
+        }
+        if (nodes.size() > 2) {
+            renderRouteSegment(poseStack, lines, origin, nodes.getLast(), nodes.getFirst());
+        }
+    }
+
+    private static void renderRouteSegment(
+            final PoseStack poseStack,
+            final VertexConsumer lines,
+            final BlockPos origin,
+            final WorksitePoi from,
+            final WorksitePoi to) {
+        final float fromX = from.position().getX() - origin.getX() + 0.5F;
+        final float fromY = from.position().getY() - origin.getY() + 1.05F;
+        final float fromZ = from.position().getZ() - origin.getZ() + 0.5F;
+        final float toX = to.position().getX() - origin.getX() + 0.5F;
+        final float toY = to.position().getY() - origin.getY() + 1.05F;
+        final float toZ = to.position().getZ() - origin.getZ() + 0.5F;
+        final float length = Math.max(0.001F, (float) Math.sqrt(
+                (toX - fromX) * (toX - fromX)
+                        + (toY - fromY) * (toY - fromY)
+                        + (toZ - fromZ) * (toZ - fromZ)));
+        final float normalX = (toX - fromX) / length;
+        final float normalY = (toY - fromY) / length;
+        final float normalZ = (toZ - fromZ) / length;
+        final PoseStack.Pose pose = poseStack.last();
+        lines.addVertex(pose, fromX, fromY, fromZ)
+                .setColor(210, 66, 66, 230)
+                .setNormal(pose, normalX, normalY, normalZ);
+        lines.addVertex(pose, toX, toY, toZ)
+                .setColor(210, 66, 66, 230)
+                .setNormal(pose, normalX, normalY, normalZ);
+    }
+
+    private static void renderRouteNumber(
+            final PoseStack poseStack,
+            final MultiBufferSource buffers,
+            final int number,
+            final double x,
+            final double y,
+            final double z) {
+        final Minecraft minecraft = Minecraft.getInstance();
+        final String label = Integer.toString(number);
+        poseStack.pushPose();
+        poseStack.translate(x, y, z);
+        poseStack.mulPose(Axis.YP.rotationDegrees(
+                180.0F - minecraft.gameRenderer.getMainCamera().getYRot()));
+        poseStack.scale(0.025F, -0.025F, 0.025F);
+        minecraft.font.drawInBatch(
+                label,
+                -minecraft.font.width(label) / 2.0F,
+                0.0F,
+                0xFFFFFFFF,
+                true,
+                poseStack.last().pose(),
+                buffers,
+                Font.DisplayMode.NORMAL,
+                0x60000000,
+                LightTexture.FULL_BRIGHT);
+        poseStack.popPose();
     }
 
     private static void renderFlag(
@@ -166,7 +252,11 @@ public final class SurvivalResidenceRenderer<T extends MarkedBuildingTileEntity>
         // NeoForge still frustum-tests globally rendered block entities. Cover the
         // complete marked volume so a visible POI flag is not culled merely because
         // the building anchor itself has left the camera frustum.
-        return mark.bounds().asAabb().inflate(2.0).minmax(anchorBounds);
+        AABB renderBounds = mark.bounds().asAabb().inflate(2.0).minmax(anchorBounds);
+        for (final WorksitePoi point : mark.pois()) {
+            renderBounds = renderBounds.minmax(new AABB(point.position()).inflate(2.0));
+        }
+        return renderBounds;
     }
 
     @Override

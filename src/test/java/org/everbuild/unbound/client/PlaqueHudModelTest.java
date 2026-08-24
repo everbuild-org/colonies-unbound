@@ -52,6 +52,17 @@ class PlaqueHudModelTest {
         assertEquals(1, model.requirements().getLast().count());
     }
 
+    @Test
+    void guardTowerIsActiveWithoutAnOptionalPatrolRoute() {
+        final PlaqueHudModel model = PlaqueHudModel.from(
+                MarkerType.GUARD,
+                mark(MarkerType.GUARD));
+
+        assertEquals(PlaqueHudModel.State.ACTIVE, model.state());
+        assertEquals(0, model.requiredCount());
+        assertTrue(model.requirements().getFirst().optional());
+    }
+
     private static CommittedWorksiteMark mark(final MarkerType type, final WorksitePoi... points) {
         return new CommittedWorksiteMark(UUID.randomUUID(), type, BOUNDS, List.of(points));
     }
