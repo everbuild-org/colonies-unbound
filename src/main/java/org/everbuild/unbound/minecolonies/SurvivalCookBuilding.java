@@ -22,6 +22,11 @@ public final class SurvivalCookBuilding extends BuildingCook {
     }
 
     @Override
+    public boolean isBuilt() {
+        return getBuildingLevel() > 0;
+    }
+
+    @Override
     public void requestUpgrade(final Player player, final BlockPos builder) {
         // Survival workplaces are reinspected rather than upgraded from a schematic.
     }
