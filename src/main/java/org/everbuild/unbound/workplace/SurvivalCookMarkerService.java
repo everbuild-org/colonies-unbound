@@ -8,6 +8,7 @@ import com.minecolonies.core.colony.buildings.modules.BuildingModules;
 import com.minecolonies.core.colony.buildings.modules.FurnaceUserModule;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -34,7 +35,8 @@ public final class SurvivalCookMarkerService {
             final ServerPlayer player,
             final MarkerSelection selection,
             final AreaBounds bounds,
-            final BlockPos plaque) {
+            final BlockPos plaque,
+            final List<BlockPos> discoveredFurnaces) {
         final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, bounds.min());
         if (colony == null) {
             return RegistrationResult.OUTSIDE_COLONY;
@@ -60,13 +62,14 @@ public final class SurvivalCookMarkerService {
                 : cookTile.committedMark().pois().stream()
                         .filter(poi -> bounds.contains(poi.position()))
                         .toList();
+        final List<WorksitePoi> updatedPois = mergeFurnacePois(retainedPois, discoveredFurnaces);
         synchronize(
                 level,
                 colony,
                 cookBuilding,
                 cookTile,
                 cookTile.committedMark() == null ? List.of() : cookTile.committedMark().pois(),
-                new CommittedWorksiteMark(markerId, MarkerType.RESTAURANT, bounds, retainedPois));
+                new CommittedWorksiteMark(markerId, MarkerType.RESTAURANT, bounds, updatedPois));
         return RegistrationResult.SAVED;
     }
 
@@ -99,6 +102,11 @@ public final class SurvivalCookMarkerService {
         }
 
         final CookOwner owner = owners.getFirst();
+        if (poiType == WorksitePoiType.WORKSITE) {
+            return new ResidenceMarkerService.PointEditOutcome(
+                    ResidenceMarkerService.PointEditResult.SCANNER_OWNED,
+                    WorkplacePointSummary.from(owner.tile().committedMark().pois()));
+        }
         final CommittedWorksiteMark current = owner.tile().committedMark();
         final WorksitePoi editedPoi = new WorksitePoi(poiType, position);
         final List<WorksitePoi> pois = new ArrayList<>(current.pois());
@@ -133,6 +141,55 @@ public final class SurvivalCookMarkerService {
                         ? ResidenceMarkerService.PointEditResult.REMOVED
                         : ResidenceMarkerService.PointEditResult.ADDED,
                 WorkplacePointSummary.from(pois));
+    }
+
+    /** Refreshes scanner-owned furnace points while preserving explicitly assigned semantics. */
+    public static ReconcileResult reconcilePois(
+            final ServerLevel level,
+            final SurvivalCookBuilding building,
+            final SurvivalCookTileEntity tile) {
+        final CommittedWorksiteMark current = tile.committedMark();
+        if (current == null) {
+            return ReconcileResult.MARK_UNAVAILABLE;
+        }
+        final CookInspection inspection = CookInspector.inspect(level, current.bounds());
+        if (inspection.status() == CookInspection.Status.AREA_NOT_LOADED) {
+            return ReconcileResult.AREA_NOT_LOADED;
+        }
+        if (inspection.status() != CookInspection.Status.VALID
+                || !inspection.plaquePositions().getFirst().equals(tile.getBlockPos())) {
+            return ReconcileResult.MARK_UNAVAILABLE;
+        }
+
+        final List<WorksitePoi> updatedPois = mergeFurnacePois(current.pois(), inspection.furnacePositions());
+        if (Set.copyOf(updatedPois).equals(Set.copyOf(current.pois()))) {
+            return ReconcileResult.UNCHANGED;
+        }
+        final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, tile.getBlockPos());
+        if (colony == null || building.getColony().getID() != colony.getID()) {
+            return ReconcileResult.BUILDING_UNAVAILABLE;
+        }
+        synchronize(
+                level,
+                colony,
+                building,
+                tile,
+                current.pois(),
+                new CommittedWorksiteMark(current.id(), current.type(), current.bounds(), updatedPois));
+        return ReconcileResult.UPDATED;
+    }
+
+    static List<WorksitePoi> mergeFurnacePois(
+            final List<WorksitePoi> existingPois,
+            final List<BlockPos> furnacePositions) {
+        final List<WorksitePoi> merged = new ArrayList<>();
+        existingPois.stream()
+                .filter(poi -> poi.type() != WorksitePoiType.WORKSITE)
+                .forEach(merged::add);
+        furnacePositions.stream()
+                .map(position -> new WorksitePoi(WorksitePoiType.WORKSITE, position))
+                .forEach(merged::add);
+        return List.copyOf(merged);
     }
 
     public static ResidenceMarkerService.RemovalResult removeCommittedMark(
@@ -248,5 +305,13 @@ public final class SurvivalCookMarkerService {
         CROSSES_COLONY_BORDER,
         NO_PERMISSION,
         PLAQUE_NOT_REGISTERED
+    }
+
+    public enum ReconcileResult {
+        UPDATED,
+        UNCHANGED,
+        AREA_NOT_LOADED,
+        MARK_UNAVAILABLE,
+        BUILDING_UNAVAILABLE
     }
 }

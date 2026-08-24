@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.minecolonies.MineColoniesIntegration;
 import org.everbuild.unbound.residence.ResidenceInspector;
@@ -19,24 +20,37 @@ public final class CookInspector {
         return inspect(
                 bounds,
                 chunksAreLoaded(level, bounds),
-                position -> level.getBlockState(position).is(MineColoniesIntegration.SURVIVAL_COOK_BLOCK.get()));
+                position -> level.getBlockState(position).is(MineColoniesIntegration.SURVIVAL_COOK_BLOCK.get()),
+                position -> level.getBlockState(position).getBlock() instanceof AbstractFurnaceBlock);
     }
 
     static CookInspection inspect(
             final AreaBounds bounds,
             final boolean areaLoaded,
             final Predicate<BlockPos> isCookPlaque) {
+        return inspect(bounds, areaLoaded, isCookPlaque, ignored -> false);
+    }
+
+    static CookInspection inspect(
+            final AreaBounds bounds,
+            final boolean areaLoaded,
+            final Predicate<BlockPos> isCookPlaque,
+            final Predicate<BlockPos> isFurnace) {
         if (bounds.volume() > ResidenceInspector.MAXIMUM_INSPECTION_VOLUME) {
-            return new CookInspection(CookInspection.Status.AREA_TOO_LARGE, bounds, List.of());
+            return new CookInspection(CookInspection.Status.AREA_TOO_LARGE, bounds, List.of(), List.of());
         }
         if (!areaLoaded) {
-            return new CookInspection(CookInspection.Status.AREA_NOT_LOADED, bounds, List.of());
+            return new CookInspection(CookInspection.Status.AREA_NOT_LOADED, bounds, List.of(), List.of());
         }
 
         final List<BlockPos> plaques = new ArrayList<>();
+        final List<BlockPos> furnaces = new ArrayList<>();
         for (final BlockPos position : BlockPos.betweenClosed(bounds.min(), bounds.max())) {
             if (isCookPlaque.test(position)) {
                 plaques.add(position.immutable());
+            }
+            if (isFurnace.test(position)) {
+                furnaces.add(position.immutable());
             }
         }
         final CookInspection.Status status = plaques.isEmpty()
@@ -44,7 +58,7 @@ public final class CookInspector {
                 : plaques.size() == 1
                         ? CookInspection.Status.VALID
                         : CookInspection.Status.MULTIPLE_PLAQUES;
-        return new CookInspection(status, bounds, plaques);
+        return new CookInspection(status, bounds, plaques, furnaces);
     }
 
     private static boolean chunksAreLoaded(final Level level, final AreaBounds bounds) {

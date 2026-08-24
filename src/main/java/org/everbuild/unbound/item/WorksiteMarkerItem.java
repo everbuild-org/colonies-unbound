@@ -198,7 +198,8 @@ public final class WorksiteMarkerItem extends Item {
                 serverPlayer,
                 selection,
                 bounds,
-                inspection.plaquePositions().getFirst());
+                inspection.plaquePositions().getFirst(),
+                inspection.furnacePositions());
         if (result == SurvivalCookMarkerService.RegistrationResult.SAVED) {
             MarkerSelection.clear(stack);
         }

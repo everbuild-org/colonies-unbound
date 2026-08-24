@@ -22,7 +22,7 @@
   "hud.coloniesunbound.plaque.volume": "Volume",
   "com.coloniesunbound.building.survival_cook": "Survival Dining Hall",
   "com.coloniesunbound.building.survival_cook.desc": "Cooks and serves food from a player-built dining hall",
-  "message.coloniesunbound.cook.saved": "Saved %sx%sx%s Dining Hall draft; mark storage, furnace, and entrance points to activate it",
+  "message.coloniesunbound.cook.saved": "Saved %sx%sx%s Dining Hall; furnaces scan automatically, mark storage and entrance to activate it",
   "message.coloniesunbound.inspection.no_beds": "Invalid residence: no beds found",
   "message.coloniesunbound.inspection.multiple_plaques": "Residence must contain exactly one plaque",
   "message.coloniesunbound.inspection.multiple_building_plaques": "A marked volume must contain exactly one building plaque",

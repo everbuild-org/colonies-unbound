@@ -5,12 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.UUID;
+import org.everbuild.unbound.marker.DebouncedRescanQueue;
 import org.junit.jupiter.api.Test;
 
 class MarkerRescanQueueTest {
     @Test
     void repeatedChangesMoveOneScanToTheLatestDeadline() {
-        final MarkerRescanQueue queue = new MarkerRescanQueue();
+        final DebouncedRescanQueue<UUID> queue = new DebouncedRescanQueue<>();
         final UUID markerId = UUID.randomUUID();
 
         queue.schedule(markerId, 10L);
@@ -23,7 +24,7 @@ class MarkerRescanQueueTest {
 
     @Test
     void drainsOnlyMarkersWhoseDelayHasElapsed() {
-        final MarkerRescanQueue queue = new MarkerRescanQueue();
+        final DebouncedRescanQueue<UUID> queue = new DebouncedRescanQueue<>();
         final UUID first = UUID.randomUUID();
         final UUID second = UUID.randomUUID();
         queue.schedule(first, 5L);

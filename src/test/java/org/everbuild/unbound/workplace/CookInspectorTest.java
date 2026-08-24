@@ -36,6 +36,20 @@ class CookInspectorTest {
                 CookInspector.inspect(oversized, true, ignored -> true).status());
     }
 
+    @Test
+    void discoversEveryFurnaceInsideTheLoadedVolume() {
+        final BlockPos plaque = new BlockPos(1, 61, 1);
+        final Set<BlockPos> furnaces = Set.of(
+                new BlockPos(2, 61, 1),
+                new BlockPos(2, 61, 2));
+
+        final CookInspection inspection = CookInspector.inspect(
+                BOUNDS, true, plaque::equals, furnaces::contains);
+
+        assertEquals(CookInspection.Status.VALID, inspection.status());
+        assertEquals(furnaces, Set.copyOf(inspection.furnacePositions()));
+    }
+
     private static CookInspection inspect(final Set<BlockPos> plaques) {
         return CookInspector.inspect(BOUNDS, true, plaques::contains);
     }

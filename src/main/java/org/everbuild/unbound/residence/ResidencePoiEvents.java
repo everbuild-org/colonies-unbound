@@ -14,6 +14,7 @@ import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import org.everbuild.unbound.ColoniesUnbound;
+import org.everbuild.unbound.marker.DebouncedRescanQueue;
 
 /** Schedules MineColonies POI reconciliation when committed residence volumes change. */
 @EventBusSubscriber(modid = ColoniesUnbound.MOD_ID)
@@ -22,7 +23,7 @@ public final class ResidencePoiEvents {
     private static final long CHUNK_LOAD_DELAY = 20L;
     private static final long ORPHAN_RETRY_DELAY = 100L;
     private static final int ORPHAN_REMOVAL_THRESHOLD = 3;
-    private static final Map<ServerLevel, MarkerRescanQueue> PENDING = new IdentityHashMap<>();
+    private static final Map<ServerLevel, DebouncedRescanQueue<UUID>> PENDING = new IdentityHashMap<>();
     private static final Map<ServerLevel, OrphanRetryTracker> ORPHAN_RETRIES = new IdentityHashMap<>();
 
     private ResidencePoiEvents() {
@@ -81,7 +82,7 @@ public final class ResidencePoiEvents {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        final MarkerRescanQueue queue = PENDING.get(level);
+        final DebouncedRescanQueue<UUID> queue = PENDING.get(level);
         if (queue == null) {
             return;
         }
@@ -138,7 +139,7 @@ public final class ResidencePoiEvents {
     }
 
     private static void schedule(final ServerLevel level, final UUID markerId, final long deadline) {
-        PENDING.computeIfAbsent(level, ignored -> new MarkerRescanQueue()).schedule(markerId, deadline);
+        PENDING.computeIfAbsent(level, ignored -> new DebouncedRescanQueue<>()).schedule(markerId, deadline);
     }
 
     private static OrphanRetryTracker orphanTracker(final ServerLevel level) {

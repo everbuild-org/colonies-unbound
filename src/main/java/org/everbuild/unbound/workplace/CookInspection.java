@@ -4,10 +4,15 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import org.everbuild.unbound.marker.AreaBounds;
 
-/** Result of locating a survival Cook plaque inside a candidate volume. */
-public record CookInspection(Status status, AreaBounds bounds, List<BlockPos> plaquePositions) {
+/** Result of locating a survival Cook plaque and accurately discoverable appliances. */
+public record CookInspection(
+        Status status,
+        AreaBounds bounds,
+        List<BlockPos> plaquePositions,
+        List<BlockPos> furnacePositions) {
     public CookInspection {
         plaquePositions = List.copyOf(plaquePositions);
+        furnacePositions = List.copyOf(furnacePositions);
     }
 
     public enum Status {
