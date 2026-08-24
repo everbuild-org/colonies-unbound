@@ -1,0 +1,74 @@
+package org.everbuild.unbound.client;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.everbuild.unbound.marker.AreaBounds;
+import org.everbuild.unbound.marker.CommittedWorksiteMark;
+import org.everbuild.unbound.marker.MarkerType;
+import org.everbuild.unbound.marker.WorksitePoi;
+import org.everbuild.unbound.marker.WorksitePoiType;
+
+/** Immutable presentation data for the plaque inspector HUD. */
+public record PlaqueHudModel(
+        MarkerType type,
+        State state,
+        AreaBounds bounds,
+        List<Requirement> requirements) {
+    public PlaqueHudModel {
+        requirements = List.copyOf(requirements);
+    }
+
+    public static PlaqueHudModel from(final MarkerType plaqueType, final CommittedWorksiteMark mark) {
+        if (mark == null) {
+            return new PlaqueHudModel(plaqueType, State.UNCONFIGURED, null, requirementsFor(plaqueType, List.of()));
+        }
+
+        final List<Requirement> requirements = requirementsFor(plaqueType, mark.pois());
+        final boolean ready = requirements.stream()
+                .filter(requirement -> !requirement.optional())
+                .allMatch(Requirement::satisfied);
+        return new PlaqueHudModel(plaqueType, ready ? State.ACTIVE : State.DRAFT, mark.bounds(), requirements);
+    }
+
+    public int satisfiedRequiredCount() {
+        return (int) requirements.stream()
+                .filter(requirement -> !requirement.optional() && requirement.satisfied())
+                .count();
+    }
+
+    public int requiredCount() {
+        return (int) requirements.stream().filter(requirement -> !requirement.optional()).count();
+    }
+
+    private static List<Requirement> requirementsFor(
+            final MarkerType type,
+            final List<WorksitePoi> points) {
+        final List<Requirement> requirements = new ArrayList<>();
+        if (type == MarkerType.RESIDENCE) {
+            requirements.add(new Requirement("hud.coloniesunbound.plaque.beds", count(points, WorksitePoiType.BED), 1, false));
+            return requirements;
+        }
+
+        requirements.add(new Requirement("hud.coloniesunbound.plaque.storage", count(points, WorksitePoiType.STORAGE), 1, false));
+        requirements.add(new Requirement("hud.coloniesunbound.plaque.furnace", count(points, WorksitePoiType.WORKSITE), 1, false));
+        requirements.add(new Requirement("hud.coloniesunbound.plaque.entrance", count(points, WorksitePoiType.ENTRANCE), 1, false));
+        requirements.add(new Requirement("hud.coloniesunbound.plaque.seats", count(points, WorksitePoiType.INTERACTION), 0, true));
+        return requirements;
+    }
+
+    private static int count(final List<WorksitePoi> points, final WorksitePoiType type) {
+        return (int) points.stream().filter(point -> point.type() == type).count();
+    }
+
+    public enum State {
+        ACTIVE,
+        DRAFT,
+        UNCONFIGURED
+    }
+
+    public record Requirement(String translationKey, int count, int minimum, boolean optional) {
+        public boolean satisfied() {
+            return optional || count >= minimum;
+        }
+    }
+}
