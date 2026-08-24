@@ -4,14 +4,14 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import org.everbuild.unbound.marker.AreaBounds;
 
-/** Result of inspecting a survival Cow Pen volume. */
-public record CowPenInspection(
+/** Result of inspecting the shared physical requirements of a survival animal pen. */
+public record AnimalPenInspection(
         Status status,
         AreaBounds bounds,
         List<BlockPos> plaquePositions,
         List<BlockPos> gatePositions,
         List<BlockPos> pasturePositions) {
-    public CowPenInspection {
+    public AnimalPenInspection {
         plaquePositions = List.copyOf(plaquePositions);
         gatePositions = List.copyOf(gatePositions);
         pasturePositions = List.copyOf(pasturePositions);

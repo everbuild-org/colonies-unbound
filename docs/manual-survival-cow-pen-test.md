@@ -20,6 +20,6 @@ inside. The selected volume must include the floor blocks, fence gate, plaque, a
 | ☐ | Save and reload the world | The marked volume, scanned requirements, storage, building state, and worker assignment persist. Joining does not stall at spawn preparation. |
 | ☐ | Sneak-use the marker on the plaque | The committed mark, registered storage, and active building level are cleared. |
 
-This slice intentionally targets MineColonies' Cowboy job, which handles cows and goats. Sheep,
-chickens, pigs, and rabbits need their own native building registrations and will follow as separate
-adapters rather than changing an occupied pen's profession dynamically.
+This plaque intentionally targets MineColonies' Cowboy job, which handles cows and goats. Other
+animals use separate native building registrations rather than changing an occupied pen's profession
+dynamically.

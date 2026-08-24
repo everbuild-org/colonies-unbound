@@ -2,9 +2,9 @@ package org.everbuild.unbound.item;
 
 import java.util.List;
 import java.util.UUID;
-import org.everbuild.unbound.animal.CowPenInspection;
-import org.everbuild.unbound.animal.CowPenInspector;
-import org.everbuild.unbound.animal.SurvivalCowPenMarkerService;
+import org.everbuild.unbound.animal.AnimalPenInspection;
+import org.everbuild.unbound.animal.AnimalPenInspector;
+import org.everbuild.unbound.animal.SurvivalAnimalPenMarkerService;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -23,6 +23,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.MarkerSelection;
+import org.everbuild.unbound.marker.MarkerType;
 import org.everbuild.unbound.marker.PatrolRouteSelection;
 import org.everbuild.unbound.marker.MarkerToolMode;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
@@ -31,7 +32,13 @@ import org.everbuild.unbound.guard.GuardInspection;
 import org.everbuild.unbound.guard.GuardInspector;
 import org.everbuild.unbound.guard.SurvivalGuardMarkerService;
 import org.everbuild.unbound.minecolonies.SurvivalCookTileEntity;
+import org.everbuild.unbound.minecolonies.MarkedBuildingTileEntity;
+import org.everbuild.unbound.minecolonies.MineColoniesIntegration;
+import org.everbuild.unbound.minecolonies.SurvivalAnimalPenBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalCowPenBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalCowPenTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalSheepPenBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalSheepPenTileEntity;
 import org.everbuild.unbound.residence.ResidenceInspection;
 import org.everbuild.unbound.residence.ResidenceInspector;
 import org.everbuild.unbound.residence.ResidenceMarkerService;
@@ -81,7 +88,7 @@ public final class WorksiteMarkerItem extends Item {
             if (!context.getLevel().isClientSide
                     && context.getLevel() instanceof ServerLevel serverLevel
                     && context.getPlayer() instanceof ServerPlayer serverPlayer) {
-                ResidenceMarkerService.PointEditOutcome outcome = SurvivalCowPenMarkerService.editPoint(
+                ResidenceMarkerService.PointEditOutcome outcome = SurvivalAnimalPenMarkerService.editPoint(
                         serverLevel,
                         serverPlayer,
                         context.getClickedPos(),
@@ -112,11 +119,12 @@ public final class WorksiteMarkerItem extends Item {
                 if (context.getLevel() instanceof ServerLevel serverLevel
                         && context.getPlayer() instanceof ServerPlayer serverPlayer
                         && context.getLevel().getBlockEntity(context.getClickedPos())
-                                instanceof SurvivalCowPenTileEntity cowPenTile
-                        && cowPenTile.committedMark() != null) {
+                                instanceof MarkedBuildingTileEntity animalPenTile
+                        && animalPenTile.committedMark() != null
+                        && animalPenTile.getBuilding() instanceof SurvivalAnimalPenBuilding) {
                     context.getPlayer().displayClientMessage(
-                            removalReport(SurvivalCowPenMarkerService.removeCommittedMark(
-                                    serverLevel, serverPlayer, cowPenTile)),
+                            removalReport(SurvivalAnimalPenMarkerService.removeCommittedMark(
+                                    serverLevel, serverPlayer, animalPenTile)),
                             true);
                     return InteractionResult.SUCCESS;
                 }
@@ -197,16 +205,55 @@ public final class WorksiteMarkerItem extends Item {
         final ResidenceInspection inspection = ResidenceInspector.inspect(context.getLevel(), bounds);
         final CookInspection cookInspection = CookInspector.inspect(context.getLevel(), bounds);
         final GuardInspection guardInspection = GuardInspector.inspect(context.getLevel(), bounds);
-        final CowPenInspection cowPenInspection = CowPenInspector.inspect(context.getLevel(), bounds);
+        final AnimalPenInspection cowPenInspection = AnimalPenInspector.inspect(
+                context.getLevel(), bounds, MineColoniesIntegration.SURVIVAL_COW_PEN_BLOCK.get());
+        final AnimalPenInspection sheepPenInspection = AnimalPenInspector.inspect(
+                context.getLevel(), bounds, MineColoniesIntegration.SURVIVAL_SHEEP_PEN_BLOCK.get());
         if (!cowPenInspection.plaquePositions().isEmpty()) {
             final Component report = !inspection.plaquePositions().isEmpty()
                             || !cookInspection.plaquePositions().isEmpty()
                             || !guardInspection.plaquePositions().isEmpty()
-                            || cowPenInspection.status() == CowPenInspection.Status.MULTIPLE_PLAQUES
+                            || !sheepPenInspection.plaquePositions().isEmpty()
+                            || cowPenInspection.status() == AnimalPenInspection.Status.MULTIPLE_PLAQUES
                     ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
                             .withStyle(ChatFormatting.RED)
                     : switch (cowPenInspection.status()) {
-                        case VALID -> cowPenRegistrationReport(context, stack, completed, cowPenInspection);
+                        case VALID -> animalPenRegistrationReport(
+                                context,
+                                stack,
+                                completed,
+                                cowPenInspection,
+                                MarkerType.ANIMAL_PEN,
+                                SurvivalCowPenBuilding.class,
+                                SurvivalCowPenTileEntity.class,
+                                "message.coloniesunbound.cow_pen.saved");
+                        case NO_GATE -> Component.translatable("message.coloniesunbound.cow_pen.no_gate")
+                                .withStyle(ChatFormatting.RED);
+                        case NO_PASTURE -> Component.translatable("message.coloniesunbound.cow_pen.no_pasture")
+                                .withStyle(ChatFormatting.RED);
+                        default -> Component.translatable("message.coloniesunbound.inspection.no_plaque")
+                                .withStyle(ChatFormatting.RED);
+                    };
+            context.getPlayer().displayClientMessage(report, true);
+            return;
+        }
+        if (!sheepPenInspection.plaquePositions().isEmpty()) {
+            final Component report = !inspection.plaquePositions().isEmpty()
+                            || !cookInspection.plaquePositions().isEmpty()
+                            || !guardInspection.plaquePositions().isEmpty()
+                            || sheepPenInspection.status() == AnimalPenInspection.Status.MULTIPLE_PLAQUES
+                    ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
+                            .withStyle(ChatFormatting.RED)
+                    : switch (sheepPenInspection.status()) {
+                        case VALID -> animalPenRegistrationReport(
+                                context,
+                                stack,
+                                completed,
+                                sheepPenInspection,
+                                MarkerType.SHEEP_PEN,
+                                SurvivalSheepPenBuilding.class,
+                                SurvivalSheepPenTileEntity.class,
+                                "message.coloniesunbound.sheep_pen.saved");
                         case NO_GATE -> Component.translatable("message.coloniesunbound.cow_pen.no_gate")
                                 .withStyle(ChatFormatting.RED);
                         case NO_PASTURE -> Component.translatable("message.coloniesunbound.cow_pen.no_pasture")
@@ -221,6 +268,7 @@ public final class WorksiteMarkerItem extends Item {
             final Component report = !inspection.plaquePositions().isEmpty()
                             || !cookInspection.plaquePositions().isEmpty()
                             || !cowPenInspection.plaquePositions().isEmpty()
+                            || !sheepPenInspection.plaquePositions().isEmpty()
                             || guardInspection.status() == GuardInspection.Status.MULTIPLE_PLAQUES
                     ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
                             .withStyle(ChatFormatting.RED)
@@ -235,6 +283,7 @@ public final class WorksiteMarkerItem extends Item {
             final Component report = !inspection.plaquePositions().isEmpty()
                             || !guardInspection.plaquePositions().isEmpty()
                             || !cowPenInspection.plaquePositions().isEmpty()
+                            || !sheepPenInspection.plaquePositions().isEmpty()
                             || cookInspection.status() == CookInspection.Status.MULTIPLE_PLAQUES
                     ? Component.translatable("message.coloniesunbound.inspection.multiple_building_plaques")
                             .withStyle(ChatFormatting.RED)
@@ -403,23 +452,27 @@ public final class WorksiteMarkerItem extends Item {
         };
     }
 
-    private static Component cowPenRegistrationReport(
+    private static Component animalPenRegistrationReport(
             final UseOnContext context,
             final ItemStack stack,
             final MarkerSelection selection,
-            final CowPenInspection inspection) {
+            final AnimalPenInspection inspection,
+            final MarkerType markerType,
+            final Class<? extends SurvivalAnimalPenBuilding> buildingType,
+            final Class<? extends MarkedBuildingTileEntity> tileType,
+            final String savedMessageKey) {
         if (!(context.getLevel() instanceof ServerLevel serverLevel)
                 || !(context.getPlayer() instanceof ServerPlayer serverPlayer)) {
             return Component.empty();
         }
-        final SurvivalCowPenMarkerService.RegistrationResult result = SurvivalCowPenMarkerService.register(
-                serverLevel, serverPlayer, selection, inspection);
-        if (result == SurvivalCowPenMarkerService.RegistrationResult.SAVED) {
+        final SurvivalAnimalPenMarkerService.RegistrationResult result = SurvivalAnimalPenMarkerService.register(
+                serverLevel, serverPlayer, selection, inspection, markerType, buildingType, tileType);
+        if (result == SurvivalAnimalPenMarkerService.RegistrationResult.SAVED) {
             MarkerSelection.clear(stack);
         }
         return switch (result) {
             case SAVED -> Component.translatable(
-                            "message.coloniesunbound.cow_pen.saved",
+                            savedMessageKey,
                             inspection.bounds().sizeX(),
                             inspection.bounds().sizeY(),
                             inspection.bounds().sizeZ(),

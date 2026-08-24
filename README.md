@@ -50,6 +50,8 @@ The Worksite Marker provides the first area-selection vertical slice:
   scanner discovers fence gates and a grass/dirt floor, while the player marks one storage inventory.
 - Cow Pen gates and pasture reconcile after block changes and chunk loads. Losing any required part
   deactivates hiring until the pen becomes valid again, without deleting its committed volume.
+- A Survival Sheep Pen Plaque uses the same scanned pen requirements but activates MineColonies'
+  native Shepherd, including breeding, shearing, dyeing settings, and sheep-specific production.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.

@@ -7,36 +7,39 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FenceGateBlock;
 import org.everbuild.unbound.marker.AreaBounds;
-import org.everbuild.unbound.minecolonies.MineColoniesIntegration;
 import org.everbuild.unbound.residence.ResidenceInspector;
 
-/** Discovers the unambiguous physical requirements of a survival cattle and goat pen. */
-public final class CowPenInspector {
-    private CowPenInspector() {
+/** Discovers plaque, gate, and pasture requirements shared by native herder adapters. */
+public final class AnimalPenInspector {
+    private AnimalPenInspector() {
     }
 
-    public static CowPenInspection inspect(final Level level, final AreaBounds bounds) {
+    public static AnimalPenInspection inspect(
+            final Level level,
+            final AreaBounds bounds,
+            final Block expectedPlaque) {
         return inspect(
                 bounds,
                 chunksAreLoaded(level, bounds),
-                position -> level.getBlockState(position).is(MineColoniesIntegration.SURVIVAL_COW_PEN_BLOCK.get()),
+                position -> level.getBlockState(position).is(expectedPlaque),
                 position -> level.getBlockState(position).getBlock() instanceof FenceGateBlock,
                 position -> level.getBlockState(position).is(BlockTags.DIRT));
     }
 
-    static CowPenInspection inspect(
+    static AnimalPenInspection inspect(
             final AreaBounds bounds,
             final boolean areaLoaded,
             final Predicate<BlockPos> isPlaque,
             final Predicate<BlockPos> isGate,
             final Predicate<BlockPos> isPasture) {
         if (bounds.volume() > ResidenceInspector.MAXIMUM_INSPECTION_VOLUME) {
-            return result(CowPenInspection.Status.AREA_TOO_LARGE, bounds);
+            return result(AnimalPenInspection.Status.AREA_TOO_LARGE, bounds);
         }
         if (!areaLoaded) {
-            return result(CowPenInspection.Status.AREA_NOT_LOADED, bounds);
+            return result(AnimalPenInspection.Status.AREA_NOT_LOADED, bounds);
         }
 
         final List<BlockPos> plaques = new ArrayList<>();
@@ -54,22 +57,22 @@ public final class CowPenInspector {
             }
         }
 
-        final CowPenInspection.Status status = plaques.isEmpty()
-                ? CowPenInspection.Status.NO_PLAQUE
+        final AnimalPenInspection.Status status = plaques.isEmpty()
+                ? AnimalPenInspection.Status.NO_PLAQUE
                 : plaques.size() > 1
-                        ? CowPenInspection.Status.MULTIPLE_PLAQUES
+                        ? AnimalPenInspection.Status.MULTIPLE_PLAQUES
                         : gates.isEmpty()
-                                ? CowPenInspection.Status.NO_GATE
+                                ? AnimalPenInspection.Status.NO_GATE
                                 : pasture.isEmpty()
-                                        ? CowPenInspection.Status.NO_PASTURE
-                                        : CowPenInspection.Status.VALID;
-        return new CowPenInspection(status, bounds, plaques, gates, pasture);
+                                        ? AnimalPenInspection.Status.NO_PASTURE
+                                        : AnimalPenInspection.Status.VALID;
+        return new AnimalPenInspection(status, bounds, plaques, gates, pasture);
     }
 
-    private static CowPenInspection result(
-            final CowPenInspection.Status status,
+    private static AnimalPenInspection result(
+            final AnimalPenInspection.Status status,
             final AreaBounds bounds) {
-        return new CowPenInspection(status, bounds, List.of(), List.of(), List.of());
+        return new AnimalPenInspection(status, bounds, List.of(), List.of(), List.of());
     }
 
     private static boolean chunksAreLoaded(final Level level, final AreaBounds bounds) {

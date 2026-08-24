@@ -20,4 +20,15 @@ class CommittedWorksiteMarkTest {
 
         assertEquals(mark, CommittedWorksiteMark.load(mark.save()));
     }
+
+    @Test
+    void roundTripsSheepPenAndScannedPasture() {
+        final CommittedWorksiteMark mark = new CommittedWorksiteMark(
+                UUID.randomUUID(),
+                MarkerType.SHEEP_PEN,
+                AreaBounds.between(BlockPos.ZERO, new BlockPos(6, 3, 6)),
+                List.of(new WorksitePoi(WorksitePoiType.PASTURE, new BlockPos(2, 0, 2))));
+
+        assertEquals(mark, CommittedWorksiteMark.load(mark.save()));
+    }
 }

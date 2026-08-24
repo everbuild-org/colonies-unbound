@@ -92,6 +92,20 @@ public final class MineColoniesIntegration {
                                     SURVIVAL_COW_PEN_BLOCK.get())
                             .build(null));
 
+    public static final DeferredBlock<SurvivalSheepPenBlock> SURVIVAL_SHEEP_PEN_BLOCK = BLOCKS.registerBlock(
+            "survival_sheep_pen_plaque",
+            SurvivalSheepPenBlock::new,
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_SHEEP_PEN_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_SHEEP_PEN_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalSheepPenTileEntity>>
+            SURVIVAL_SHEEP_PEN_TILE = BLOCK_ENTITIES.register(
+                    "survival_sheep_pen_plaque",
+                    () -> BlockEntityType.Builder.of(
+                                    SurvivalSheepPenTileEntity::new,
+                                    SURVIVAL_SHEEP_PEN_BLOCK.get())
+                            .build(null));
+
     public static final BuildingEntry.ModuleProducer<SurvivalLivingBuildingModule, LivingBuildingModuleView>
             SURVIVAL_LIVING = new BuildingEntry.ModuleProducer<>(
                     ColoniesUnbound.MOD_ID + ":survival_living",
@@ -161,6 +175,21 @@ public final class MineColoniesIntegration {
                     .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
                     .createBuildingEntry());
 
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_SHEEP_PEN = BUILDINGS.register(
+            "survival_sheep_pen",
+            () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(
+                            ColoniesUnbound.MOD_ID, "survival_sheep_pen"))
+                    .setBuildingBlock(SURVIVAL_SHEEP_PEN_BLOCK.get())
+                    .setBuildingProducer(SurvivalSheepPenBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.SHEPERD_WORK)
+                    .addBuildingModuleProducer(BuildingModules.SHEPERD_HERDING)
+                    .addBuildingModuleProducer(BuildingModules.SHEPERD_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+
     private MineColoniesIntegration() {
     }
 
@@ -182,6 +211,7 @@ public final class MineColoniesIntegration {
             event.accept(SURVIVAL_COOK_ITEM);
             event.accept(SURVIVAL_GUARD_ITEM);
             event.accept(SURVIVAL_COW_PEN_ITEM);
+            event.accept(SURVIVAL_SHEEP_PEN_ITEM);
         }
     }
 }

@@ -7,7 +7,8 @@ public enum MarkerType {
     RESIDENCE("residence"),
     RESTAURANT("restaurant"),
     GUARD("guard"),
-    ANIMAL_PEN("animal_pen");
+    ANIMAL_PEN("animal_pen"),
+    SHEEP_PEN("sheep_pen");
 
     private final String id;
 

@@ -19,17 +19,17 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import org.everbuild.unbound.ColoniesUnbound;
 import org.everbuild.unbound.marker.DebouncedRescanQueue;
-import org.everbuild.unbound.minecolonies.SurvivalCowPenBuilding;
-import org.everbuild.unbound.minecolonies.SurvivalCowPenTileEntity;
+import org.everbuild.unbound.minecolonies.MarkedBuildingTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalAnimalPenBuilding;
 
-/** Reconciles scanner-owned Cow Pen gates and pasture without forcing chunk loads. */
+/** Reconciles scanner-owned livestock gates and pasture without forcing chunk loads. */
 @EventBusSubscriber(modid = ColoniesUnbound.MOD_ID)
-public final class CowPenPoiEvents {
+public final class AnimalPenPoiEvents {
     private static final long BLOCK_CHANGE_DELAY = 10L;
     private static final long CHUNK_LOAD_DELAY = 20L;
     private static final Map<ServerLevel, DebouncedRescanQueue<BlockPos>> PENDING = new IdentityHashMap<>();
 
-    private CowPenPoiEvents() {
+    private AnimalPenPoiEvents() {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -78,9 +78,9 @@ public final class CowPenPoiEvents {
         }
         for (final BlockPos plaquePosition : queue.drainDue(level.getGameTime())) {
             final IBuilding building = IColonyManager.getInstance().getBuilding(level, plaquePosition);
-            final SurvivalCowPenTileEntity tile = noLoadTile(level, plaquePosition, null);
-            if (building instanceof SurvivalCowPenBuilding cowPen && tile != null) {
-                SurvivalCowPenMarkerService.reconcilePois(level, cowPen, tile);
+            final MarkedBuildingTileEntity tile = noLoadTile(level, plaquePosition, null);
+            if (building instanceof SurvivalAnimalPenBuilding animalPen && tile != null) {
+                SurvivalAnimalPenMarkerService.reconcilePois(level, animalPen, tile);
             }
         }
         if (queue.isEmpty()) {
@@ -102,8 +102,8 @@ public final class CowPenPoiEvents {
         }
         final long deadline = level.getGameTime() + delay;
         for (final IBuilding building : colony.getServerBuildingManager().getBuildings().values()) {
-            if (building instanceof SurvivalCowPenBuilding cowPen) {
-                final SurvivalCowPenTileEntity tile = noLoadTile(level, cowPen.getPosition(), null);
+            if (building instanceof SurvivalAnimalPenBuilding animalPen) {
+                final MarkedBuildingTileEntity tile = noLoadTile(level, animalPen.getPosition(), null);
                 if (tile != null && tile.committedMark().bounds().contains(position)) {
                     schedule(level, tile.getBlockPos(), deadline);
                 }
@@ -121,8 +121,8 @@ public final class CowPenPoiEvents {
         final long deadline = level.getGameTime() + CHUNK_LOAD_DELAY;
         for (final IColony colony : IColonyManager.getInstance().getColonies(level)) {
             for (final IBuilding building : colony.getServerBuildingManager().getBuildings().values()) {
-                if (building instanceof SurvivalCowPenBuilding cowPen) {
-                    final SurvivalCowPenTileEntity tile = noLoadTile(level, cowPen.getPosition(), loadedChunk);
+                if (building instanceof SurvivalAnimalPenBuilding animalPen) {
+                    final MarkedBuildingTileEntity tile = noLoadTile(level, animalPen.getPosition(), loadedChunk);
                     if (tile != null && tile.committedMark().bounds()
                             .intersectsChunk(minimumX, minimumZ, maximumX, maximumZ)) {
                         schedule(level, tile.getBlockPos(), deadline);
@@ -132,7 +132,7 @@ public final class CowPenPoiEvents {
         }
     }
 
-    private static SurvivalCowPenTileEntity noLoadTile(
+    private static MarkedBuildingTileEntity noLoadTile(
             final ServerLevel level,
             final BlockPos position,
             final ChunkAccess loadedChunk) {
@@ -144,8 +144,9 @@ public final class CowPenPoiEvents {
                 ? loadedChunk
                 : level.getChunkSource().getChunkNow(chunkX, chunkZ);
         return chunk != null
-                        && chunk.getBlockEntity(position) instanceof SurvivalCowPenTileEntity tile
+                        && chunk.getBlockEntity(position) instanceof MarkedBuildingTileEntity tile
                         && tile.committedMark() != null
+                        && tile.getBuilding() instanceof SurvivalAnimalPenBuilding
                 ? tile
                 : null;
     }

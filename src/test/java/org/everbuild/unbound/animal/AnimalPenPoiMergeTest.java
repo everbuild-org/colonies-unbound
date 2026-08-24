@@ -9,7 +9,7 @@ import org.everbuild.unbound.marker.WorksitePoi;
 import org.everbuild.unbound.marker.WorksitePoiType;
 import org.junit.jupiter.api.Test;
 
-class CowPenPoiMergeTest {
+class AnimalPenPoiMergeTest {
     @Test
     void replacesScannedGateAndPastureWhilePreservingStorage() {
         final WorksitePoi oldGate = new WorksitePoi(WorksitePoiType.ENTRANCE, new BlockPos(0, 64, 0));
@@ -17,8 +17,8 @@ class CowPenPoiMergeTest {
         final WorksitePoi storage = new WorksitePoi(WorksitePoiType.STORAGE, new BlockPos(2, 64, 2));
         final BlockPos newGate = new BlockPos(3, 64, 3);
         final BlockPos newPasture = new BlockPos(4, 63, 4);
-        final CowPenInspection inspection = new CowPenInspection(
-                CowPenInspection.Status.VALID,
+        final AnimalPenInspection inspection = new AnimalPenInspection(
+                AnimalPenInspection.Status.VALID,
                 AreaBounds.between(BlockPos.ZERO, new BlockPos(5, 5, 5)),
                 List.of(new BlockPos(2, 64, 1)),
                 List.of(newGate),
@@ -29,7 +29,7 @@ class CowPenPoiMergeTest {
                         storage,
                         new WorksitePoi(WorksitePoiType.ENTRANCE, newGate),
                         new WorksitePoi(WorksitePoiType.PASTURE, newPasture)),
-                SurvivalCowPenMarkerService.mergeScannedPois(
+                SurvivalAnimalPenMarkerService.mergeScannedPois(
                         List.of(oldGate, oldPasture, storage), inspection));
     }
 }

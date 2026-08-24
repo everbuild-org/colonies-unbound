@@ -18,20 +18,23 @@ import org.everbuild.unbound.marker.MarkerType;
 import org.everbuild.unbound.marker.PoiTargetValidator;
 import org.everbuild.unbound.marker.WorksitePoi;
 import org.everbuild.unbound.marker.WorksitePoiType;
-import org.everbuild.unbound.minecolonies.SurvivalCowPenBuilding;
-import org.everbuild.unbound.minecolonies.SurvivalCowPenTileEntity;
+import org.everbuild.unbound.minecolonies.MarkedBuildingTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalAnimalPenBuilding;
 import org.everbuild.unbound.residence.ResidenceMarkerService;
 
-/** Activates a native MineColonies Cowboy inside an inspected survival pen. */
-public final class SurvivalCowPenMarkerService {
-    private SurvivalCowPenMarkerService() {
+/** Activates a species-specific native MineColonies herder inside an inspected survival pen. */
+public final class SurvivalAnimalPenMarkerService {
+    private SurvivalAnimalPenMarkerService() {
     }
 
     public static RegistrationResult register(
             final ServerLevel level,
             final ServerPlayer player,
             final MarkerSelection selection,
-            final CowPenInspection inspection) {
+            final AnimalPenInspection inspection,
+            final MarkerType markerType,
+            final Class<? extends SurvivalAnimalPenBuilding> buildingType,
+            final Class<? extends MarkedBuildingTileEntity> tileType) {
         final AreaBounds bounds = inspection.bounds();
         final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, bounds.min());
         if (colony == null) {
@@ -45,10 +48,12 @@ public final class SurvivalCowPenMarkerService {
         }
         final BlockPos plaque = inspection.plaquePositions().getFirst();
         final IBuilding nativeBuilding = IColonyManager.getInstance().getBuilding(level, plaque);
-        if (!(nativeBuilding instanceof SurvivalCowPenBuilding building)
-                || !(level.getBlockEntity(plaque) instanceof SurvivalCowPenTileEntity tile)) {
+        if (!buildingType.isInstance(nativeBuilding)
+                || !tileType.isInstance(level.getBlockEntity(plaque))) {
             return RegistrationResult.PLAQUE_NOT_REGISTERED;
         }
+        final SurvivalAnimalPenBuilding building = buildingType.cast(nativeBuilding);
+        final MarkedBuildingTileEntity tile = tileType.cast(level.getBlockEntity(plaque));
 
         final UUID markerId = tile.committedMark() == null
                 ? selection.markerId()
@@ -65,7 +70,7 @@ public final class SurvivalCowPenMarkerService {
                 tile.committedMark() == null ? List.of() : tile.committedMark().pois(),
                 new CommittedWorksiteMark(
                         markerId,
-                        MarkerType.ANIMAL_PEN,
+                        markerType,
                         bounds,
                         mergeScannedPois(retained, inspection)));
         return RegistrationResult.SAVED;
@@ -82,8 +87,8 @@ public final class SurvivalCowPenMarkerService {
             return outcome(ResidenceMarkerService.PointEditResult.NO_COMMITTED_VOLUME);
         }
         final List<Owner> owners = colony.getServerBuildingManager().getBuildings().values().stream()
-                .filter(SurvivalCowPenBuilding.class::isInstance)
-                .map(SurvivalCowPenBuilding.class::cast)
+                .filter(SurvivalAnimalPenBuilding.class::isInstance)
+                .map(SurvivalAnimalPenBuilding.class::cast)
                 .map(building -> owner(building, level))
                 .filter(java.util.Objects::nonNull)
                 .filter(owner -> owner.tile().committedMark().bounds().contains(position))
@@ -130,14 +135,15 @@ public final class SurvivalCowPenMarkerService {
 
     public static ReconcileResult reconcilePois(
             final ServerLevel level,
-            final SurvivalCowPenBuilding building,
-            final SurvivalCowPenTileEntity tile) {
+            final SurvivalAnimalPenBuilding building,
+            final MarkedBuildingTileEntity tile) {
         final CommittedWorksiteMark current = tile.committedMark();
         if (current == null) {
             return ReconcileResult.MARK_UNAVAILABLE;
         }
-        final CowPenInspection inspection = CowPenInspector.inspect(level, current.bounds());
-        if (inspection.status() == CowPenInspection.Status.AREA_NOT_LOADED) {
+        final AnimalPenInspection inspection = AnimalPenInspector.inspect(
+                level, current.bounds(), tile.getBlockState().getBlock());
+        if (inspection.status() == AnimalPenInspection.Status.AREA_NOT_LOADED) {
             return ReconcileResult.AREA_NOT_LOADED;
         }
         if (inspection.plaquePositions().size() != 1
@@ -165,7 +171,7 @@ public final class SurvivalCowPenMarkerService {
 
     static List<WorksitePoi> mergeScannedPois(
             final List<WorksitePoi> existing,
-            final CowPenInspection inspection) {
+            final AnimalPenInspection inspection) {
         final List<WorksitePoi> merged = new ArrayList<>();
         existing.stream()
                 .filter(poi -> poi.type() != WorksitePoiType.ENTRANCE
@@ -184,7 +190,7 @@ public final class SurvivalCowPenMarkerService {
     public static ResidenceMarkerService.RemovalResult removeCommittedMark(
             final ServerLevel level,
             final ServerPlayer player,
-            final SurvivalCowPenTileEntity tile) {
+            final MarkedBuildingTileEntity tile) {
         if (tile.committedMark() == null) {
             return ResidenceMarkerService.RemovalResult.NO_MARK;
         }
@@ -195,7 +201,7 @@ public final class SurvivalCowPenMarkerService {
         if (!colony.getPermissions().hasPermission(player, Action.MANAGE_HUTS)) {
             return ResidenceMarkerService.RemovalResult.NO_PERMISSION;
         }
-        if (tile.getBuilding() instanceof SurvivalCowPenBuilding building) {
+        if (tile.getBuilding() instanceof SurvivalAnimalPenBuilding building) {
             synchronize(colony, building, tile, tile.committedMark().pois(), null);
         } else {
             tile.clearCommittedMark();
@@ -205,8 +211,8 @@ public final class SurvivalCowPenMarkerService {
 
     private static void synchronize(
             final IColony colony,
-            final SurvivalCowPenBuilding building,
-            final SurvivalCowPenTileEntity tile,
+            final SurvivalAnimalPenBuilding building,
+            final MarkedBuildingTileEntity tile,
             final List<WorksitePoi> previous,
             final CommittedWorksiteMark updated) {
         previous.stream()
@@ -239,8 +245,8 @@ public final class SurvivalCowPenMarkerService {
         return points.stream().anyMatch(point -> point.type() == type);
     }
 
-    private static Owner owner(final SurvivalCowPenBuilding building, final ServerLevel level) {
-        return level.getBlockEntity(building.getPosition()) instanceof SurvivalCowPenTileEntity tile
+    private static Owner owner(final SurvivalAnimalPenBuilding building, final ServerLevel level) {
+        return level.getBlockEntity(building.getPosition()) instanceof MarkedBuildingTileEntity tile
                         && tile.committedMark() != null
                 ? new Owner(building, tile)
                 : null;
@@ -270,7 +276,7 @@ public final class SurvivalCowPenMarkerService {
                 });
     }
 
-    private record Owner(SurvivalCowPenBuilding building, SurvivalCowPenTileEntity tile) {
+    private record Owner(SurvivalAnimalPenBuilding building, MarkedBuildingTileEntity tile) {
     }
 
     public enum RegistrationResult {

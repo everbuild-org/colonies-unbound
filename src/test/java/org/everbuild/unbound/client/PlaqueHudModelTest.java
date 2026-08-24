@@ -81,6 +81,18 @@ class PlaqueHudModelTest {
         assertEquals(3, active.requiredCount());
     }
 
+    @Test
+    void sheepPenUsesTheSharedLivestockRequirements() {
+        final PlaqueHudModel model = PlaqueHudModel.from(MarkerType.SHEEP_PEN, mark(
+                MarkerType.SHEEP_PEN,
+                new WorksitePoi(WorksitePoiType.STORAGE, BlockPos.ZERO),
+                new WorksitePoi(WorksitePoiType.ENTRANCE, BlockPos.ZERO.offset(1, 0, 0)),
+                new WorksitePoi(WorksitePoiType.PASTURE, BlockPos.ZERO.offset(2, 0, 0))));
+
+        assertEquals(PlaqueHudModel.State.ACTIVE, model.state());
+        assertEquals(3, model.requiredCount());
+    }
+
     private static CommittedWorksiteMark mark(final MarkerType type, final WorksitePoi... points) {
         return new CommittedWorksiteMark(UUID.randomUUID(), type, BOUNDS, List.of(points));
     }
