@@ -2,6 +2,7 @@ package org.everbuild.unbound.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -14,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import org.everbuild.unbound.ColoniesUnbound;
 import org.everbuild.unbound.marker.CommittedWorksiteMark;
+import org.everbuild.unbound.marker.WorksitePoi;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
 
 /** Renders a committed residence volume and its type flag while a marker is held. */
@@ -48,22 +50,37 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
                 poseStack, lines, mark.bounds().asAabb().inflate(0.004), RED, GREEN, BLUE, 0.95F);
         poseStack.popPose();
 
-        renderFlag(poseStack, buffers, mark);
+        renderFlag(
+                poseStack, buffers, mark.type().id(), 0.5, 2.0, 0.5, 1.25F);
+        for (final WorksitePoi poi : mark.pois()) {
+            renderFlag(
+                    poseStack,
+                    buffers,
+                    poi.type().id(),
+                    poi.position().getX() - origin.getX() + 0.5,
+                    poi.position().getY() - origin.getY() + 1.6,
+                    poi.position().getZ() - origin.getZ() + 0.5,
+                    0.75F);
+        }
     }
 
     private static void renderFlag(
             final PoseStack poseStack,
             final MultiBufferSource buffers,
-            final CommittedWorksiteMark mark) {
+            final String iconId,
+            final double x,
+            final double y,
+            final double z,
+            final float scale) {
         final Minecraft minecraft = Minecraft.getInstance();
         final ResourceLocation iconTexture = ResourceLocation.fromNamespaceAndPath(
                 ColoniesUnbound.MOD_ID,
-                "textures/marker/icons/" + mark.type().id() + ".png");
+                "textures/marker/icons/" + iconId + ".png");
 
         poseStack.pushPose();
-        poseStack.translate(0.5, 2.0, 0.5);
-        poseStack.mulPose(minecraft.getEntityRenderDispatcher().cameraOrientation());
-        poseStack.scale(1.25F, 1.25F, 1.25F);
+        poseStack.translate(x, y, z);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-minecraft.gameRenderer.getMainCamera().getYRot()));
+        poseStack.scale(scale, scale, scale);
 
         if (minecraft.getResourceManager().getResource(FLAG_TEXTURE).isPresent()) {
             renderTexturedQuad(

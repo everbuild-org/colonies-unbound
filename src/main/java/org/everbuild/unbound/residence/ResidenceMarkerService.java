@@ -16,6 +16,8 @@ import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.CommittedWorksiteMark;
 import org.everbuild.unbound.marker.MarkerSelection;
 import org.everbuild.unbound.marker.MarkerType;
+import org.everbuild.unbound.marker.WorksitePoi;
+import org.everbuild.unbound.marker.WorksitePoiType;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceBuilding;
 
@@ -64,7 +66,8 @@ public final class ResidenceMarkerService {
         building.markDirty();
         colony.markDirty();
 
-        residenceTile.setCommittedMark(new CommittedWorksiteMark(markerId, MarkerType.RESIDENCE, bounds));
+        residenceTile.setCommittedMark(new CommittedWorksiteMark(
+                markerId, MarkerType.RESIDENCE, bounds, bedPois(inspection.bedHeads())));
 
         ResidenceMarkerData.get(level).put(new SurvivalResidenceMarker(
                 markerId,
@@ -105,23 +108,36 @@ public final class ResidenceMarkerService {
         if (inspection.status() == ResidenceInspection.Status.AREA_NOT_LOADED) {
             return ReconcileResult.AREA_NOT_LOADED;
         }
-        if (inspection.plaquePositions().size() != 1) {
-            return ReconcileResult.INVALID_PLAQUE;
+        if (inspection.plaquePositions().isEmpty()) {
+            return ReconcileResult.MISSING_PLAQUE;
+        }
+        if (inspection.plaquePositions().size() > 1) {
+            return ReconcileResult.MULTIPLE_PLAQUES;
         }
 
         final BlockPos plaque = inspection.plaquePositions().getFirst();
-        final IBuilding building = IColonyManager.getInstance().getBuilding(level, plaque);
-        if (!(building instanceof SurvivalResidenceBuilding)
-                || !(level.getBlockEntity(plaque) instanceof SurvivalResidenceTileEntity residenceTile)
-                || residenceTile.committedMark() == null
+        if (!(level.getBlockEntity(plaque) instanceof SurvivalResidenceTileEntity residenceTile)) {
+            return ReconcileResult.MISSING_PLAQUE;
+        }
+        if (residenceTile.committedMark() == null
                 || !residenceTile.committedMark().id().equals(marker.id())) {
-            return ReconcileResult.INVALID_PLAQUE;
+            return ReconcileResult.MARK_MISMATCH;
+        }
+        final IBuilding building = IColonyManager.getInstance().getBuilding(level, plaque);
+        final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, plaque);
+        if (!(building instanceof SurvivalResidenceBuilding)
+                || colony == null
+                || colony.getID() != marker.colonyId()) {
+            return ReconcileResult.BUILDING_UNAVAILABLE;
         }
 
         final BedHandlingModule bedModule = building.getModule(BuildingModules.BED);
         final Set<BlockPos> previousBeds = Set.copyOf(bedModule.getRegisteredBlocks());
         final Set<BlockPos> discoveredBeds = Set.copyOf(inspection.bedHeads());
-        if (previousBeds.equals(discoveredBeds) && Set.copyOf(marker.bedHeads()).equals(discoveredBeds)) {
+        final List<WorksitePoi> discoveredPois = bedPois(inspection.bedHeads());
+        if (previousBeds.equals(discoveredBeds)
+                && Set.copyOf(marker.bedHeads()).equals(discoveredBeds)
+                && Set.copyOf(residenceTile.committedMark().pois()).equals(Set.copyOf(discoveredPois))) {
             return ReconcileResult.UNCHANGED;
         }
 
@@ -136,11 +152,11 @@ public final class ResidenceMarkerService {
             }
         }
 
+        residenceTile.setCommittedMark(new CommittedWorksiteMark(
+                marker.id(), MarkerType.RESIDENCE, marker.bounds(), discoveredPois));
+
         building.markDirty();
-        final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, plaque);
-        if (colony != null) {
-            colony.markDirty();
-        }
+        colony.markDirty();
         ResidenceMarkerData.get(level).put(new SurvivalResidenceMarker(
                 marker.id(),
                 marker.colonyId(),
@@ -149,6 +165,26 @@ public final class ResidenceMarkerService {
                 inspection.bedHeads(),
                 level.getGameTime()));
         return ReconcileResult.UPDATED;
+    }
+
+    public static void removeOrphanedMarker(
+            final ServerLevel level,
+            final SurvivalResidenceMarker marker) {
+        ResidenceMarkerData.get(level).remove(marker.id());
+        final ResidenceInspection inspection = ResidenceInspector.inspect(level, marker.bounds());
+        for (final BlockPos plaque : inspection.plaquePositions()) {
+            if (level.getBlockEntity(plaque) instanceof SurvivalResidenceTileEntity residenceTile
+                    && residenceTile.committedMark() != null
+                    && residenceTile.committedMark().id().equals(marker.id())) {
+                residenceTile.clearCommittedMark();
+            }
+        }
+    }
+
+    private static List<WorksitePoi> bedPois(final List<BlockPos> bedHeads) {
+        return bedHeads.stream()
+                .map(position -> new WorksitePoi(WorksitePoiType.BED, position))
+                .toList();
     }
 
     private static boolean cornersBelongTo(
@@ -188,6 +224,9 @@ public final class ResidenceMarkerService {
         UPDATED,
         UNCHANGED,
         AREA_NOT_LOADED,
-        INVALID_PLAQUE
+        MISSING_PLAQUE,
+        MULTIPLE_PLAQUES,
+        MARK_MISMATCH,
+        BUILDING_UNAVAILABLE
     }
 }

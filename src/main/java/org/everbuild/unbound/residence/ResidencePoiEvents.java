@@ -20,7 +20,10 @@ import org.everbuild.unbound.ColoniesUnbound;
 public final class ResidencePoiEvents {
     private static final long BLOCK_CHANGE_DELAY = 10L;
     private static final long CHUNK_LOAD_DELAY = 20L;
+    private static final long ORPHAN_RETRY_DELAY = 100L;
+    private static final int ORPHAN_REMOVAL_THRESHOLD = 3;
     private static final Map<ServerLevel, MarkerRescanQueue> PENDING = new IdentityHashMap<>();
+    private static final Map<ServerLevel, OrphanRetryTracker> ORPHAN_RETRIES = new IdentityHashMap<>();
 
     private ResidencePoiEvents() {
     }
@@ -86,7 +89,9 @@ public final class ResidencePoiEvents {
         for (final UUID markerId : queue.drainDue(level.getGameTime())) {
             final SurvivalResidenceMarker marker = data.marker(markerId);
             if (marker != null) {
-                ResidenceMarkerService.reconcilePois(level, marker);
+                handleResult(level, marker, ResidenceMarkerService.reconcilePois(level, marker));
+            } else {
+                orphanTracker(level).clear(markerId);
             }
         }
         if (queue.isEmpty()) {
@@ -98,6 +103,28 @@ public final class ResidencePoiEvents {
     public static void onLevelUnload(final LevelEvent.Unload event) {
         if (event.getLevel() instanceof ServerLevel level) {
             PENDING.remove(level);
+            ORPHAN_RETRIES.remove(level);
+        }
+    }
+
+    private static void handleResult(
+            final ServerLevel level,
+            final SurvivalResidenceMarker marker,
+            final ResidenceMarkerService.ReconcileResult result) {
+        switch (result) {
+            case UPDATED, UNCHANGED -> orphanTracker(level).clear(marker.id());
+            case AREA_NOT_LOADED, MULTIPLE_PLAQUES -> {
+                // A later chunk load or block change will make this safe to inspect again.
+            }
+            case MISSING_PLAQUE, MARK_MISMATCH, BUILDING_UNAVAILABLE -> {
+                final OrphanRetryTracker tracker = orphanTracker(level);
+                if (tracker.recordFailure(marker.id())) {
+                    ResidenceMarkerService.removeOrphanedMarker(level, marker);
+                    tracker.clear(marker.id());
+                } else {
+                    schedule(level, marker.id(), level.getGameTime() + ORPHAN_RETRY_DELAY);
+                }
+            }
         }
     }
 
@@ -112,5 +139,10 @@ public final class ResidencePoiEvents {
 
     private static void schedule(final ServerLevel level, final UUID markerId, final long deadline) {
         PENDING.computeIfAbsent(level, ignored -> new MarkerRescanQueue()).schedule(markerId, deadline);
+    }
+
+    private static OrphanRetryTracker orphanTracker(final ServerLevel level) {
+        return ORPHAN_RETRIES.computeIfAbsent(
+                level, ignored -> new OrphanRetryTracker(ORPHAN_REMOVAL_THRESHOLD));
     }
 }

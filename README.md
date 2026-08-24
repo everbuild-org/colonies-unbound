@@ -28,16 +28,19 @@ The Worksite Marker provides the first area-selection vertical slice:
 - Craft it from a MineColonies Clipboard and a Feather, obtain it from the Tools & Utilities creative tab, or use `/give @s coloniesunbound:worksite_marker`.
 - Place one Survival Residence Plaque inside the candidate house from the Functional Blocks tab.
 - Use it on two blocks to select the inclusive corners of a volume.
-- Hold it to see a live cyan preview and committed residence outlines with a residence-type flag.
+- Hold it to see a live cyan preview, committed residence outlines, and yaw-facing typed flags.
 - Completing an area inspects loaded blocks and reports the number of bed heads found.
 - Valid residences configure a dedicated MineColonies building whose capacity is its registered bed count.
 - Placing or removing beds inside committed, loaded volumes automatically reconciles MineColonies POIs and capacity.
+- Discovered beds are synchronized to clients and shown with their own smaller bed flags.
 - Residence bounds, beds, ownership, and inspection time are also stored per dimension.
 - Saving requires MineColonies' `MANAGE_HUTS` permission and an area wholly inside one colony.
 - Sneak-use it on a block to clear the current selection, or on a residence plaque to remove its committed mark.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.
+Repeated reconciliation also removes orphaned marks after their MineColonies building disappears,
+while tolerating transient loading gaps and non-destructive validation failures.
 
 The POI reconciliation path is intentionally event-driven and debounced, ready for other accurately
 assignable MineColonies POIs as survival workplace adapters are added.
