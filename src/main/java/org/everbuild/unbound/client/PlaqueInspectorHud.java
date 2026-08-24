@@ -14,6 +14,7 @@ import org.everbuild.unbound.ColoniesUnbound;
 import org.everbuild.unbound.marker.MarkerType;
 import org.everbuild.unbound.minecolonies.MarkedBuildingTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalCookTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalCowPenTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalGuardTileEntity;
 
 /** Compact contextual inspector shown while the crosshair rests on a survival plaque. */
@@ -50,7 +51,11 @@ public final class PlaqueInspectorHud {
 
         final MarkerType plaqueType = plaque instanceof SurvivalCookTileEntity
                 ? MarkerType.RESTAURANT
-                : plaque instanceof SurvivalGuardTileEntity ? MarkerType.GUARD : MarkerType.RESIDENCE;
+                : plaque instanceof SurvivalGuardTileEntity
+                        ? MarkerType.GUARD
+                        : plaque instanceof SurvivalCowPenTileEntity
+                                ? MarkerType.ANIMAL_PEN
+                                : MarkerType.RESIDENCE;
         renderPanel(event.getGuiGraphics(), minecraft.font, PlaqueHudModel.from(plaqueType, plaque.committedMark()));
     }
 
@@ -65,6 +70,7 @@ public final class PlaqueInspectorHud {
         final int accent = switch (model.type()) {
             case RESTAURANT -> 0xFFB460D2;
             case GUARD -> 0xFFD24242;
+            case ANIMAL_PEN -> 0xFF5BB048;
             case RESIDENCE -> 0xFF4E83EE;
         };
 
@@ -133,6 +139,7 @@ public final class PlaqueInspectorHud {
         return Component.translatable(switch (type) {
             case RESTAURANT -> "hud.coloniesunbound.plaque.dining_hall";
             case GUARD -> "hud.coloniesunbound.plaque.guard_tower";
+            case ANIMAL_PEN -> "hud.coloniesunbound.plaque.cow_pen";
             case RESIDENCE -> "hud.coloniesunbound.plaque.residence";
         });
     }

@@ -9,7 +9,8 @@ public enum WorksitePoiType {
     WORKSITE("worksite"),
     ENTRANCE("entrance"),
     INTERACTION("interaction"),
-    PATROL("patrol");
+    PATROL("patrol"),
+    PASTURE("animal_pen");
 
     private final String id;
 

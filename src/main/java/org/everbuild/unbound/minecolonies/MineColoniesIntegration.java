@@ -5,6 +5,7 @@ import com.minecolonies.core.colony.buildings.modules.BuildingModules;
 import com.minecolonies.core.colony.buildings.modules.HomeBuildingModule;
 import com.minecolonies.core.colony.buildings.moduleviews.LivingBuildingModuleView;
 import com.minecolonies.core.colony.buildings.workerbuildings.BuildingCook;
+import com.minecolonies.core.colony.buildings.views.EmptyView;
 import com.minecolonies.core.colony.buildings.workerbuildings.BuildingGuardTower;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.BlockPos;
@@ -77,6 +78,20 @@ public final class MineColoniesIntegration {
                                     SURVIVAL_GUARD_BLOCK.get())
                             .build(null));
 
+    public static final DeferredBlock<SurvivalCowPenBlock> SURVIVAL_COW_PEN_BLOCK = BLOCKS.registerBlock(
+            "survival_cow_pen_plaque",
+            SurvivalCowPenBlock::new,
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_COW_PEN_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_COW_PEN_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalCowPenTileEntity>>
+            SURVIVAL_COW_PEN_TILE = BLOCK_ENTITIES.register(
+                    "survival_cow_pen_plaque",
+                    () -> BlockEntityType.Builder.of(
+                                    SurvivalCowPenTileEntity::new,
+                                    SURVIVAL_COW_PEN_BLOCK.get())
+                            .build(null));
+
     public static final BuildingEntry.ModuleProducer<SurvivalLivingBuildingModule, LivingBuildingModuleView>
             SURVIVAL_LIVING = new BuildingEntry.ModuleProducer<>(
                     ColoniesUnbound.MOD_ID + ":survival_living",
@@ -131,6 +146,21 @@ public final class MineColoniesIntegration {
                     .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
                     .createBuildingEntry());
 
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_COW_PEN = BUILDINGS.register(
+            "survival_cow_pen",
+            () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(
+                            ColoniesUnbound.MOD_ID, "survival_cow_pen"))
+                    .setBuildingBlock(SURVIVAL_COW_PEN_BLOCK.get())
+                    .setBuildingProducer(SurvivalCowPenBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.COWHERDER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.COWHERDER_HERDING)
+                    .addBuildingModuleProducer(BuildingModules.COWHERDER_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+
     private MineColoniesIntegration() {
     }
 
@@ -151,6 +181,7 @@ public final class MineColoniesIntegration {
             event.accept(SURVIVAL_RESIDENCE_ITEM);
             event.accept(SURVIVAL_COOK_ITEM);
             event.accept(SURVIVAL_GUARD_ITEM);
+            event.accept(SURVIVAL_COW_PEN_ITEM);
         }
     }
 }

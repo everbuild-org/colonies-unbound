@@ -6,7 +6,8 @@ import java.util.Arrays;
 public enum MarkerType {
     RESIDENCE("residence"),
     RESTAURANT("restaurant"),
-    GUARD("guard");
+    GUARD("guard"),
+    ANIMAL_PEN("animal_pen");
 
     private final String id;
 

@@ -63,6 +63,24 @@ class PlaqueHudModelTest {
         assertTrue(model.requirements().getFirst().optional());
     }
 
+    @Test
+    void cowPenRequiresStorageGateAndPasture() {
+        final PlaqueHudModel draft = PlaqueHudModel.from(MarkerType.ANIMAL_PEN, mark(
+                MarkerType.ANIMAL_PEN,
+                new WorksitePoi(WorksitePoiType.ENTRANCE, BlockPos.ZERO),
+                new WorksitePoi(WorksitePoiType.PASTURE, BlockPos.ZERO.offset(1, 0, 0))));
+        final PlaqueHudModel active = PlaqueHudModel.from(MarkerType.ANIMAL_PEN, mark(
+                MarkerType.ANIMAL_PEN,
+                new WorksitePoi(WorksitePoiType.STORAGE, BlockPos.ZERO),
+                new WorksitePoi(WorksitePoiType.ENTRANCE, BlockPos.ZERO.offset(1, 0, 0)),
+                new WorksitePoi(WorksitePoiType.PASTURE, BlockPos.ZERO.offset(2, 0, 0))));
+
+        assertEquals(PlaqueHudModel.State.DRAFT, draft.state());
+        assertEquals(2, draft.satisfiedRequiredCount());
+        assertEquals(PlaqueHudModel.State.ACTIVE, active.state());
+        assertEquals(3, active.requiredCount());
+    }
+
     private static CommittedWorksiteMark mark(final MarkerType type, final WorksitePoi... points) {
         return new CommittedWorksiteMark(UUID.randomUUID(), type, BOUNDS, List.of(points));
     }

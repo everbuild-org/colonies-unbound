@@ -46,6 +46,10 @@ The Worksite Marker provides the first area-selection vertical slice:
   after block changes and chunk loads without disturbing manual storage, entrance, or seating points.
 - A Survival Guard Tower Plaque activates MineColonies' native Guard Tower modules. Patrol Route mode
   selects a committed tower, then authors up to 32 ordered, colony-contained native patrol targets.
+- A Survival Cow Pen Plaque activates MineColonies' native Cowhand for cattle and goats. The pen
+  scanner discovers fence gates and a grass/dirt floor, while the player marks one storage inventory.
+- Cow Pen gates and pasture reconcile after block changes and chunk loads. Losing any required part
+  deactivates hiring until the pen becomes valid again, without deleting its committed volume.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.
