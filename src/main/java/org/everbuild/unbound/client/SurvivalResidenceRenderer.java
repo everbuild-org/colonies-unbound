@@ -25,8 +25,6 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
     private static final float BLUE = 0.08F;
     private static final ResourceLocation FLAG_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             ColoniesUnbound.MOD_ID, "textures/marker/flag_base.png");
-    private static final ResourceLocation FLAG_TINT_MASK_TEXTURE = ResourceLocation.fromNamespaceAndPath(
-            ColoniesUnbound.MOD_ID, "textures/marker/flag_tint_mask.png");
 
     public SurvivalResidenceRenderer(final BlockEntityRendererProvider.Context context) {
     }
@@ -85,17 +83,12 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
                 180.0F - minecraft.gameRenderer.getMainCamera().getYRot()));
         poseStack.scale(scale, scale, scale);
 
-        final boolean hasTintMask = minecraft.getResourceManager()
-                .getResource(FLAG_TINT_MASK_TEXTURE)
-                .isPresent();
-        final ResourceLocation flagTexture = hasTintMask ? FLAG_TINT_MASK_TEXTURE : FLAG_TEXTURE;
-        if (minecraft.getResourceManager().getResource(flagTexture).isPresent()) {
-            final FlagColor color = hasTintMask ? FlagColor.forIcon(iconId) : FlagColor.WHITE;
+        if (minecraft.getResourceManager().getResource(FLAG_TEXTURE).isPresent()) {
             renderTexturedQuad(
                     poseStack,
-                    buffers.getBuffer(RenderType.entityTranslucent(flagTexture)),
+                    buffers.getBuffer(RenderType.entityTranslucent(FLAG_TEXTURE)),
                     0.0F,
-                    color);
+                    FlagColor.forIcon(iconId));
         }
         if (minecraft.getResourceManager().getResource(iconTexture).isPresent()) {
             renderTexturedQuad(
