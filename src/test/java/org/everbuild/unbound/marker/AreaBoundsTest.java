@@ -36,4 +36,16 @@ class AreaBoundsTest {
         assertTrue(AreaBounds.between(BlockPos.ZERO, new BlockPos(127, 0, 0)).fitsWithin(128));
         assertFalse(AreaBounds.between(BlockPos.ZERO, new BlockPos(128, 0, 0)).fitsWithin(128));
     }
+
+    @Test
+    void detectsContainedPositionsAndIntersectingChunks() {
+        final AreaBounds bounds = AreaBounds.between(new BlockPos(15, 60, 15), new BlockPos(20, 70, 20));
+
+        assertTrue(bounds.contains(new BlockPos(15, 60, 15)));
+        assertTrue(bounds.contains(new BlockPos(20, 70, 20)));
+        assertFalse(bounds.contains(new BlockPos(21, 65, 20)));
+        assertTrue(bounds.intersectsChunk(0, 0, 15, 15));
+        assertTrue(bounds.intersectsChunk(16, 16, 31, 31));
+        assertFalse(bounds.intersectsChunk(32, 16, 47, 31));
+    }
 }

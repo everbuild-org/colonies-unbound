@@ -39,6 +39,17 @@ public record AreaBounds(BlockPos min, BlockPos max) {
                 && sizeZ() <= maximumAxisLength;
     }
 
+    public boolean contains(final BlockPos position) {
+        return position.getX() >= min.getX() && position.getX() <= max.getX()
+                && position.getY() >= min.getY() && position.getY() <= max.getY()
+                && position.getZ() >= min.getZ() && position.getZ() <= max.getZ();
+    }
+
+    public boolean intersectsChunk(final int minimumX, final int minimumZ, final int maximumX, final int maximumZ) {
+        return max.getX() >= minimumX && min.getX() <= maximumX
+                && max.getZ() >= minimumZ && min.getZ() <= maximumZ;
+    }
+
     public AABB asAabb() {
         return new AABB(
                 min.getX(), min.getY(), min.getZ(),

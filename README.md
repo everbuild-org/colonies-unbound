@@ -31,6 +31,7 @@ The Worksite Marker provides the first area-selection vertical slice:
 - Hold it to see a live cyan preview and committed residence outlines with a residence-type flag.
 - Completing an area inspects loaded blocks and reports the number of bed heads found.
 - Valid residences configure a dedicated MineColonies building whose capacity is its registered bed count.
+- Placing or removing beds inside committed, loaded volumes automatically reconciles MineColonies POIs and capacity.
 - Residence bounds, beds, ownership, and inspection time are also stored per dimension.
 - Saving requires MineColonies' `MANAGE_HUTS` permission and an area wholly inside one colony.
 - Sneak-use it on a block to clear the current selection, or on a residence plaque to remove its committed mark.
@@ -38,8 +39,11 @@ The Worksite Marker provides the first area-selection vertical slice:
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.
 
-Planned follow-up: block changes inside committed volumes should reconcile accurately assignable
-beds and other MineColonies POIs automatically.
+The POI reconciliation path is intentionally event-driven and debounced, ready for other accurately
+assignable MineColonies POIs as survival workplace adapters are added.
+
+Billboard marker art is layered from `textures/marker/flag_base.png` and a typed icon such as
+`textures/marker/icons/residence.png`; transparent 32x32 textures are recommended.
 
 ## Development
 

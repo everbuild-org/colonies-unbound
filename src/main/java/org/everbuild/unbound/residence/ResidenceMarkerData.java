@@ -31,6 +31,10 @@ public final class ResidenceMarkerData extends SavedData {
         return java.util.List.copyOf(markers.values());
     }
 
+    public SurvivalResidenceMarker marker(final UUID markerId) {
+        return markers.get(markerId);
+    }
+
     public SurvivalResidenceMarker put(final SurvivalResidenceMarker marker) {
         markers.put(marker.id(), marker);
         setDirty();

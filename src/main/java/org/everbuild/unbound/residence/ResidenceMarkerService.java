@@ -7,6 +7,7 @@ import com.minecolonies.api.colony.buildings.IBuilding;
 import com.minecolonies.core.colony.buildings.modules.BedHandlingModule;
 import com.minecolonies.core.colony.buildings.modules.BuildingModules;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -96,6 +97,60 @@ public final class ResidenceMarkerService {
         return RemovalResult.REMOVED;
     }
 
+    /** Refreshes accurately discoverable POIs after block changes in a committed residence. */
+    public static ReconcileResult reconcilePois(
+            final ServerLevel level,
+            final SurvivalResidenceMarker marker) {
+        final ResidenceInspection inspection = ResidenceInspector.inspect(level, marker.bounds());
+        if (inspection.status() == ResidenceInspection.Status.AREA_NOT_LOADED) {
+            return ReconcileResult.AREA_NOT_LOADED;
+        }
+        if (inspection.plaquePositions().size() != 1) {
+            return ReconcileResult.INVALID_PLAQUE;
+        }
+
+        final BlockPos plaque = inspection.plaquePositions().getFirst();
+        final IBuilding building = IColonyManager.getInstance().getBuilding(level, plaque);
+        if (!(building instanceof SurvivalResidenceBuilding)
+                || !(level.getBlockEntity(plaque) instanceof SurvivalResidenceTileEntity residenceTile)
+                || residenceTile.committedMark() == null
+                || !residenceTile.committedMark().id().equals(marker.id())) {
+            return ReconcileResult.INVALID_PLAQUE;
+        }
+
+        final BedHandlingModule bedModule = building.getModule(BuildingModules.BED);
+        final Set<BlockPos> previousBeds = Set.copyOf(bedModule.getRegisteredBlocks());
+        final Set<BlockPos> discoveredBeds = Set.copyOf(inspection.bedHeads());
+        if (previousBeds.equals(discoveredBeds) && Set.copyOf(marker.bedHeads()).equals(discoveredBeds)) {
+            return ReconcileResult.UNCHANGED;
+        }
+
+        for (final BlockPos removedBed : previousBeds) {
+            if (!discoveredBeds.contains(removedBed)) {
+                bedModule.removeBed(removedBed);
+            }
+        }
+        for (final BlockPos addedBed : discoveredBeds) {
+            if (!previousBeds.contains(addedBed)) {
+                bedModule.onBlockPlacedInBuilding(level.getBlockState(addedBed), addedBed, level);
+            }
+        }
+
+        building.markDirty();
+        final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, plaque);
+        if (colony != null) {
+            colony.markDirty();
+        }
+        ResidenceMarkerData.get(level).put(new SurvivalResidenceMarker(
+                marker.id(),
+                marker.colonyId(),
+                marker.ownerId(),
+                marker.bounds(),
+                inspection.bedHeads(),
+                level.getGameTime()));
+        return ReconcileResult.UPDATED;
+    }
+
     private static boolean cornersBelongTo(
             final ServerLevel level,
             final AreaBounds bounds,
@@ -127,5 +182,12 @@ public final class ResidenceMarkerService {
         NO_MARK,
         OUTSIDE_COLONY,
         NO_PERMISSION
+    }
+
+    public enum ReconcileResult {
+        UPDATED,
+        UNCHANGED,
+        AREA_NOT_LOADED,
+        INVALID_PLAQUE
     }
 }

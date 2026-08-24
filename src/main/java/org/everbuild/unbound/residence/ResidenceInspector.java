@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -82,6 +83,8 @@ public final class ResidenceInspector {
     }
 
     private static boolean isBedHead(final BlockState state) {
-        return state.getBlock() instanceof BedBlock && state.getValue(BedBlock.PART) == BedPart.HEAD;
+        return state.is(BlockTags.BEDS)
+                && state.hasProperty(BedBlock.PART)
+                && state.getValue(BedBlock.PART) == BedPart.HEAD;
     }
 }
