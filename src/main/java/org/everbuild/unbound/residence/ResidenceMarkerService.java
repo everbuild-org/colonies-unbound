@@ -6,6 +6,7 @@ import com.minecolonies.api.colony.permissions.Action;
 import com.minecolonies.api.colony.buildings.IBuilding;
 import com.minecolonies.core.colony.buildings.modules.BedHandlingModule;
 import com.minecolonies.core.colony.buildings.modules.BuildingModules;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -66,8 +67,17 @@ public final class ResidenceMarkerService {
         building.markDirty();
         colony.markDirty();
 
+        final List<WorksitePoi> existingPois = residenceTile.committedMark() == null
+                ? List.of()
+                : residenceTile.committedMark().pois();
+        final List<WorksitePoi> retainedPois = existingPois.stream()
+                .filter(poi -> bounds.contains(poi.position()))
+                .toList();
         residenceTile.setCommittedMark(new CommittedWorksiteMark(
-                markerId, MarkerType.RESIDENCE, bounds, bedPois(inspection.bedHeads())));
+                markerId,
+                MarkerType.RESIDENCE,
+                bounds,
+                mergeBedPois(retainedPois, inspection.bedHeads())));
 
         ResidenceMarkerData.get(level).put(new SurvivalResidenceMarker(
                 markerId,
@@ -134,7 +144,8 @@ public final class ResidenceMarkerService {
         final BedHandlingModule bedModule = building.getModule(BuildingModules.BED);
         final Set<BlockPos> previousBeds = Set.copyOf(bedModule.getRegisteredBlocks());
         final Set<BlockPos> discoveredBeds = Set.copyOf(inspection.bedHeads());
-        final List<WorksitePoi> discoveredPois = bedPois(inspection.bedHeads());
+        final List<WorksitePoi> discoveredPois = mergeBedPois(
+                residenceTile.committedMark().pois(), inspection.bedHeads());
         if (previousBeds.equals(discoveredBeds)
                 && Set.copyOf(marker.bedHeads()).equals(discoveredBeds)
                 && Set.copyOf(residenceTile.committedMark().pois()).equals(Set.copyOf(discoveredPois))) {
@@ -181,10 +192,74 @@ public final class ResidenceMarkerService {
         }
     }
 
+    public static PointEditResult editPoint(
+            final ServerLevel level,
+            final ServerPlayer player,
+            final BlockPos position,
+            final WorksitePoiType poiType,
+            final boolean remove) {
+        final List<SurvivalResidenceMarker> containingMarkers = ResidenceMarkerData.get(level).markers().stream()
+                .filter(marker -> marker.bounds().contains(position))
+                .toList();
+        if (containingMarkers.isEmpty()) {
+            return PointEditResult.NO_COMMITTED_VOLUME;
+        }
+        if (containingMarkers.size() > 1) {
+            return PointEditResult.AMBIGUOUS_VOLUME;
+        }
+
+        final SurvivalResidenceMarker marker = containingMarkers.getFirst();
+        final ResidenceInspection inspection = ResidenceInspector.inspect(level, marker.bounds());
+        if (inspection.plaquePositions().size() != 1) {
+            return PointEditResult.MARK_UNAVAILABLE;
+        }
+        final BlockPos plaque = inspection.plaquePositions().getFirst();
+        if (!(level.getBlockEntity(plaque) instanceof SurvivalResidenceTileEntity residenceTile)
+                || residenceTile.committedMark() == null
+                || !residenceTile.committedMark().id().equals(marker.id())) {
+            return PointEditResult.MARK_UNAVAILABLE;
+        }
+        final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, plaque);
+        if (colony == null || colony.getID() != marker.colonyId()) {
+            return PointEditResult.MARK_UNAVAILABLE;
+        }
+        if (!colony.getPermissions().hasPermission(player, Action.MANAGE_HUTS)) {
+            return PointEditResult.NO_PERMISSION;
+        }
+
+        final WorksitePoi editedPoi = new WorksitePoi(poiType, position);
+        final List<WorksitePoi> pois = new ArrayList<>(residenceTile.committedMark().pois());
+        if (remove) {
+            if (!pois.remove(editedPoi)) {
+                return PointEditResult.POINT_NOT_FOUND;
+            }
+        } else if (pois.contains(editedPoi)) {
+            return PointEditResult.ALREADY_PRESENT;
+        } else {
+            pois.add(editedPoi);
+        }
+
+        final CommittedWorksiteMark committedMark = residenceTile.committedMark();
+        residenceTile.setCommittedMark(new CommittedWorksiteMark(
+                committedMark.id(), committedMark.type(), committedMark.bounds(), pois));
+        return remove ? PointEditResult.REMOVED : PointEditResult.ADDED;
+    }
+
     private static List<WorksitePoi> bedPois(final List<BlockPos> bedHeads) {
         return bedHeads.stream()
                 .map(position -> new WorksitePoi(WorksitePoiType.BED, position))
                 .toList();
+    }
+
+    static List<WorksitePoi> mergeBedPois(
+            final List<WorksitePoi> existingPois,
+            final List<BlockPos> bedHeads) {
+        final List<WorksitePoi> merged = new ArrayList<>();
+        existingPois.stream()
+                .filter(poi -> poi.type() != WorksitePoiType.BED)
+                .forEach(merged::add);
+        merged.addAll(bedPois(bedHeads));
+        return List.copyOf(merged);
     }
 
     private static boolean cornersBelongTo(
@@ -228,5 +303,16 @@ public final class ResidenceMarkerService {
         MULTIPLE_PLAQUES,
         MARK_MISMATCH,
         BUILDING_UNAVAILABLE
+    }
+
+    public enum PointEditResult {
+        ADDED,
+        REMOVED,
+        ALREADY_PRESENT,
+        POINT_NOT_FOUND,
+        NO_COMMITTED_VOLUME,
+        AMBIGUOUS_VOLUME,
+        NO_PERMISSION,
+        MARK_UNAVAILABLE
     }
 }

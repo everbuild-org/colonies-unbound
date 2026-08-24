@@ -9,18 +9,23 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.MarkerSelection;
+import org.everbuild.unbound.marker.MarkerToolMode;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
 import org.everbuild.unbound.residence.ResidenceInspection;
 import org.everbuild.unbound.residence.ResidenceInspector;
 import org.everbuild.unbound.residence.ResidenceMarkerService;
 
-/** Selects an inclusive survival-building volume using two block clicks. */
+/** Selects residence volumes and edits typed semantic points with one marker tool. */
 public final class WorksiteMarkerItem extends Item {
     public static final int MAXIMUM_AXIS_LENGTH = 128;
 
@@ -29,10 +34,47 @@ public final class WorksiteMarkerItem extends Item {
     }
 
     @Override
+    public InteractionResultHolder<ItemStack> use(
+            final Level level,
+            final Player player,
+            final InteractionHand usedHand) {
+        final ItemStack stack = player.getItemInHand(usedHand);
+        if (!level.isClientSide) {
+            final MarkerToolMode nextMode = MarkerToolMode.read(stack).next();
+            MarkerToolMode.write(stack, nextMode);
+            MarkerSelection.clear(stack);
+            player.displayClientMessage(
+                    Component.translatable(
+                            "message.coloniesunbound.marker.mode_changed",
+                            Component.translatable(modeTranslationKey(nextMode))),
+                    true);
+        }
+        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    }
+
+    @Override
     public InteractionResult useOn(final UseOnContext context) {
         final ItemStack stack = context.getItemInHand();
         if (context.getPlayer() == null) {
             return InteractionResult.PASS;
+        }
+        final MarkerToolMode mode = MarkerToolMode.read(stack);
+        if (!mode.isAreaMode()) {
+            if (!context.getLevel().isClientSide
+                    && context.getLevel() instanceof ServerLevel serverLevel
+                    && context.getPlayer() instanceof ServerPlayer serverPlayer) {
+                context.getPlayer().displayClientMessage(
+                        pointEditReport(
+                                ResidenceMarkerService.editPoint(
+                                        serverLevel,
+                                        serverPlayer,
+                                        context.getClickedPos(),
+                                        mode.poiType(),
+                                        context.getPlayer().isShiftKeyDown()),
+                                mode),
+                        true);
+            }
+            return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
         }
         if (context.getPlayer().isShiftKeyDown()) {
             if (!context.getLevel().isClientSide) {
@@ -151,6 +193,34 @@ public final class WorksiteMarkerItem extends Item {
         };
     }
 
+    private static Component pointEditReport(
+            final ResidenceMarkerService.PointEditResult result,
+            final MarkerToolMode mode) {
+        final Component type = Component.translatable(modeTranslationKey(mode));
+        return switch (result) {
+            case ADDED -> Component.translatable("message.coloniesunbound.marker.point_added", type)
+                    .withStyle(ChatFormatting.GREEN);
+            case REMOVED -> Component.translatable("message.coloniesunbound.marker.point_removed", type)
+                    .withStyle(ChatFormatting.GREEN);
+            case ALREADY_PRESENT -> Component.translatable("message.coloniesunbound.marker.point_exists", type)
+                    .withStyle(ChatFormatting.YELLOW);
+            case POINT_NOT_FOUND -> Component.translatable("message.coloniesunbound.marker.point_not_found", type)
+                    .withStyle(ChatFormatting.RED);
+            case NO_COMMITTED_VOLUME -> Component.translatable("message.coloniesunbound.marker.no_volume")
+                    .withStyle(ChatFormatting.RED);
+            case AMBIGUOUS_VOLUME -> Component.translatable("message.coloniesunbound.marker.ambiguous_volume")
+                    .withStyle(ChatFormatting.RED);
+            case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
+                    .withStyle(ChatFormatting.RED);
+            case MARK_UNAVAILABLE -> Component.translatable("message.coloniesunbound.marker.mark_unavailable")
+                    .withStyle(ChatFormatting.RED);
+        };
+    }
+
+    private static String modeTranslationKey(final MarkerToolMode mode) {
+        return "mode.coloniesunbound.marker." + mode.id();
+    }
+
     @Override
     public void appendHoverText(
             final ItemStack stack,
@@ -161,6 +231,10 @@ public final class WorksiteMarkerItem extends Item {
                 .withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("tooltip.coloniesunbound.worksite_marker.clear")
                 .withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.translatable(
+                        "tooltip.coloniesunbound.worksite_marker.mode",
+                        Component.translatable(modeTranslationKey(MarkerToolMode.read(stack))))
+                .withStyle(ChatFormatting.AQUA));
 
         final MarkerSelection selection = MarkerSelection.read(stack);
         if (selection == null) {

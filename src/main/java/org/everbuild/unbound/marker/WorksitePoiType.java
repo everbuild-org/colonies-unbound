@@ -6,7 +6,9 @@ import java.util.Arrays;
 public enum WorksitePoiType {
     BED("bed"),
     STORAGE("storage"),
-    WORKSITE("worksite");
+    WORKSITE("worksite"),
+    ENTRANCE("entrance"),
+    INTERACTION("interaction");
 
     private final String id;
 

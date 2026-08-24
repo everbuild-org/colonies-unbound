@@ -36,6 +36,8 @@ The Worksite Marker provides the first area-selection vertical slice:
 - Residence bounds, beds, ownership, and inspection time are also stored per dimension.
 - Saving requires MineColonies' `MANAGE_HUTS` permission and an area wholly inside one colony.
 - Sneak-use it on a block to clear the current selection, or on a residence plaque to remove its committed mark.
+- Use it in air to cycle Residence Area, Storage, Worksite, Entrance, and Interaction editing modes.
+- In a point mode, use inside a committed volume to add a point and sneak-use the same block to remove it.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.
@@ -43,7 +45,8 @@ Repeated reconciliation also removes orphaned marks after their MineColonies bui
 while tolerating transient loading gaps and non-destructive validation failures.
 
 The POI reconciliation path is intentionally event-driven and debounced, ready for other accurately
-assignable MineColonies POIs as survival workplace adapters are added.
+assignable MineColonies POIs as survival workplace adapters are added. Scanner-owned bed points are
+refreshed independently, so manually assigned semantic points survive rescans and reloads.
 
 Billboard marker art is layered from `textures/marker/flag_base.png` and a typed icon such as
 `textures/marker/icons/residence.png`; transparent 32x32 textures are recommended. The white
