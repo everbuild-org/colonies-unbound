@@ -6,7 +6,9 @@ import com.minecolonies.api.colony.buildings.IBuilding;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -60,8 +62,8 @@ public final class CookPoiEvents {
         final int minimumZ = event.getChunk().getPos().getMinBlockZ();
         final int maximumX = event.getChunk().getPos().getMaxBlockX();
         final int maximumZ = event.getChunk().getPos().getMaxBlockZ();
-        level.getServer().execute(() -> scheduleChunk(
-                level, minimumX, minimumZ, maximumX, maximumZ));
+        scheduleChunk(
+                level, event.getChunk(), minimumX, minimumZ, maximumX, maximumZ);
     }
 
     @SubscribeEvent
@@ -75,8 +77,8 @@ public final class CookPoiEvents {
         }
         for (final BlockPos plaquePosition : queue.drainDue(level.getGameTime())) {
             final IBuilding building = IColonyManager.getInstance().getBuilding(level, plaquePosition);
-            if (building instanceof SurvivalCookBuilding cookBuilding
-                    && level.getBlockEntity(plaquePosition) instanceof SurvivalCookTileEntity cookTile) {
+            final SurvivalCookTileEntity cookTile = noLoadTile(level, plaquePosition, null);
+            if (building instanceof SurvivalCookBuilding cookBuilding && cookTile != null) {
                 SurvivalCookMarkerService.reconcilePois(level, cookBuilding, cookTile);
             }
         }
@@ -100,7 +102,7 @@ public final class CookPoiEvents {
         final long deadline = level.getGameTime() + delay;
         for (final IBuilding building : colony.getServerBuildingManager().getBuildings().values()) {
             if (building instanceof SurvivalCookBuilding cookBuilding) {
-                final SurvivalCookTileEntity tile = tile(level, cookBuilding);
+                final SurvivalCookTileEntity tile = noLoadTile(level, cookBuilding.getPosition(), null);
                 if (tile != null && tile.committedMark().bounds().contains(position)) {
                     schedule(level, tile.getBlockPos(), deadline);
                 }
@@ -110,6 +112,7 @@ public final class CookPoiEvents {
 
     private static void scheduleChunk(
             final ServerLevel level,
+            final ChunkAccess loadedChunk,
             final int minimumX,
             final int minimumZ,
             final int maximumX,
@@ -118,7 +121,8 @@ public final class CookPoiEvents {
         for (final IColony colony : IColonyManager.getInstance().getColonies(level)) {
             for (final IBuilding building : colony.getServerBuildingManager().getBuildings().values()) {
                 if (building instanceof SurvivalCookBuilding cookBuilding) {
-                    final SurvivalCookTileEntity tile = tile(level, cookBuilding);
+                    final SurvivalCookTileEntity tile = noLoadTile(
+                            level, cookBuilding.getPosition(), loadedChunk);
                     if (tile != null && tile.committedMark().bounds()
                             .intersectsChunk(minimumX, minimumZ, maximumX, maximumZ)) {
                         schedule(level, tile.getBlockPos(), deadline);
@@ -128,10 +132,20 @@ public final class CookPoiEvents {
         }
     }
 
-    private static SurvivalCookTileEntity tile(
+    /** Reads a plaque only from an already available chunk; never enters synchronous chunk loading. */
+    private static SurvivalCookTileEntity noLoadTile(
             final ServerLevel level,
-            final SurvivalCookBuilding building) {
-        return level.getBlockEntity(building.getPosition()) instanceof SurvivalCookTileEntity tile
+            final BlockPos position,
+            final ChunkAccess loadedChunk) {
+        final int chunkX = SectionPos.blockToSectionCoord(position.getX());
+        final int chunkZ = SectionPos.blockToSectionCoord(position.getZ());
+        final ChunkAccess chunk = loadedChunk != null
+                        && loadedChunk.getPos().x == chunkX
+                        && loadedChunk.getPos().z == chunkZ
+                ? loadedChunk
+                : level.getChunkSource().getChunkNow(chunkX, chunkZ);
+        return chunk != null
+                        && chunk.getBlockEntity(position) instanceof SurvivalCookTileEntity tile
                         && tile.committedMark() != null
                 ? tile
                 : null;
