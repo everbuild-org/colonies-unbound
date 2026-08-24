@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
 import org.everbuild.unbound.ColoniesUnbound;
 import org.everbuild.unbound.marker.CommittedWorksiteMark;
 import org.everbuild.unbound.marker.WorksitePoi;
@@ -151,6 +152,20 @@ public final class SurvivalResidenceRenderer implements BlockEntityRenderer<Surv
     @Override
     public boolean shouldRenderOffScreen(final SurvivalResidenceTileEntity tile) {
         return true;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(final SurvivalResidenceTileEntity tile) {
+        final AABB anchorBounds = new AABB(tile.getBlockPos()).inflate(2.0);
+        final CommittedWorksiteMark mark = tile.committedMark();
+        if (mark == null) {
+            return anchorBounds;
+        }
+
+        // NeoForge still frustum-tests globally rendered block entities. Cover the
+        // complete marked volume so a visible POI flag is not culled merely because
+        // the building anchor itself has left the camera frustum.
+        return mark.bounds().asAabb().inflate(2.0).minmax(anchorBounds);
     }
 
     @Override
