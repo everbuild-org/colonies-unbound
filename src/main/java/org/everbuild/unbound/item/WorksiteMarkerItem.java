@@ -5,6 +5,7 @@ import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -194,10 +195,10 @@ public final class WorksiteMarkerItem extends Item {
     }
 
     private static Component pointEditReport(
-            final ResidenceMarkerService.PointEditResult result,
+            final ResidenceMarkerService.PointEditOutcome outcome,
             final MarkerToolMode mode) {
         final Component type = Component.translatable(modeTranslationKey(mode));
-        return switch (result) {
+        final MutableComponent report = switch (outcome.result()) {
             case ADDED -> Component.translatable("message.coloniesunbound.marker.point_added", type)
                     .withStyle(ChatFormatting.GREEN);
             case REMOVED -> Component.translatable("message.coloniesunbound.marker.point_removed", type)
@@ -214,7 +215,28 @@ public final class WorksiteMarkerItem extends Item {
                     .withStyle(ChatFormatting.RED);
             case MARK_UNAVAILABLE -> Component.translatable("message.coloniesunbound.marker.mark_unavailable")
                     .withStyle(ChatFormatting.RED);
+            case INVALID_STORAGE_TARGET -> Component.translatable("message.coloniesunbound.marker.invalid_storage")
+                    .withStyle(ChatFormatting.RED);
+            case INVALID_WORKSITE_TARGET -> Component.translatable("message.coloniesunbound.marker.invalid_worksite")
+                    .withStyle(ChatFormatting.RED);
+            case INVALID_ENTRANCE_TARGET -> Component.translatable("message.coloniesunbound.marker.invalid_entrance")
+                    .withStyle(ChatFormatting.RED);
+            case INVALID_INTERACTION_TARGET -> Component.translatable("message.coloniesunbound.marker.invalid_interaction")
+                    .withStyle(ChatFormatting.RED);
+            case SCANNER_OWNED -> Component.translatable("message.coloniesunbound.marker.scanner_owned")
+                    .withStyle(ChatFormatting.RED);
         };
+        if (outcome.summary() == null) {
+            return report;
+        }
+        final String summaryKey = outcome.summary().isReady()
+                ? "message.coloniesunbound.workplace.ready"
+                : "message.coloniesunbound.workplace.progress";
+        return report.append(" — ").append(Component.translatable(
+                summaryKey,
+                outcome.summary().storagePoints(),
+                outcome.summary().worksitePoints(),
+                outcome.summary().entrancePoints()));
     }
 
     private static String modeTranslationKey(final MarkerToolMode mode) {

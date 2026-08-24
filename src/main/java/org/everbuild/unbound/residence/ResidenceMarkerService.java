@@ -17,8 +17,10 @@ import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.CommittedWorksiteMark;
 import org.everbuild.unbound.marker.MarkerSelection;
 import org.everbuild.unbound.marker.MarkerType;
+import org.everbuild.unbound.marker.PoiTargetValidator;
 import org.everbuild.unbound.marker.WorksitePoi;
 import org.everbuild.unbound.marker.WorksitePoiType;
+import org.everbuild.unbound.marker.WorkplacePointSummary;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceBuilding;
 
@@ -192,7 +194,7 @@ public final class ResidenceMarkerService {
         }
     }
 
-    public static PointEditResult editPoint(
+    public static PointEditOutcome editPoint(
             final ServerLevel level,
             final ServerPlayer player,
             final BlockPos position,
@@ -202,47 +204,67 @@ public final class ResidenceMarkerService {
                 .filter(marker -> marker.bounds().contains(position))
                 .toList();
         if (containingMarkers.isEmpty()) {
-            return PointEditResult.NO_COMMITTED_VOLUME;
+            return PointEditOutcome.of(PointEditResult.NO_COMMITTED_VOLUME);
         }
         if (containingMarkers.size() > 1) {
-            return PointEditResult.AMBIGUOUS_VOLUME;
+            return PointEditOutcome.of(PointEditResult.AMBIGUOUS_VOLUME);
         }
 
         final SurvivalResidenceMarker marker = containingMarkers.getFirst();
         final ResidenceInspection inspection = ResidenceInspector.inspect(level, marker.bounds());
         if (inspection.plaquePositions().size() != 1) {
-            return PointEditResult.MARK_UNAVAILABLE;
+            return PointEditOutcome.of(PointEditResult.MARK_UNAVAILABLE);
         }
         final BlockPos plaque = inspection.plaquePositions().getFirst();
         if (!(level.getBlockEntity(plaque) instanceof SurvivalResidenceTileEntity residenceTile)
                 || residenceTile.committedMark() == null
                 || !residenceTile.committedMark().id().equals(marker.id())) {
-            return PointEditResult.MARK_UNAVAILABLE;
+            return PointEditOutcome.of(PointEditResult.MARK_UNAVAILABLE);
         }
         final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, plaque);
         if (colony == null || colony.getID() != marker.colonyId()) {
-            return PointEditResult.MARK_UNAVAILABLE;
+            return PointEditOutcome.of(PointEditResult.MARK_UNAVAILABLE);
         }
         if (!colony.getPermissions().hasPermission(player, Action.MANAGE_HUTS)) {
-            return PointEditResult.NO_PERMISSION;
+            return PointEditOutcome.of(PointEditResult.NO_PERMISSION);
         }
 
         final WorksitePoi editedPoi = new WorksitePoi(poiType, position);
         final List<WorksitePoi> pois = new ArrayList<>(residenceTile.committedMark().pois());
         if (remove) {
             if (!pois.remove(editedPoi)) {
-                return PointEditResult.POINT_NOT_FOUND;
+                return new PointEditOutcome(
+                        PointEditResult.POINT_NOT_FOUND,
+                        WorkplacePointSummary.from(pois));
             }
         } else if (pois.contains(editedPoi)) {
-            return PointEditResult.ALREADY_PRESENT;
+            return new PointEditOutcome(
+                    PointEditResult.ALREADY_PRESENT,
+                    WorkplacePointSummary.from(pois));
         } else {
+            final PoiTargetValidator.Result validation =
+                    PoiTargetValidator.validate(level, position, poiType);
+            if (validation != PoiTargetValidator.Result.VALID) {
+                return new PointEditOutcome(
+                        switch (validation) {
+                            case INVALID_STORAGE -> PointEditResult.INVALID_STORAGE_TARGET;
+                            case INVALID_WORKSITE -> PointEditResult.INVALID_WORKSITE_TARGET;
+                            case INVALID_ENTRANCE -> PointEditResult.INVALID_ENTRANCE_TARGET;
+                            case INVALID_INTERACTION -> PointEditResult.INVALID_INTERACTION_TARGET;
+                            case SCANNER_OWNED -> PointEditResult.SCANNER_OWNED;
+                            case VALID -> throw new IllegalStateException("Handled above");
+                        },
+                        WorkplacePointSummary.from(pois));
+            }
             pois.add(editedPoi);
         }
 
         final CommittedWorksiteMark committedMark = residenceTile.committedMark();
         residenceTile.setCommittedMark(new CommittedWorksiteMark(
                 committedMark.id(), committedMark.type(), committedMark.bounds(), pois));
-        return remove ? PointEditResult.REMOVED : PointEditResult.ADDED;
+        return new PointEditOutcome(
+                remove ? PointEditResult.REMOVED : PointEditResult.ADDED,
+                WorkplacePointSummary.from(pois));
     }
 
     private static List<WorksitePoi> bedPois(final List<BlockPos> bedHeads) {
@@ -313,6 +335,17 @@ public final class ResidenceMarkerService {
         NO_COMMITTED_VOLUME,
         AMBIGUOUS_VOLUME,
         NO_PERMISSION,
-        MARK_UNAVAILABLE
+        MARK_UNAVAILABLE,
+        INVALID_STORAGE_TARGET,
+        INVALID_WORKSITE_TARGET,
+        INVALID_ENTRANCE_TARGET,
+        INVALID_INTERACTION_TARGET,
+        SCANNER_OWNED
+    }
+
+    public record PointEditOutcome(PointEditResult result, WorkplacePointSummary summary) {
+        private static PointEditOutcome of(final PointEditResult result) {
+            return new PointEditOutcome(result, null);
+        }
     }
 }

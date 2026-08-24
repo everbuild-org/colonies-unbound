@@ -38,6 +38,8 @@ The Worksite Marker provides the first area-selection vertical slice:
 - Sneak-use it on a block to clear the current selection, or on a residence plaque to remove its committed mark.
 - Use it in air to cycle Residence Area, Storage, Worksite, Entrance, and Interaction editing modes.
 - In a point mode, use inside a committed volume to add a point and sneak-use the same block to remove it.
+- Point-mode clicks take priority over block menus; storage, furnace worksite, and entrance targets are validated.
+- A minimal workplace draft becomes ready once it has at least one Storage, Worksite, and Entrance point.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.
