@@ -1,6 +1,7 @@
 package org.everbuild.unbound.residence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -45,5 +46,19 @@ class ResidenceMarkerDataTest {
         assertEquals(1, data.markers().size());
         assertEquals(updatedBounds, data.markers().iterator().next().bounds());
         assertTrue(data.isDirty());
+    }
+
+    @Test
+    void removesMarkerByStableId() {
+        final UUID markerId = UUID.randomUUID();
+        final ResidenceMarkerData data = new ResidenceMarkerData();
+        final SurvivalResidenceMarker marker = new SurvivalResidenceMarker(
+                markerId, 1, UUID.randomUUID(),
+                AreaBounds.between(BlockPos.ZERO, BlockPos.ZERO), List.of(), 10L);
+        data.put(marker);
+
+        assertEquals(marker, data.remove(markerId));
+        assertTrue(data.markers().isEmpty());
+        assertNull(data.remove(markerId));
     }
 }

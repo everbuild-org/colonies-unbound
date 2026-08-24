@@ -25,19 +25,21 @@ MineColonies integration will intentionally be version-pinned because some requi
 
 The Worksite Marker provides the first area-selection vertical slice:
 
-- Obtain it from the Tools & Utilities creative tab (or `/give @s coloniesunbound:worksite_marker`).
+- Craft it from a MineColonies Clipboard and a Feather, obtain it from the Tools & Utilities creative tab, or use `/give @s coloniesunbound:worksite_marker`.
 - Place one Survival Residence Plaque inside the candidate house from the Functional Blocks tab.
 - Use it on two blocks to select the inclusive corners of a volume.
-- Hold it to see a live cyan preview and the finalized gold outline in-world.
+- Hold it to see a live cyan preview and committed residence outlines with a residence-type flag.
 - Completing an area inspects loaded blocks and reports the number of bed heads found.
 - Valid residences configure a dedicated MineColonies building whose capacity is its registered bed count.
 - Residence bounds, beds, ownership, and inspection time are also stored per dimension.
 - Saving requires MineColonies' `MANAGE_HUTS` permission and an area wholly inside one colony.
-- Sneak-use it on a block to clear the current selection.
+- Sneak-use it on a block to clear the current selection, or on a residence plaque to remove its committed mark.
 
-Selection data is mutated by the server and synchronized as item data. The current item-local
-representation is intentionally small; world-level marker collections and MineColonies ownership
-links will be introduced with the Residence integration.
+Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
+by their residence plaque, so removing that building anchor also removes the mark.
+
+Planned follow-up: block changes inside committed volumes should reconcile accurately assignable
+beds and other MineColonies POIs automatically.
 
 ## Development
 

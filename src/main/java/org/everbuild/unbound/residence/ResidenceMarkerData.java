@@ -37,6 +37,14 @@ public final class ResidenceMarkerData extends SavedData {
         return marker;
     }
 
+    public SurvivalResidenceMarker remove(final UUID markerId) {
+        final SurvivalResidenceMarker removed = markers.remove(markerId);
+        if (removed != null) {
+            setDirty();
+        }
+        return removed;
+    }
+
     @Override
     public CompoundTag save(final CompoundTag tag, final HolderLookup.Provider registries) {
         final ListTag markerTags = new ListTag();

@@ -80,6 +80,10 @@ public final class MarkerOverlayRenderer {
         poseStack.popPose();
     }
 
+    public static boolean isMarkerHeld(final Minecraft minecraft) {
+        return !heldMarker(minecraft).isEmpty();
+    }
+
     private static ItemStack heldMarker(final Minecraft minecraft) {
         final ItemStack mainHand = minecraft.player.getMainHandItem();
         if (mainHand.is(ModItems.WORKSITE_MARKER.get())) {
@@ -98,7 +102,7 @@ public final class MarkerOverlayRenderer {
             final float green,
             final float blue,
             final float alpha) {
-        LevelRenderer.renderLineBox(poseStack, lines, bounds.asAabb(), red, green, blue, alpha);
+        LevelRenderer.renderLineBox(poseStack, lines, bounds.asAabb().inflate(0.004), red, green, blue, alpha);
     }
 
     /** A compact pin head and stem whose tip terminates at the selected block's top center. */

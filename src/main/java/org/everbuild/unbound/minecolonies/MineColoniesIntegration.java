@@ -4,7 +4,6 @@ import com.minecolonies.api.colony.buildings.registry.BuildingEntry;
 import com.minecolonies.core.colony.buildings.modules.BuildingModules;
 import com.minecolonies.core.colony.buildings.modules.HomeBuildingModule;
 import com.minecolonies.core.colony.buildings.moduleviews.LivingBuildingModuleView;
-import com.minecolonies.core.tileentities.TileEntityColonyBuilding;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -40,7 +39,7 @@ public final class MineColoniesIntegration {
             BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
     public static final DeferredItem<BlockItem> SURVIVAL_RESIDENCE_ITEM = ITEMS.registerSimpleBlockItem(
             SURVIVAL_RESIDENCE_BLOCK, new Item.Properties().stacksTo(1));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TileEntityColonyBuilding>>
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalResidenceTileEntity>>
             SURVIVAL_RESIDENCE_TILE = BLOCK_ENTITIES.register(
                     "survival_residence_plaque",
                     () -> BlockEntityType.Builder.of(
@@ -70,8 +69,8 @@ public final class MineColoniesIntegration {
     private MineColoniesIntegration() {
     }
 
-    private static TileEntityColonyBuilding createTile(final BlockPos position, final BlockState state) {
-        return new TileEntityColonyBuilding(SURVIVAL_RESIDENCE_TILE.get(), position, state);
+    private static SurvivalResidenceTileEntity createTile(final BlockPos position, final BlockState state) {
+        return new SurvivalResidenceTileEntity(position, state);
     }
 
     public static void register(final IEventBus modBus) {

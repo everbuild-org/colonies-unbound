@@ -1,6 +1,7 @@
 package org.everbuild.unbound.item;
 
 import java.util.List;
+import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -14,10 +15,10 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.MarkerSelection;
+import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
 import org.everbuild.unbound.residence.ResidenceInspection;
 import org.everbuild.unbound.residence.ResidenceInspector;
 import org.everbuild.unbound.residence.ResidenceMarkerService;
-import java.util.UUID;
 
 /** Selects an inclusive survival-building volume using two block clicks. */
 public final class WorksiteMarkerItem extends Item {
@@ -35,6 +36,17 @@ public final class WorksiteMarkerItem extends Item {
         }
         if (context.getPlayer().isShiftKeyDown()) {
             if (!context.getLevel().isClientSide) {
+                if (context.getLevel() instanceof ServerLevel serverLevel
+                        && context.getPlayer() instanceof ServerPlayer serverPlayer
+                        && context.getLevel().getBlockEntity(context.getClickedPos())
+                                instanceof SurvivalResidenceTileEntity residenceTile
+                        && residenceTile.committedMark() != null) {
+                    context.getPlayer().displayClientMessage(
+                            removalReport(ResidenceMarkerService.removeCommittedMark(
+                                    serverLevel, serverPlayer, residenceTile)),
+                            true);
+                    return InteractionResult.SUCCESS;
+                }
                 MarkerSelection.clear(stack);
                 context.getPlayer().displayClientMessage(
                         Component.translatable("message.coloniesunbound.marker.cleared"), true);
@@ -78,7 +90,7 @@ public final class WorksiteMarkerItem extends Item {
         MarkerSelection.write(stack, completed);
         final ResidenceInspection inspection = ResidenceInspector.inspect(context.getLevel(), bounds);
         final Component report = switch (inspection.status()) {
-            case VALID -> registrationReport(context, completed, inspection, bounds);
+            case VALID -> registrationReport(context, stack, completed, inspection, bounds);
             case NO_BEDS -> Component.translatable("message.coloniesunbound.inspection.no_beds")
                     .withStyle(ChatFormatting.RED);
             case AREA_NOT_LOADED -> Component.translatable("message.coloniesunbound.inspection.not_loaded")
@@ -97,6 +109,7 @@ public final class WorksiteMarkerItem extends Item {
 
     private static Component registrationReport(
             final UseOnContext context,
+            final ItemStack stack,
             final MarkerSelection selection,
             final ResidenceInspection inspection,
             final AreaBounds bounds) {
@@ -104,10 +117,15 @@ public final class WorksiteMarkerItem extends Item {
                 || !(context.getPlayer() instanceof ServerPlayer serverPlayer)) {
             return Component.empty();
         }
-        return switch (ResidenceMarkerService.register(serverLevel, serverPlayer, selection, inspection)) {
+        final ResidenceMarkerService.Result result =
+                ResidenceMarkerService.register(serverLevel, serverPlayer, selection, inspection);
+        if (result == ResidenceMarkerService.Result.SAVED) {
+            MarkerSelection.clear(stack);
+        }
+        return switch (result) {
             case SAVED -> Component.translatable(
-                            "message.coloniesunbound.inspection.saved",
-                            bounds.sizeX(), bounds.sizeY(), bounds.sizeZ(), inspection.capacity())
+                    "message.coloniesunbound.inspection.saved",
+                    bounds.sizeX(), bounds.sizeY(), bounds.sizeZ(), inspection.capacity())
                     .withStyle(ChatFormatting.GREEN);
             case OUTSIDE_COLONY -> Component.translatable("message.coloniesunbound.inspection.outside_colony")
                     .withStyle(ChatFormatting.RED);
@@ -116,6 +134,19 @@ public final class WorksiteMarkerItem extends Item {
             case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
                     .withStyle(ChatFormatting.RED);
             case PLAQUE_NOT_REGISTERED -> Component.translatable("message.coloniesunbound.inspection.plaque_not_registered")
+                    .withStyle(ChatFormatting.RED);
+        };
+    }
+
+    private static Component removalReport(final ResidenceMarkerService.RemovalResult result) {
+        return switch (result) {
+            case REMOVED -> Component.translatable("message.coloniesunbound.marker.committed_removed")
+                    .withStyle(ChatFormatting.GREEN);
+            case NO_MARK -> Component.translatable("message.coloniesunbound.marker.no_committed_mark")
+                    .withStyle(ChatFormatting.RED);
+            case OUTSIDE_COLONY -> Component.translatable("message.coloniesunbound.inspection.outside_colony")
+                    .withStyle(ChatFormatting.RED);
+            case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
                     .withStyle(ChatFormatting.RED);
         };
     }
