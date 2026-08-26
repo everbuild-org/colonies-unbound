@@ -21,7 +21,14 @@ public enum MarkerType {
     MECHANIC("mechanic"),
     CONCRETE_MIXER("concrete_mixer"),
     CRUSHER("crusher"),
-    SIFTER("sifter");
+    SIFTER("sifter"),
+    BAKERY("bakery"),
+    KITCHEN("kitchen"),
+    SMELTERY("smeltery"),
+    STONE_SMELTER("stone_smelter"),
+    GLASSBLOWER("glassblower"),
+    DYER("dyer"),
+    ALCHEMIST("alchemist");
 
     private final String id;
 

@@ -131,6 +131,22 @@ class PlaqueHudModelTest {
         assertEquals(PlaqueHudModel.State.ACTIVE, active.state());
     }
 
+    @Test
+    void waveThreeWorkplacesUseSharedCraftingRequirements() {
+        for (final MarkerType type : List.of(
+                MarkerType.BAKERY, MarkerType.KITCHEN, MarkerType.SMELTERY,
+                MarkerType.STONE_SMELTER, MarkerType.GLASSBLOWER, MarkerType.DYER,
+                MarkerType.ALCHEMIST)) {
+            final PlaqueHudModel model = PlaqueHudModel.from(type, mark(
+                    type,
+                    new WorksitePoi(WorksitePoiType.WORKSITE, BlockPos.ZERO),
+                    new WorksitePoi(WorksitePoiType.STORAGE, new BlockPos(1, 0, 0))));
+
+            assertEquals(PlaqueHudModel.State.ACTIVE, model.state(), type::name);
+            assertEquals(2, model.requiredCount(), type::name);
+        }
+    }
+
     private static CommittedWorksiteMark mark(final MarkerType type, final WorksitePoi... points) {
         return new CommittedWorksiteMark(UUID.randomUUID(), type, BOUNDS, List.of(points));
     }

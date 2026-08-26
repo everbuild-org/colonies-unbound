@@ -2,6 +2,7 @@ package org.everbuild.unbound.minecolonies;
 
 import com.minecolonies.api.colony.IColony;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /** Common native-building operations used by survival crafting adapters. */
 public interface SurvivalCraftingBuilding {
@@ -13,4 +14,7 @@ public interface SurvivalCraftingBuilding {
     void addContainerPosition(BlockPos position);
     void removeContainerPosition(BlockPos position);
     void markDirty();
+
+    default void registerWorkstation(final Level level, final BlockPos position) { }
+    default void removeWorkstation(final BlockPos position) { }
 }

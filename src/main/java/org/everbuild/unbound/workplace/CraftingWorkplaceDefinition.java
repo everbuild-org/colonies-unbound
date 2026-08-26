@@ -8,17 +8,25 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FurnaceBlock;
 import net.minecraft.world.level.material.Fluids;
 import org.everbuild.unbound.marker.MarkerType;
 import org.everbuild.unbound.minecolonies.MineColoniesIntegration;
 import org.everbuild.unbound.minecolonies.SurvivalBlacksmithBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalAlchemistBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalBakerBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalConcreteMixerBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalCraftingBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalCrusherBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalFletcherBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalDyerBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalGlassblowerBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalKitchenBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalMechanicBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalSawmillBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalSifterBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalSmelteryBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalStoneSmelteryBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalStonemasonBuilding;
 
 /** Declarative physical and native bindings for one crafting workplace. */
@@ -51,7 +59,21 @@ public record CraftingWorkplaceDefinition(
                 definition("crusher", MarkerType.CRUSHER, MineColoniesIntegration.SURVIVAL_CRUSHER_BLOCK,
                         SurvivalCrusherBuilding.class, (level, pos) -> level.getBlockState(pos).getBlock() instanceof AnvilBlock),
                 definition("sifter", MarkerType.SIFTER, MineColoniesIntegration.SURVIVAL_SIFTER_BLOCK,
-                        SurvivalSifterBuilding.class, (level, pos) -> level.getBlockState(pos).is(Blocks.SCAFFOLDING)));
+                        SurvivalSifterBuilding.class, (level, pos) -> level.getBlockState(pos).is(Blocks.SCAFFOLDING)),
+                furnaceDefinition("bakery", MarkerType.BAKERY, MineColoniesIntegration.SURVIVAL_BAKERY_BLOCK,
+                        SurvivalBakerBuilding.class),
+                furnaceDefinition("kitchen", MarkerType.KITCHEN, MineColoniesIntegration.SURVIVAL_KITCHEN_BLOCK,
+                        SurvivalKitchenBuilding.class),
+                furnaceDefinition("smeltery", MarkerType.SMELTERY, MineColoniesIntegration.SURVIVAL_SMELTERY_BLOCK,
+                        SurvivalSmelteryBuilding.class),
+                furnaceDefinition("stone_smelter", MarkerType.STONE_SMELTER,
+                        MineColoniesIntegration.SURVIVAL_STONE_SMELTER_BLOCK, SurvivalStoneSmelteryBuilding.class),
+                furnaceDefinition("glassblower", MarkerType.GLASSBLOWER,
+                        MineColoniesIntegration.SURVIVAL_GLASSBLOWER_BLOCK, SurvivalGlassblowerBuilding.class),
+                furnaceDefinition("dyer", MarkerType.DYER, MineColoniesIntegration.SURVIVAL_DYER_BLOCK,
+                        SurvivalDyerBuilding.class),
+                definition("alchemist", MarkerType.ALCHEMIST, MineColoniesIntegration.SURVIVAL_ALCHEMIST_BLOCK,
+                        SurvivalAlchemistBuilding.class, (level, pos) -> level.getBlockState(pos).is(Blocks.BREWING_STAND)));
     }
 
     private static CraftingWorkplaceDefinition definition(
@@ -59,5 +81,12 @@ public record CraftingWorkplaceDefinition(
             final Class<? extends SurvivalCraftingBuilding> buildingType,
             final BiPredicate<Level, BlockPos> workstation) {
         return new CraftingWorkplaceDefinition(id, type, plaque, buildingType, workstation);
+    }
+
+    private static CraftingWorkplaceDefinition furnaceDefinition(
+            final String id, final MarkerType type, final Supplier<? extends Block> plaque,
+            final Class<? extends SurvivalCraftingBuilding> buildingType) {
+        return definition(id, type, plaque, buildingType,
+                (level, pos) -> level.getBlockState(pos).getBlock() instanceof FurnaceBlock);
     }
 }

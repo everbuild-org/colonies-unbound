@@ -218,6 +218,55 @@ public final class MineColoniesIntegration {
             BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
     public static final DeferredItem<BlockItem> SURVIVAL_SIFTER_ITEM = ITEMS.registerSimpleBlockItem(
             SURVIVAL_SIFTER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_BAKERY_BLOCK = BLOCKS.registerBlock(
+            "survival_bakery_plaque",
+            properties -> new SurvivalCraftingBlock(properties, "survival_bakery",
+                    () -> MineColoniesIntegration.SURVIVAL_BAKERY.get()),
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_BAKERY_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_BAKERY_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_KITCHEN_BLOCK = BLOCKS.registerBlock(
+            "survival_kitchen_plaque",
+            properties -> new SurvivalCraftingBlock(properties, "survival_kitchen",
+                    () -> MineColoniesIntegration.SURVIVAL_KITCHEN.get()),
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_KITCHEN_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_KITCHEN_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_SMELTERY_BLOCK = BLOCKS.registerBlock(
+            "survival_smeltery_plaque",
+            properties -> new SurvivalCraftingBlock(properties, "survival_smeltery",
+                    () -> MineColoniesIntegration.SURVIVAL_SMELTERY.get()),
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_SMELTERY_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_SMELTERY_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_STONE_SMELTER_BLOCK = BLOCKS.registerBlock(
+            "survival_stone_smelter_plaque",
+            properties -> new SurvivalCraftingBlock(properties, "survival_stone_smelter",
+                    () -> MineColoniesIntegration.SURVIVAL_STONE_SMELTER.get()),
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_STONE_SMELTER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_STONE_SMELTER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_GLASSBLOWER_BLOCK = BLOCKS.registerBlock(
+            "survival_glassblower_plaque",
+            properties -> new SurvivalCraftingBlock(properties, "survival_glassblower",
+                    () -> MineColoniesIntegration.SURVIVAL_GLASSBLOWER.get()),
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_GLASSBLOWER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_GLASSBLOWER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_DYER_BLOCK = BLOCKS.registerBlock(
+            "survival_dyer_plaque",
+            properties -> new SurvivalCraftingBlock(properties, "survival_dyer",
+                    () -> MineColoniesIntegration.SURVIVAL_DYER.get()),
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_DYER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_DYER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_ALCHEMIST_BLOCK = BLOCKS.registerBlock(
+            "survival_alchemist_plaque",
+            properties -> new SurvivalCraftingBlock(properties, "survival_alchemist",
+                    () -> MineColoniesIntegration.SURVIVAL_ALCHEMIST.get()),
+            BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> SURVIVAL_ALCHEMIST_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_ALCHEMIST_BLOCK, new Item.Properties().stacksTo(1));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalCraftingTileEntity>>
             SURVIVAL_CRAFTING_TILE = BLOCK_ENTITIES.register(
                     "survival_crafting_plaque",
@@ -230,7 +279,14 @@ public final class MineColoniesIntegration {
                             SURVIVAL_MECHANIC_BLOCK.get(),
                             SURVIVAL_CONCRETE_MIXER_BLOCK.get(),
                             SURVIVAL_CRUSHER_BLOCK.get(),
-                            SURVIVAL_SIFTER_BLOCK.get())
+                            SURVIVAL_SIFTER_BLOCK.get(),
+                            SURVIVAL_BAKERY_BLOCK.get(),
+                            SURVIVAL_KITCHEN_BLOCK.get(),
+                            SURVIVAL_SMELTERY_BLOCK.get(),
+                            SURVIVAL_STONE_SMELTER_BLOCK.get(),
+                            SURVIVAL_GLASSBLOWER_BLOCK.get(),
+                            SURVIVAL_DYER_BLOCK.get(),
+                            SURVIVAL_ALCHEMIST_BLOCK.get())
                             .build(null));
 
 
@@ -460,6 +516,73 @@ public final class MineColoniesIntegration {
                     .addBuildingModuleProducer(BuildingModules.SIFTER_WORK).addBuildingModuleProducer(BuildingModules.SIFTER_CRAFT)
                     .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
                     .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_BAKERY = BUILDINGS.register(
+            "survival_bakery", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_bakery"))
+                    .setBuildingBlock(SURVIVAL_BAKERY_BLOCK.get()).setBuildingProducer(SurvivalBakerBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.BAKER_WORK).addBuildingModuleProducer(BuildingModules.BAKER_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW).addBuildingModuleProducer(BuildingModules.BAKER_SMELT)
+                    .addBuildingModuleProducer(BuildingModules.SETTINGS_CRAFTER_RECIPE).addBuildingModuleProducer(BuildingModules.FURNACE)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.ITEMLIST_FUEL)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_KITCHEN = BUILDINGS.register(
+            "survival_kitchen", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_kitchen"))
+                    .setBuildingBlock(SURVIVAL_KITCHEN_BLOCK.get()).setBuildingProducer(SurvivalKitchenBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW)
+                    .addBuildingModuleProducer(BuildingModules.CHEF_WORK).addBuildingModuleProducer(BuildingModules.CHEF_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.CHEF_SMELT).addBuildingModuleProducer(BuildingModules.FURNACE)
+                    .addBuildingModuleProducer(BuildingModules.ITEMLIST_FUEL).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_SMELTERY = BUILDINGS.register(
+            "survival_smeltery", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_smeltery"))
+                    .setBuildingBlock(SURVIVAL_SMELTERY_BLOCK.get()).setBuildingProducer(SurvivalSmelteryBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.SMELTER_WORK).addBuildingModuleProducer(BuildingModules.SMELTER_SMELTING)
+                    .addBuildingModuleProducer(BuildingModules.SMELTER_OREBREAK).addBuildingModuleProducer(BuildingModules.FURNACE)
+                    .addBuildingModuleProducer(BuildingModules.ITEMLIST_FUEL).addBuildingModuleProducer(BuildingModules.ITEMLIST_ORE)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.SMELTER_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_STONE_SMELTER = BUILDINGS.register(
+            "survival_stone_smelter", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_stone_smelter"))
+                    .setBuildingBlock(SURVIVAL_STONE_SMELTER_BLOCK.get()).setBuildingProducer(SurvivalStoneSmelteryBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.STONESMELTER_WORK).addBuildingModuleProducer(BuildingModules.STONESMELTER_SMELTING)
+                    .addBuildingModuleProducer(BuildingModules.SETTINGS_CRAFTER_RECIPE).addBuildingModuleProducer(BuildingModules.FURNACE)
+                    .addBuildingModuleProducer(BuildingModules.ITEMLIST_FUEL).addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_GLASSBLOWER = BUILDINGS.register(
+            "survival_glassblower", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_glassblower"))
+                    .setBuildingBlock(SURVIVAL_GLASSBLOWER_BLOCK.get()).setBuildingProducer(SurvivalGlassblowerBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.GLASSBLOWER_WORK).addBuildingModuleProducer(BuildingModules.GLASSBLOWER_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.GLASSBLOWER_DO_CRAFT).addBuildingModuleProducer(BuildingModules.GLASSBLOWER_SMELTING)
+                    .addBuildingModuleProducer(BuildingModules.SETTINGS_CRAFTER_RECIPE).addBuildingModuleProducer(BuildingModules.FURNACE)
+                    .addBuildingModuleProducer(BuildingModules.ITEMLIST_FUEL).addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_DYER = BUILDINGS.register(
+            "survival_dyer", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_dyer"))
+                    .setBuildingBlock(SURVIVAL_DYER_BLOCK.get()).setBuildingProducer(SurvivalDyerBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.DYER_WORK).addBuildingModuleProducer(BuildingModules.DYER_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.DYER_SMELT).addBuildingModuleProducer(BuildingModules.SETTINGS_CRAFTER_RECIPE)
+                    .addBuildingModuleProducer(BuildingModules.FURNACE).addBuildingModuleProducer(BuildingModules.ITEMLIST_FUEL)
+                    .addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_ALCHEMIST = BUILDINGS.register(
+            "survival_alchemist", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_alchemist"))
+                    .setBuildingBlock(SURVIVAL_ALCHEMIST_BLOCK.get()).setBuildingProducer(SurvivalAlchemistBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.ALCHEMIST_WORK).addBuildingModuleProducer(BuildingModules.ALCHEMIST_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.ALCHEMIST_BREW).addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
 
 
     private MineColoniesIntegration() {
@@ -497,6 +620,13 @@ public final class MineColoniesIntegration {
             event.accept(SURVIVAL_CONCRETE_MIXER_ITEM);
             event.accept(SURVIVAL_CRUSHER_ITEM);
             event.accept(SURVIVAL_SIFTER_ITEM);
+            event.accept(SURVIVAL_BAKERY_ITEM);
+            event.accept(SURVIVAL_KITCHEN_ITEM);
+            event.accept(SURVIVAL_SMELTERY_ITEM);
+            event.accept(SURVIVAL_STONE_SMELTER_ITEM);
+            event.accept(SURVIVAL_GLASSBLOWER_ITEM);
+            event.accept(SURVIVAL_DYER_ITEM);
+            event.accept(SURVIVAL_ALCHEMIST_ITEM);
         }
     }
 }

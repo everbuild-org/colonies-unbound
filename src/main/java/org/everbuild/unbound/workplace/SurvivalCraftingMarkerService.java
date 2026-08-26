@@ -17,12 +17,11 @@ import org.everbuild.unbound.marker.MarkerSelection;
 import org.everbuild.unbound.marker.PoiTargetValidator;
 import org.everbuild.unbound.marker.WorksitePoi;
 import org.everbuild.unbound.marker.WorksitePoiType;
-import org.everbuild.unbound.minecolonies.SurvivalConcreteMixerBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalCraftingBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalCraftingTileEntity;
 import org.everbuild.unbound.residence.ResidenceMarkerService;
 
-/** Shared persistence, readiness, and native binding for Wave 2 crafting workplaces. */
+/** Shared persistence, readiness, and native binding for survival crafting workplaces. */
 public final class SurvivalCraftingMarkerService {
     private SurvivalCraftingMarkerService() { }
 
@@ -144,6 +143,8 @@ public final class SurvivalCraftingMarkerService {
             final ServerLevel level, final IColony colony, final SurvivalCraftingBuilding building,
             final SurvivalCraftingTileEntity tile, final List<WorksitePoi> previous,
             final CommittedWorksiteMark updated) {
+        previous.stream().filter(point -> point.type() == WorksitePoiType.WORKSITE)
+                .map(WorksitePoi::position).forEach(building::removeWorkstation);
         previous.stream().filter(point -> point.type() == WorksitePoiType.STORAGE)
                 .map(WorksitePoi::position).forEach(building::removeContainerPosition);
         if (updated == null) {
@@ -154,11 +155,8 @@ public final class SurvivalCraftingMarkerService {
             building.setCorners(updated.bounds().min(), updated.bounds().max());
             updated.pois().stream().filter(point -> point.type() == WorksitePoiType.STORAGE)
                     .map(WorksitePoi::position).forEach(building::addContainerPosition);
-            if (building instanceof SurvivalConcreteMixerBuilding mixer) {
-                updated.pois().stream().filter(point -> point.type() == WorksitePoiType.WORKSITE)
-                        .map(WorksitePoi::position)
-                        .forEach(pos -> mixer.registerBlockPosition(level.getBlockState(pos), pos, level));
-            }
+            updated.pois().stream().filter(point -> point.type() == WorksitePoiType.WORKSITE)
+                    .map(WorksitePoi::position).forEach(pos -> building.registerWorkstation(level, pos));
             building.setBuildingLevel(isReady(updated.pois()) ? 1 : 0);
         }
         building.markDirty();

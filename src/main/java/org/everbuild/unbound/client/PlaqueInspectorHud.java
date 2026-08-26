@@ -103,6 +103,11 @@ public final class PlaqueInspectorHud {
             case STONEMASON, CONCRETE_MIXER -> 0xFF9B9387;
             case MECHANIC -> 0xFF6F93A8;
             case SIFTER -> 0xFFC5A96A;
+            case BAKERY, KITCHEN -> 0xFFD18A45;
+            case SMELTERY, STONE_SMELTER -> 0xFF8A5A48;
+            case GLASSBLOWER -> 0xFF62B7C2;
+            case DYER -> 0xFFB35EAD;
+            case ALCHEMIST -> 0xFF7656B8;
             case RESIDENCE -> 0xFF4E83EE;
         };
 
@@ -186,6 +191,13 @@ public final class PlaqueInspectorHud {
             case CONCRETE_MIXER -> "hud.coloniesunbound.plaque.concrete_mixer";
             case CRUSHER -> "hud.coloniesunbound.plaque.crusher";
             case SIFTER -> "hud.coloniesunbound.plaque.sifter";
+            case BAKERY -> "hud.coloniesunbound.plaque.bakery";
+            case KITCHEN -> "hud.coloniesunbound.plaque.kitchen";
+            case SMELTERY -> "hud.coloniesunbound.plaque.smeltery";
+            case STONE_SMELTER -> "hud.coloniesunbound.plaque.stone_smelter";
+            case GLASSBLOWER -> "hud.coloniesunbound.plaque.glassblower";
+            case DYER -> "hud.coloniesunbound.plaque.dyer";
+            case ALCHEMIST -> "hud.coloniesunbound.plaque.alchemist";
             case RESIDENCE -> "hud.coloniesunbound.plaque.residence";
         });
     }
