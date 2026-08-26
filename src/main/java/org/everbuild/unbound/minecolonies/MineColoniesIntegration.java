@@ -8,6 +8,7 @@ import com.minecolonies.core.colony.buildings.workerbuildings.BuildingCook;
 import com.minecolonies.core.colony.buildings.views.EmptyView;
 import com.minecolonies.core.colony.buildings.workerbuildings.BuildingGuardTower;
 import com.minecolonies.core.colony.buildings.workerbuildings.BuildingBeekeeper;
+import com.minecolonies.core.colony.buildings.workerbuildings.BuildingLumberjack;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -267,6 +268,30 @@ public final class MineColoniesIntegration {
             BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
     public static final DeferredItem<BlockItem> SURVIVAL_ALCHEMIST_ITEM = ITEMS.registerSimpleBlockItem(
             SURVIVAL_ALCHEMIST_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_FARMER_BLOCK = naturalPlaqueBlock(
+            "farmer", () -> MineColoniesIntegration.SURVIVAL_FARMER.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_FARMER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_FARMER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_PLANTATION_BLOCK = naturalPlaqueBlock(
+            "plantation", () -> MineColoniesIntegration.SURVIVAL_PLANTATION.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_PLANTATION_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_PLANTATION_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_FISHERMAN_BLOCK = naturalPlaqueBlock(
+            "fisherman", () -> MineColoniesIntegration.SURVIVAL_FISHERMAN.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_FISHERMAN_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_FISHERMAN_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_LUMBERJACK_BLOCK = naturalPlaqueBlock(
+            "lumberjack", () -> MineColoniesIntegration.SURVIVAL_LUMBERJACK.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_LUMBERJACK_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_LUMBERJACK_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_FLORIST_BLOCK = naturalPlaqueBlock(
+            "florist", () -> MineColoniesIntegration.SURVIVAL_FLORIST.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_FLORIST_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_FLORIST_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_COMPOSTER_BLOCK = naturalPlaqueBlock(
+            "composter", () -> MineColoniesIntegration.SURVIVAL_COMPOSTER.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_COMPOSTER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_COMPOSTER_BLOCK, new Item.Properties().stacksTo(1));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalCraftingTileEntity>>
             SURVIVAL_CRAFTING_TILE = BLOCK_ENTITIES.register(
                     "survival_crafting_plaque",
@@ -286,7 +311,13 @@ public final class MineColoniesIntegration {
                             SURVIVAL_STONE_SMELTER_BLOCK.get(),
                             SURVIVAL_GLASSBLOWER_BLOCK.get(),
                             SURVIVAL_DYER_BLOCK.get(),
-                            SURVIVAL_ALCHEMIST_BLOCK.get())
+                            SURVIVAL_ALCHEMIST_BLOCK.get(),
+                            SURVIVAL_FARMER_BLOCK.get(),
+                            SURVIVAL_PLANTATION_BLOCK.get(),
+                            SURVIVAL_FISHERMAN_BLOCK.get(),
+                            SURVIVAL_LUMBERJACK_BLOCK.get(),
+                            SURVIVAL_FLORIST_BLOCK.get(),
+                            SURVIVAL_COMPOSTER_BLOCK.get())
                             .build(null));
 
 
@@ -583,9 +614,68 @@ public final class MineColoniesIntegration {
                     .addBuildingModuleProducer(BuildingModules.ALCHEMIST_WORK).addBuildingModuleProducer(BuildingModules.ALCHEMIST_CRAFT)
                     .addBuildingModuleProducer(BuildingModules.ALCHEMIST_BREW).addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW)
                     .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_FARMER = BUILDINGS.register(
+            "survival_farmer", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_farmer"))
+                    .setBuildingBlock(SURVIVAL_FARMER_BLOCK.get()).setBuildingProducer(SurvivalFarmerBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.FARMER_WORK).addBuildingModuleProducer(BuildingModules.FARMER_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.FARMER_FIELDS).addBuildingModuleProducer(BuildingModules.FARMER_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW).addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_PLANTATION = BUILDINGS.register(
+            "survival_plantation", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_plantation"))
+                    .setBuildingBlock(SURVIVAL_PLANTATION_BLOCK.get()).setBuildingProducer(SurvivalPlantationBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.PLANTATION_WORK).addBuildingModuleProducer(BuildingModules.PLANTATION_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.PLANTATION_FIELDS).addBuildingModuleProducer(BuildingModules.PLANTATION_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_FISHERMAN = BUILDINGS.register(
+            "survival_fisherman", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_fisherman"))
+                    .setBuildingBlock(SURVIVAL_FISHERMAN_BLOCK.get()).setBuildingProducer(SurvivalFishermanBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.FISHER_WORK).addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_LUMBERJACK = BUILDINGS.register(
+            "survival_lumberjack", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_lumberjack"))
+                    .setBuildingBlock(SURVIVAL_LUMBERJACK_BLOCK.get()).setBuildingProducer(SurvivalLumberjackBuilding::new)
+                    .setBuildingViewProducer(() -> BuildingLumberjack.View::new)
+                    .addBuildingModuleProducer(BuildingModules.FORESTER_WORK).addBuildingModuleProducer(BuildingModules.FORESTER_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.FORESTER_SETTINGS).addBuildingModuleProducer(BuildingModules.FORESTER_TOOL)
+                    .addBuildingModuleProducer(BuildingModules.ITEMLIST_SAPLING).addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_FLORIST = BUILDINGS.register(
+            "survival_florist", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_florist"))
+                    .setBuildingBlock(SURVIVAL_FLORIST_BLOCK.get()).setBuildingProducer(SurvivalFloristBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.FLORIST_WORK).addBuildingModuleProducer(BuildingModules.FLORIST_ITEMS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_COMPOSTER = BUILDINGS.register(
+            "survival_composter", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_composter"))
+                    .setBuildingBlock(SURVIVAL_COMPOSTER_BLOCK.get()).setBuildingProducer(SurvivalComposterBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.COMPOSTER_WORK).addBuildingModuleProducer(BuildingModules.COMPOSTER_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.ITEMLIST_COMPOSTABLE).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
 
 
     private MineColoniesIntegration() {
+    }
+
+    private static DeferredBlock<SurvivalCraftingBlock> naturalPlaqueBlock(
+            final String id, final java.util.function.Supplier<BuildingEntry> building) {
+        return BLOCKS.registerBlock(
+                "survival_" + id + "_plaque",
+                properties -> new SurvivalCraftingBlock(properties, "survival_" + id, building),
+                BlockBehaviour.Properties.of().strength(3.0F).sound(SoundType.WOOD));
     }
 
     private static SurvivalResidenceTileEntity createTile(final BlockPos position, final BlockState state) {
@@ -627,6 +717,12 @@ public final class MineColoniesIntegration {
             event.accept(SURVIVAL_GLASSBLOWER_ITEM);
             event.accept(SURVIVAL_DYER_ITEM);
             event.accept(SURVIVAL_ALCHEMIST_ITEM);
+            event.accept(SURVIVAL_FARMER_ITEM);
+            event.accept(SURVIVAL_PLANTATION_ITEM);
+            event.accept(SURVIVAL_FISHERMAN_ITEM);
+            event.accept(SURVIVAL_LUMBERJACK_ITEM);
+            event.accept(SURVIVAL_FLORIST_ITEM);
+            event.accept(SURVIVAL_COMPOSTER_ITEM);
         }
     }
 }

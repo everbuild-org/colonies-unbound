@@ -64,6 +64,8 @@ The Worksite Marker provides the first area-selection vertical slice:
   shallow flowing-water cells into MineColonies' native mixer topology for real placement/harvesting.
 - Wave 3 adds Bakery, Kitchen, Smeltery, Stone Smelter, Glassblower, Dyer, and Alchemist plaques.
   Furnaces and brewing stands are scanner-owned and synchronized with their native worker topology.
+- Wave 4 adds Farmer, Plantation, Fisherman's Hut, Forester's Hut, Florist, and Composter plaques.
+  Natural resource volumes bind native fields, soil, barrels, ponds, and restricted woodland areas.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.

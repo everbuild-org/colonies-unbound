@@ -28,7 +28,13 @@ public enum MarkerType {
     STONE_SMELTER("stone_smelter"),
     GLASSBLOWER("glassblower"),
     DYER("dyer"),
-    ALCHEMIST("alchemist");
+    ALCHEMIST("alchemist"),
+    FARMER("farmer"),
+    PLANTATION("plantation"),
+    FISHERMAN("fisherman"),
+    LUMBERJACK("lumberjack"),
+    FLORIST("florist"),
+    COMPOSTER("composter");
 
     private final String id;
 

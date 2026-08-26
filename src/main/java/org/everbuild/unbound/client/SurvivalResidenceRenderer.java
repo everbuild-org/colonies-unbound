@@ -166,7 +166,8 @@ public final class SurvivalResidenceRenderer<T extends MarkedBuildingTileEntity>
             case "apiary", "hive" -> "farm";
             case "blacksmith", "sawmill", "stonemason", "fletcher", "mechanic",
                     "concrete_mixer", "crusher", "sifter", "bakery", "kitchen", "smeltery",
-                    "stone_smelter", "glassblower", "dyer", "alchemist" -> "worksite";
+                    "stone_smelter", "glassblower", "dyer", "alchemist", "farmer", "plantation",
+                    "fisherman", "lumberjack", "florist", "composter" -> "worksite";
             default -> iconId;
         };
         final ResourceLocation iconTexture = ResourceLocation.fromNamespaceAndPath(

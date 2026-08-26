@@ -148,16 +148,18 @@ public final class SurvivalCraftingMarkerService {
         previous.stream().filter(point -> point.type() == WorksitePoiType.STORAGE)
                 .map(WorksitePoi::position).forEach(building::removeContainerPosition);
         if (updated == null) {
+            building.clearWorkArea();
             tile.clearCommittedMark();
             building.setBuildingLevel(0);
         } else {
             tile.setCommittedMark(updated);
             building.setCorners(updated.bounds().min(), updated.bounds().max());
+            building.configureWorkArea(updated.bounds());
+            building.setBuildingLevel(isReady(updated.pois()) ? 1 : 0);
             updated.pois().stream().filter(point -> point.type() == WorksitePoiType.STORAGE)
                     .map(WorksitePoi::position).forEach(building::addContainerPosition);
             updated.pois().stream().filter(point -> point.type() == WorksitePoiType.WORKSITE)
                     .map(WorksitePoi::position).forEach(pos -> building.registerWorkstation(level, pos));
-            building.setBuildingLevel(isReady(updated.pois()) ? 1 : 0);
         }
         building.markDirty();
         colony.markDirty();

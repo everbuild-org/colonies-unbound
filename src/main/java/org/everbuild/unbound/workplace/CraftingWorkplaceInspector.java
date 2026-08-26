@@ -37,7 +37,10 @@ public final class CraftingWorkplaceInspector {
         }
         final List<BlockPos> workstations = new ArrayList<>();
         for (final BlockPos position : BlockPos.betweenClosed(bounds.min(), bounds.max())) {
-            if (selected.isWorkstation().test(level, position)) workstations.add(position.immutable());
+            if (workstations.size() < selected.maximumWorkstations()
+                    && selected.isWorkstation().test(level, position)) {
+                workstations.add(position.immutable());
+            }
         }
         return new CraftingWorkplaceInspection(
                 workstations.isEmpty() ? CraftingWorkplaceInspection.Status.NO_WORKSTATION

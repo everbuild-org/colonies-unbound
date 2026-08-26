@@ -22,7 +22,7 @@ import org.everbuild.unbound.marker.DebouncedRescanQueue;
 import org.everbuild.unbound.minecolonies.SurvivalCraftingBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalCraftingTileEntity;
 
-/** Reconciles scanner-owned Wave 2 workstation positions without forcing chunk loads. */
+/** Reconciles scanner-owned workplace positions without forcing chunk loads. */
 @EventBusSubscriber(modid = ColoniesUnbound.MOD_ID)
 public final class CraftingWorkplacePoiEvents {
     private static final Map<ServerLevel, DebouncedRescanQueue<BlockPos>> PENDING = new IdentityHashMap<>();

@@ -23,6 +23,7 @@ import org.everbuild.unbound.minecolonies.SurvivalStableTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalApiaryTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalCraftingTileEntity;
 import org.everbuild.unbound.minecolonies.SurvivalGuardTileEntity;
+import org.everbuild.unbound.workplace.CraftingWorkplaceDefinition;
 
 /** Compact contextual inspector shown while the crosshair rests on a survival plaque. */
 @EventBusSubscriber(modid = ColoniesUnbound.MOD_ID, value = Dist.CLIENT)
@@ -56,8 +57,13 @@ public final class PlaqueInspectorHud {
             return;
         }
 
-        final MarkerType plaqueType = plaque instanceof SurvivalCraftingTileEntity && plaque.committedMark() != null
-                ? plaque.committedMark().type()
+        final MarkerType plaqueType = plaque instanceof SurvivalCraftingTileEntity crafting
+                ? crafting.committedMark() != null
+                        ? crafting.committedMark().type()
+                        : CraftingWorkplaceDefinition.all().stream()
+                                .filter(definition -> minecraft.level.getBlockState(hit.getBlockPos()).is(definition.plaque().get()))
+                                .map(CraftingWorkplaceDefinition::markerType)
+                                .findFirst().orElse(MarkerType.RESIDENCE)
                 : plaque instanceof SurvivalCookTileEntity
                 ? MarkerType.RESTAURANT
                 : plaque instanceof SurvivalGuardTileEntity
@@ -108,6 +114,11 @@ public final class PlaqueInspectorHud {
             case GLASSBLOWER -> 0xFF62B7C2;
             case DYER -> 0xFFB35EAD;
             case ALCHEMIST -> 0xFF7656B8;
+            case FARMER, PLANTATION -> 0xFF72A94C;
+            case FISHERMAN -> 0xFF4C91B8;
+            case LUMBERJACK -> 0xFF497B3F;
+            case FLORIST -> 0xFFD16E9B;
+            case COMPOSTER -> 0xFF8A704C;
             case RESIDENCE -> 0xFF4E83EE;
         };
 
@@ -198,6 +209,12 @@ public final class PlaqueInspectorHud {
             case GLASSBLOWER -> "hud.coloniesunbound.plaque.glassblower";
             case DYER -> "hud.coloniesunbound.plaque.dyer";
             case ALCHEMIST -> "hud.coloniesunbound.plaque.alchemist";
+            case FARMER -> "hud.coloniesunbound.plaque.farmer";
+            case PLANTATION -> "hud.coloniesunbound.plaque.plantation";
+            case FISHERMAN -> "hud.coloniesunbound.plaque.fisherman";
+            case LUMBERJACK -> "hud.coloniesunbound.plaque.lumberjack";
+            case FLORIST -> "hud.coloniesunbound.plaque.florist";
+            case COMPOSTER -> "hud.coloniesunbound.plaque.composter";
             case RESIDENCE -> "hud.coloniesunbound.plaque.residence";
         });
     }

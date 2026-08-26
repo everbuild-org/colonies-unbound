@@ -64,9 +64,17 @@ public record PlaqueHudModel(
                 || type == MarkerType.BAKERY || type == MarkerType.KITCHEN
                 || type == MarkerType.SMELTERY || type == MarkerType.STONE_SMELTER
                 || type == MarkerType.GLASSBLOWER || type == MarkerType.DYER
-                || type == MarkerType.ALCHEMIST) {
+                || type == MarkerType.ALCHEMIST || type == MarkerType.FARMER
+                || type == MarkerType.PLANTATION || type == MarkerType.FISHERMAN
+                || type == MarkerType.LUMBERJACK || type == MarkerType.FLORIST
+                || type == MarkerType.COMPOSTER) {
             requirements.add(new Requirement("hud.coloniesunbound.plaque.storage", count(points, WorksitePoiType.STORAGE), 1, false));
-            requirements.add(new Requirement("hud.coloniesunbound.plaque.workstations", count(points, WorksitePoiType.WORKSITE), 1, false));
+            final boolean natural = type == MarkerType.FARMER || type == MarkerType.PLANTATION
+                    || type == MarkerType.FISHERMAN || type == MarkerType.LUMBERJACK
+                    || type == MarkerType.FLORIST || type == MarkerType.COMPOSTER;
+            requirements.add(new Requirement(
+                    natural ? "hud.coloniesunbound.plaque.resources" : "hud.coloniesunbound.plaque.workstations",
+                    count(points, WorksitePoiType.WORKSITE), 1, false));
             return requirements;
         }
         if (type == MarkerType.ANIMAL_PEN
