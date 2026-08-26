@@ -34,7 +34,15 @@ public enum MarkerType {
     FISHERMAN("fisherman"),
     LUMBERJACK("lumberjack"),
     FLORIST("florist"),
-    COMPOSTER("composter");
+    COMPOSTER("composter"),
+    HOSPITAL("hospital"),
+    SCHOOL("school"),
+    LIBRARY("library"),
+    UNIVERSITY("university"),
+    TAVERN("tavern"),
+    GRAVEYARD("graveyard"),
+    ENCHANTER("enchanter"),
+    NETHER_WORKER("nether_worker");
 
     private final String id;
 

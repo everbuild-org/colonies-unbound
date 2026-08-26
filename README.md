@@ -66,6 +66,9 @@ The Worksite Marker provides the first area-selection vertical slice:
   Furnaces and brewing stands are scanner-owned and synchronized with their native worker topology.
 - Wave 4 adds Farmer, Plantation, Fisherman's Hut, Forester's Hut, Florist, and Composter plaques.
   Natural resource volumes bind native fields, soil, barrels, ponds, and restricted woodland areas.
+- Wave 5 adds Hospital, School, Library, University, Tavern, Graveyard, Enchanter, and Nether Worker
+  plaques. Their beds, classroom seats, bookshelves, graves, enchanting tables, and live portals are
+  scanner-owned; the Enchanter also links all operational worker buildings as native draining targets.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.

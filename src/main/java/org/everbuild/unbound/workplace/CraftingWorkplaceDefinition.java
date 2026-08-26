@@ -11,6 +11,9 @@ import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FurnaceBlock;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.WoolCarpetBlock;
+import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.material.Fluids;
 import org.everbuild.unbound.marker.MarkerType;
 import org.everbuild.unbound.minecolonies.MineColoniesIntegration;
@@ -36,6 +39,14 @@ import org.everbuild.unbound.minecolonies.SurvivalFishermanBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalFloristBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalLumberjackBuilding;
 import org.everbuild.unbound.minecolonies.SurvivalPlantationBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalHospitalBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalSchoolBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalLibraryBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalUniversityBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalTavernBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalGraveyardBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalEnchanterBuilding;
+import org.everbuild.unbound.minecolonies.SurvivalNetherWorkerBuilding;
 
 /** Declarative physical and native bindings for one crafting workplace. */
 public record CraftingWorkplaceDefinition(
@@ -101,7 +112,30 @@ public record CraftingWorkplaceDefinition(
                         (level, pos) -> level.getBlockState(pos).is(com.minecolonies.api.blocks.ModBlocks.blockCompostedDirt)),
                 definition("composter", MarkerType.COMPOSTER, MineColoniesIntegration.SURVIVAL_COMPOSTER_BLOCK,
                         SurvivalComposterBuilding.class,
-                        (level, pos) -> level.getBlockState(pos).is(com.minecolonies.api.blocks.ModBlocks.blockBarrel)));
+                        (level, pos) -> level.getBlockState(pos).is(com.minecolonies.api.blocks.ModBlocks.blockBarrel)),
+                definition("hospital", MarkerType.HOSPITAL, MineColoniesIntegration.SURVIVAL_HOSPITAL_BLOCK,
+                        SurvivalHospitalBuilding.class, CraftingWorkplaceDefinition::isBedHead),
+                definition("school", MarkerType.SCHOOL, MineColoniesIntegration.SURVIVAL_SCHOOL_BLOCK,
+                        SurvivalSchoolBuilding.class,
+                        (level, pos) -> level.getBlockState(pos).getBlock() instanceof WoolCarpetBlock),
+                definition("library", MarkerType.LIBRARY, MineColoniesIntegration.SURVIVAL_LIBRARY_BLOCK,
+                        SurvivalLibraryBuilding.class,
+                        (level, pos) -> level.getBlockState(pos).is(net.neoforged.neoforge.common.Tags.Blocks.BOOKSHELVES)),
+                definition("university", MarkerType.UNIVERSITY, MineColoniesIntegration.SURVIVAL_UNIVERSITY_BLOCK,
+                        SurvivalUniversityBuilding.class,
+                        (level, pos) -> level.getBlockState(pos).is(net.neoforged.neoforge.common.Tags.Blocks.BOOKSHELVES)),
+                definition("tavern", MarkerType.TAVERN, MineColoniesIntegration.SURVIVAL_TAVERN_BLOCK,
+                        SurvivalTavernBuilding.class, CraftingWorkplaceDefinition::isBedHead),
+                definition("graveyard", MarkerType.GRAVEYARD, MineColoniesIntegration.SURVIVAL_GRAVEYARD_BLOCK,
+                        SurvivalGraveyardBuilding.class,
+                        (level, pos) -> level.getBlockState(pos).is(com.minecolonies.api.blocks.ModBlocks.blockGrave)
+                                || level.getBlockState(pos).is(com.minecolonies.api.blocks.ModBlocks.blockNamedGrave)),
+                definition("enchanter", MarkerType.ENCHANTER, MineColoniesIntegration.SURVIVAL_ENCHANTER_BLOCK,
+                        SurvivalEnchanterBuilding.class,
+                        (level, pos) -> level.getBlockState(pos).is(Blocks.ENCHANTING_TABLE)),
+                definition("nether_worker", MarkerType.NETHER_WORKER, MineColoniesIntegration.SURVIVAL_NETHER_WORKER_BLOCK,
+                        SurvivalNetherWorkerBuilding.class,
+                        (level, pos) -> level.getBlockState(pos).is(Blocks.NETHER_PORTAL), 1));
     }
 
     private static CraftingWorkplaceDefinition definition(
@@ -123,5 +157,10 @@ public record CraftingWorkplaceDefinition(
             final Class<? extends SurvivalCraftingBuilding> buildingType) {
         return definition(id, type, plaque, buildingType,
                 (level, pos) -> level.getBlockState(pos).getBlock() instanceof FurnaceBlock);
+    }
+
+    private static boolean isBedHead(final Level level, final BlockPos position) {
+        final var state = level.getBlockState(position);
+        return state.getBlock() instanceof BedBlock && state.getValue(BedBlock.PART) == BedPart.HEAD;
     }
 }

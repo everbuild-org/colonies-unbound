@@ -3,6 +3,7 @@ package org.everbuild.unbound.minecolonies;
 import com.minecolonies.api.colony.buildings.registry.BuildingEntry;
 import com.minecolonies.core.colony.buildings.modules.BuildingModules;
 import com.minecolonies.core.colony.buildings.modules.HomeBuildingModule;
+import com.minecolonies.core.colony.buildings.modules.TavernBuildingModule;
 import com.minecolonies.core.colony.buildings.moduleviews.LivingBuildingModuleView;
 import com.minecolonies.core.colony.buildings.workerbuildings.BuildingCook;
 import com.minecolonies.core.colony.buildings.views.EmptyView;
@@ -292,6 +293,38 @@ public final class MineColoniesIntegration {
             "composter", () -> MineColoniesIntegration.SURVIVAL_COMPOSTER.get());
     public static final DeferredItem<BlockItem> SURVIVAL_COMPOSTER_ITEM = ITEMS.registerSimpleBlockItem(
             SURVIVAL_COMPOSTER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_HOSPITAL_BLOCK = naturalPlaqueBlock(
+            "hospital", () -> MineColoniesIntegration.SURVIVAL_HOSPITAL.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_HOSPITAL_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_HOSPITAL_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_SCHOOL_BLOCK = naturalPlaqueBlock(
+            "school", () -> MineColoniesIntegration.SURVIVAL_SCHOOL.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_SCHOOL_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_SCHOOL_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_LIBRARY_BLOCK = naturalPlaqueBlock(
+            "library", () -> MineColoniesIntegration.SURVIVAL_LIBRARY.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_LIBRARY_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_LIBRARY_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_UNIVERSITY_BLOCK = naturalPlaqueBlock(
+            "university", () -> MineColoniesIntegration.SURVIVAL_UNIVERSITY.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_UNIVERSITY_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_UNIVERSITY_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_TAVERN_BLOCK = naturalPlaqueBlock(
+            "tavern", () -> MineColoniesIntegration.SURVIVAL_TAVERN.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_TAVERN_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_TAVERN_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_GRAVEYARD_BLOCK = naturalPlaqueBlock(
+            "graveyard", () -> MineColoniesIntegration.SURVIVAL_GRAVEYARD.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_GRAVEYARD_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_GRAVEYARD_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_ENCHANTER_BLOCK = naturalPlaqueBlock(
+            "enchanter", () -> MineColoniesIntegration.SURVIVAL_ENCHANTER.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_ENCHANTER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_ENCHANTER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_NETHER_WORKER_BLOCK = naturalPlaqueBlock(
+            "nether_worker", () -> MineColoniesIntegration.SURVIVAL_NETHER_WORKER.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_NETHER_WORKER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_NETHER_WORKER_BLOCK, new Item.Properties().stacksTo(1));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalCraftingTileEntity>>
             SURVIVAL_CRAFTING_TILE = BLOCK_ENTITIES.register(
                     "survival_crafting_plaque",
@@ -317,7 +350,15 @@ public final class MineColoniesIntegration {
                             SURVIVAL_FISHERMAN_BLOCK.get(),
                             SURVIVAL_LUMBERJACK_BLOCK.get(),
                             SURVIVAL_FLORIST_BLOCK.get(),
-                            SURVIVAL_COMPOSTER_BLOCK.get())
+                            SURVIVAL_COMPOSTER_BLOCK.get(),
+                            SURVIVAL_HOSPITAL_BLOCK.get(),
+                            SURVIVAL_SCHOOL_BLOCK.get(),
+                            SURVIVAL_LIBRARY_BLOCK.get(),
+                            SURVIVAL_UNIVERSITY_BLOCK.get(),
+                            SURVIVAL_TAVERN_BLOCK.get(),
+                            SURVIVAL_GRAVEYARD_BLOCK.get(),
+                            SURVIVAL_ENCHANTER_BLOCK.get(),
+                            SURVIVAL_NETHER_WORKER_BLOCK.get())
                             .build(null));
 
 
@@ -665,6 +706,68 @@ public final class MineColoniesIntegration {
                     .addBuildingModuleProducer(BuildingModules.COMPOSTER_WORK).addBuildingModuleProducer(BuildingModules.COMPOSTER_SETTINGS)
                     .addBuildingModuleProducer(BuildingModules.ITEMLIST_COMPOSTABLE).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
                     .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_HOSPITAL = BUILDINGS.register(
+            "survival_hospital", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_hospital"))
+                    .setBuildingBlock(SURVIVAL_HOSPITAL_BLOCK.get()).setBuildingProducer(SurvivalHospitalBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.HEALER_WORK).addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_SCHOOL = BUILDINGS.register(
+            "survival_school", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_school"))
+                    .setBuildingBlock(SURVIVAL_SCHOOL_BLOCK.get()).setBuildingProducer(SurvivalSchoolBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.TEACHER_WORK).addBuildingModuleProducer(BuildingModules.PUPIL_WORK)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_LIBRARY = BUILDINGS.register(
+            "survival_library", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_library"))
+                    .setBuildingBlock(SURVIVAL_LIBRARY_BLOCK.get()).setBuildingProducer(SurvivalLibraryBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.STUDENT_WORK).addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_UNIVERSITY = BUILDINGS.register(
+            "survival_university", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_university"))
+                    .setBuildingBlock(SURVIVAL_UNIVERSITY_BLOCK.get()).setBuildingProducer(SurvivalUniversityBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.UNIVERSITY_WORK).addBuildingModuleProducer(BuildingModules.UNIVERSITY_RESEARCH)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_TAVERN = BUILDINGS.register(
+            "survival_tavern", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_tavern"))
+                    .setBuildingBlock(SURVIVAL_TAVERN_BLOCK.get()).setBuildingProducer(SurvivalTavernBuilding::new)
+                    .setBuildingViewProducer(() -> TavernBuildingModule.View::new)
+                    .addBuildingModuleProducer(BuildingModules.TAVERN_LIVING).addBuildingModuleProducer(BuildingModules.TAVERN_VISITOR)
+                    .addBuildingModuleProducer(BuildingModules.BED).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_GRAVEYARD = BUILDINGS.register(
+            "survival_graveyard", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_graveyard"))
+                    .setBuildingBlock(SURVIVAL_GRAVEYARD_BLOCK.get()).setBuildingProducer(SurvivalGraveyardBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.GRAVEYARD_WORK).addBuildingModuleProducer(BuildingModules.GRAVEYARD)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_ENCHANTER = BUILDINGS.register(
+            "survival_enchanter", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_enchanter"))
+                    .setBuildingBlock(SURVIVAL_ENCHANTER_BLOCK.get()).setBuildingProducer(SurvivalEnchanterBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.ENCHANTER_WORK).addBuildingModuleProducer(BuildingModules.ENCHANTER_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.ENCHANTER_STATIONS).addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_NETHER_WORKER = BUILDINGS.register(
+            "survival_nether_worker", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_nether_worker"))
+                    .setBuildingBlock(SURVIVAL_NETHER_WORKER_BLOCK.get()).setBuildingProducer(SurvivalNetherWorkerBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.NETHERWORKER_WORK).addBuildingModuleProducer(BuildingModules.NETHERWORKER_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.NETHERWORKER_EXPEDITION).addBuildingModuleProducer(BuildingModules.NETHERWORKER_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.NETHERMINER_MENU).addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
 
 
     private MineColoniesIntegration() {
@@ -723,6 +826,14 @@ public final class MineColoniesIntegration {
             event.accept(SURVIVAL_LUMBERJACK_ITEM);
             event.accept(SURVIVAL_FLORIST_ITEM);
             event.accept(SURVIVAL_COMPOSTER_ITEM);
+            event.accept(SURVIVAL_HOSPITAL_ITEM);
+            event.accept(SURVIVAL_SCHOOL_ITEM);
+            event.accept(SURVIVAL_LIBRARY_ITEM);
+            event.accept(SURVIVAL_UNIVERSITY_ITEM);
+            event.accept(SURVIVAL_TAVERN_ITEM);
+            event.accept(SURVIVAL_GRAVEYARD_ITEM);
+            event.accept(SURVIVAL_ENCHANTER_ITEM);
+            event.accept(SURVIVAL_NETHER_WORKER_ITEM);
         }
     }
 }

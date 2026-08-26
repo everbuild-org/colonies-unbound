@@ -67,13 +67,26 @@ public record PlaqueHudModel(
                 || type == MarkerType.ALCHEMIST || type == MarkerType.FARMER
                 || type == MarkerType.PLANTATION || type == MarkerType.FISHERMAN
                 || type == MarkerType.LUMBERJACK || type == MarkerType.FLORIST
-                || type == MarkerType.COMPOSTER) {
+                || type == MarkerType.COMPOSTER || type == MarkerType.HOSPITAL
+                || type == MarkerType.SCHOOL || type == MarkerType.LIBRARY
+                || type == MarkerType.UNIVERSITY || type == MarkerType.TAVERN
+                || type == MarkerType.GRAVEYARD || type == MarkerType.ENCHANTER
+                || type == MarkerType.NETHER_WORKER) {
             requirements.add(new Requirement("hud.coloniesunbound.plaque.storage", count(points, WorksitePoiType.STORAGE), 1, false));
             final boolean natural = type == MarkerType.FARMER || type == MarkerType.PLANTATION
                     || type == MarkerType.FISHERMAN || type == MarkerType.LUMBERJACK
                     || type == MarkerType.FLORIST || type == MarkerType.COMPOSTER;
+            final String resourceKey = switch (type) {
+                case HOSPITAL, TAVERN -> "hud.coloniesunbound.plaque.beds";
+                case SCHOOL -> "hud.coloniesunbound.plaque.classroom_seats";
+                case LIBRARY, UNIVERSITY -> "hud.coloniesunbound.plaque.bookshelves";
+                case GRAVEYARD -> "hud.coloniesunbound.plaque.graves";
+                case ENCHANTER -> "hud.coloniesunbound.plaque.enchanting_tables";
+                case NETHER_WORKER -> "hud.coloniesunbound.plaque.nether_portals";
+                default -> natural ? "hud.coloniesunbound.plaque.resources" : "hud.coloniesunbound.plaque.workstations";
+            };
             requirements.add(new Requirement(
-                    natural ? "hud.coloniesunbound.plaque.resources" : "hud.coloniesunbound.plaque.workstations",
+                    resourceKey,
                     count(points, WorksitePoiType.WORKSITE), 1, false));
             return requirements;
         }

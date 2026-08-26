@@ -119,6 +119,14 @@ public final class PlaqueInspectorHud {
             case LUMBERJACK -> 0xFF497B3F;
             case FLORIST -> 0xFFD16E9B;
             case COMPOSTER -> 0xFF8A704C;
+            case HOSPITAL -> 0xFFD85A63;
+            case SCHOOL -> 0xFFDAA84A;
+            case LIBRARY -> 0xFF8B6948;
+            case UNIVERSITY -> 0xFF4C69B8;
+            case TAVERN -> 0xFFB66A3C;
+            case GRAVEYARD -> 0xFF68717C;
+            case ENCHANTER -> 0xFF8754B8;
+            case NETHER_WORKER -> 0xFF7440A0;
             case RESIDENCE -> 0xFF4E83EE;
         };
 
@@ -215,6 +223,14 @@ public final class PlaqueInspectorHud {
             case LUMBERJACK -> "hud.coloniesunbound.plaque.lumberjack";
             case FLORIST -> "hud.coloniesunbound.plaque.florist";
             case COMPOSTER -> "hud.coloniesunbound.plaque.composter";
+            case HOSPITAL -> "hud.coloniesunbound.plaque.hospital";
+            case SCHOOL -> "hud.coloniesunbound.plaque.school";
+            case LIBRARY -> "hud.coloniesunbound.plaque.library";
+            case UNIVERSITY -> "hud.coloniesunbound.plaque.university";
+            case TAVERN -> "hud.coloniesunbound.plaque.tavern";
+            case GRAVEYARD -> "hud.coloniesunbound.plaque.graveyard";
+            case ENCHANTER -> "hud.coloniesunbound.plaque.enchanter";
+            case NETHER_WORKER -> "hud.coloniesunbound.plaque.nether_worker";
             case RESIDENCE -> "hud.coloniesunbound.plaque.residence";
         });
     }
