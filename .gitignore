@@ -9,4 +9,5 @@ out/
 .vscode/
 .DS_Store
 src/generated/resources/.cache/
-
+.eclipse/
+bin/
