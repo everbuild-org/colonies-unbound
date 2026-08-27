@@ -91,7 +91,7 @@ public final class PlaqueInspectorHud {
             final Font font,
             final PlaqueHudModel model) {
         final int requirementRows = Math.max(1, model.requirements().size());
-        final int panelHeight = HEADER_HEIGHT + 39 + requirementRows * ROW_HEIGHT + 17;
+        final int panelHeight = HEADER_HEIGHT + 63 + requirementRows * ROW_HEIGHT + 17;
         final int x = Math.max(8, graphics.guiWidth() - PANEL_WIDTH - 12);
         final int y = Mth.clamp((graphics.guiHeight() - panelHeight) / 2, 8, Math.max(8, graphics.guiHeight() - panelHeight - 8));
         final int accent = switch (model.type()) {
@@ -156,6 +156,15 @@ public final class PlaqueInspectorHud {
         int rowY = y + HEADER_HEIGHT + 7;
         graphics.drawString(font, Component.translatable("hud.coloniesunbound.plaque.state"), x + PADDING, rowY, MUTED, false);
         graphics.drawString(font, stateDescription(model.state()), x + 58, rowY, TEXT, false);
+        rowY += 12;
+
+        graphics.drawString(font, Component.translatable("hud.coloniesunbound.plaque.configured_level"), x + PADDING, rowY, MUTED, false);
+        graphics.drawString(font, levelLabel(model.configuredLevel()), x + 82, rowY, TEXT, false);
+        rowY += 12;
+
+        graphics.drawString(font, Component.translatable("hud.coloniesunbound.plaque.effective_level"), x + PADDING, rowY, MUTED, false);
+        graphics.drawString(font, levelLabel(model.effectiveLevel()), x + 82, rowY,
+                model.effectiveLevel() > 0 ? SUCCESS : INACTIVE, false);
         rowY += 12;
 
         graphics.drawString(font, Component.translatable("hud.coloniesunbound.plaque.volume"), x + PADDING, rowY, MUTED, false);
@@ -264,6 +273,12 @@ public final class PlaqueInspectorHud {
             case DRAFT -> "hud.coloniesunbound.plaque.draft";
             case UNCONFIGURED -> "hud.coloniesunbound.plaque.unconfigured";
         });
+    }
+
+    private static Component levelLabel(final int level) {
+        return level == 0
+                ? Component.translatable("hud.coloniesunbound.plaque.inactive_level")
+                : Component.literal(Integer.toString(level));
     }
 
     private static Component stateDescription(final PlaqueHudModel.State state) {

@@ -46,7 +46,8 @@ public final class SurvivalCraftingMarkerService {
         synchronize(level, colony, building, tile,
                 tile.committedMark() == null ? List.of() : tile.committedMark().pois(),
                 new CommittedWorksiteMark(id, inspection.definition().markerType(), inspection.bounds(),
-                        mergeWorkstations(retained, inspection.workstationPositions())));
+                        mergeWorkstations(retained, inspection.workstationPositions()),
+                        tile.committedMark() == null ? 1 : tile.committedMark().configuredLevel()));
         return RegistrationResult.SAVED;
     }
 
@@ -85,7 +86,7 @@ public final class SurvivalCraftingMarkerService {
             points.add(point);
         }
         synchronize(level, colony, owner.building(), owner.tile(), current.pois(),
-                new CommittedWorksiteMark(current.id(), current.type(), current.bounds(), points));
+                current.withPois(points));
         return outcome(remove ? ResidenceMarkerService.PointEditResult.REMOVED
                 : ResidenceMarkerService.PointEditResult.ADDED);
     }
@@ -107,14 +108,15 @@ public final class SurvivalCraftingMarkerService {
             return ReconcileResult.MARK_UNAVAILABLE;
         }
         final List<WorksitePoi> updated = mergeWorkstations(current.pois(), inspection.workstationPositions());
-        final int desiredLevel = isReady(current.type(), updated) ? 1 : 0;
+        final CommittedWorksiteMark updatedMark = current.withPois(updated);
+        final int desiredLevel = updatedMark.effectiveLevel();
         if (Set.copyOf(updated).equals(Set.copyOf(current.pois())) && building.getBuildingLevel() == desiredLevel) {
             return ReconcileResult.UNCHANGED;
         }
         final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, tile.getBlockPos());
         if (colony == null || colony.getID() != building.getColony().getID()) return ReconcileResult.BUILDING_UNAVAILABLE;
         synchronize(level, colony, building, tile, current.pois(),
-                new CommittedWorksiteMark(current.id(), current.type(), current.bounds(), updated));
+                updatedMark);
         return ReconcileResult.UPDATED;
     }
 
@@ -155,7 +157,7 @@ public final class SurvivalCraftingMarkerService {
             tile.setCommittedMark(updated);
             building.setCorners(updated.bounds().min(), updated.bounds().max());
             building.configureWorkArea(updated.bounds());
-            building.setBuildingLevel(isReady(updated.type(), updated.pois()) ? 1 : 0);
+            building.setBuildingLevel(updated.effectiveLevel());
             updated.pois().stream().filter(point -> point.type() == WorksitePoiType.STORAGE)
                     .map(WorksitePoi::position).forEach(building::addContainerPosition);
             updated.pois().stream().filter(point -> point.type() == WorksitePoiType.WORKSITE)
@@ -163,15 +165,6 @@ public final class SurvivalCraftingMarkerService {
         }
         building.markDirty();
         colony.markDirty();
-    }
-
-    private static boolean isReady(final org.everbuild.unbound.marker.MarkerType type, final List<WorksitePoi> points) {
-        final CraftingWorkplaceDefinition definition = CraftingWorkplaceDefinition.all().stream()
-                .filter(candidate -> candidate.markerType() == type).findFirst().orElseThrow();
-        return (!definition.requiresStorage()
-                        || points.stream().anyMatch(point -> point.type() == WorksitePoiType.STORAGE))
-                && (!definition.requiresWorkstation()
-                        || points.stream().anyMatch(point -> point.type() == WorksitePoiType.WORKSITE));
     }
 
     private static Owner owner(final ServerLevel level, final SurvivalCraftingBuilding building) {

@@ -20,7 +20,8 @@ class MarkerToolModeTest {
     @Test
     void cyclesBackToAreaAfterAllPointModes() {
         assertEquals(MarkerToolMode.STALL, MarkerToolMode.INTERACTION.next());
-        assertEquals(MarkerToolMode.PATROL_ROUTE, MarkerToolMode.STALL.next());
+        assertEquals(MarkerToolMode.BUILDING_LEVEL, MarkerToolMode.STALL.next());
+        assertEquals(MarkerToolMode.PATROL_ROUTE, MarkerToolMode.BUILDING_LEVEL.next());
         assertEquals(MarkerToolMode.RESIDENCE_AREA, MarkerToolMode.PATROL_ROUTE.next());
     }
 }

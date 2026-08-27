@@ -56,9 +56,11 @@ public final class ResidenceMarkerService {
         final UUID markerId = residenceTile.committedMark() == null
                 ? selection.markerId()
                 : residenceTile.committedMark().id();
+        final int configuredLevel = residenceTile.committedMark() == null
+                ? 1
+                : residenceTile.committedMark().configuredLevel();
 
         building.setCorners(bounds.min(), bounds.max());
-        building.setBuildingLevel(1);
         final BedHandlingModule bedModule = building.getModule(BuildingModules.BED);
         for (final BlockPos oldBed : List.copyOf(bedModule.getRegisteredBlocks())) {
             bedModule.removeBed(oldBed);
@@ -75,11 +77,14 @@ public final class ResidenceMarkerService {
         final List<WorksitePoi> retainedPois = existingPois.stream()
                 .filter(poi -> bounds.contains(poi.position()))
                 .toList();
-        residenceTile.setCommittedMark(new CommittedWorksiteMark(
+        final CommittedWorksiteMark updatedMark = new CommittedWorksiteMark(
                 markerId,
                 MarkerType.RESIDENCE,
                 bounds,
-                mergeBedPois(retainedPois, inspection.bedHeads())));
+                mergeBedPois(retainedPois, inspection.bedHeads()),
+                configuredLevel);
+        residenceTile.setCommittedMark(updatedMark);
+        building.setBuildingLevel(updatedMark.effectiveLevel());
 
         ResidenceMarkerData.get(level).put(new SurvivalResidenceMarker(
                 markerId,
@@ -108,6 +113,11 @@ public final class ResidenceMarkerService {
         }
 
         ResidenceMarkerData.get(level).remove(residenceTile.committedMark().id());
+        if (residenceTile.getBuilding() instanceof SurvivalResidenceBuilding building) {
+            building.setBuildingLevel(0);
+            building.markDirty();
+            colony.markDirty();
+        }
         residenceTile.clearCommittedMark();
         return RemovalResult.REMOVED;
     }
@@ -148,9 +158,11 @@ public final class ResidenceMarkerService {
         final Set<BlockPos> discoveredBeds = Set.copyOf(inspection.bedHeads());
         final List<WorksitePoi> discoveredPois = mergeBedPois(
                 residenceTile.committedMark().pois(), inspection.bedHeads());
+        final CommittedWorksiteMark updatedMark = residenceTile.committedMark().withPois(discoveredPois);
         if (previousBeds.equals(discoveredBeds)
                 && Set.copyOf(marker.bedHeads()).equals(discoveredBeds)
-                && Set.copyOf(residenceTile.committedMark().pois()).equals(Set.copyOf(discoveredPois))) {
+                && Set.copyOf(residenceTile.committedMark().pois()).equals(Set.copyOf(discoveredPois))
+                && building.getBuildingLevel() == updatedMark.effectiveLevel()) {
             return ReconcileResult.UNCHANGED;
         }
 
@@ -165,8 +177,8 @@ public final class ResidenceMarkerService {
             }
         }
 
-        residenceTile.setCommittedMark(new CommittedWorksiteMark(
-                marker.id(), MarkerType.RESIDENCE, marker.bounds(), discoveredPois));
+        residenceTile.setCommittedMark(updatedMark);
+        building.setBuildingLevel(updatedMark.effectiveLevel());
 
         building.markDirty();
         colony.markDirty();
@@ -260,8 +272,13 @@ public final class ResidenceMarkerService {
         }
 
         final CommittedWorksiteMark committedMark = residenceTile.committedMark();
-        residenceTile.setCommittedMark(new CommittedWorksiteMark(
-                committedMark.id(), committedMark.type(), committedMark.bounds(), pois));
+        final CommittedWorksiteMark updatedMark = committedMark.withPois(pois);
+        residenceTile.setCommittedMark(updatedMark);
+        if (residenceTile.getBuilding() instanceof SurvivalResidenceBuilding building) {
+            building.setBuildingLevel(updatedMark.effectiveLevel());
+            building.markDirty();
+            colony.markDirty();
+        }
         return new PointEditOutcome(
                 remove ? PointEditResult.REMOVED : PointEditResult.ADDED,
                 WorkplacePointSummary.from(pois));

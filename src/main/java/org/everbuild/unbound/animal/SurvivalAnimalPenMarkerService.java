@@ -72,7 +72,8 @@ public final class SurvivalAnimalPenMarkerService {
                         markerId,
                         markerType,
                         bounds,
-                        mergeScannedPois(retained, inspection)));
+                        mergeScannedPois(retained, inspection),
+                        tile.committedMark() == null ? 1 : tile.committedMark().configuredLevel()));
         return RegistrationResult.SAVED;
     }
 
@@ -130,7 +131,7 @@ public final class SurvivalAnimalPenMarkerService {
                 owner.building(),
                 owner.tile(),
                 current.pois(),
-                new CommittedWorksiteMark(current.id(), current.type(), current.bounds(), points));
+                current.withPois(points));
         return outcome(remove
                 ? ResidenceMarkerService.PointEditResult.REMOVED
                 : ResidenceMarkerService.PointEditResult.ADDED);
@@ -154,7 +155,8 @@ public final class SurvivalAnimalPenMarkerService {
             return ReconcileResult.MARK_UNAVAILABLE;
         }
         final List<WorksitePoi> updated = mergeScannedPois(current.pois(), inspection);
-        final int desiredLevel = isReady(updated, current.type()) ? 1 : 0;
+        final CommittedWorksiteMark updatedMark = current.withPois(updated);
+        final int desiredLevel = updatedMark.effectiveLevel();
         if (Set.copyOf(updated).equals(Set.copyOf(current.pois()))
                 && building.getBuildingLevel() == desiredLevel) {
             return ReconcileResult.UNCHANGED;
@@ -168,7 +170,7 @@ public final class SurvivalAnimalPenMarkerService {
                 building,
                 tile,
                 current.pois(),
-                new CommittedWorksiteMark(current.id(), current.type(), current.bounds(), updated));
+                updatedMark);
         return ReconcileResult.UPDATED;
     }
 
@@ -232,21 +234,10 @@ public final class SurvivalAnimalPenMarkerService {
                     .filter(poi -> poi.type() == WorksitePoiType.STORAGE)
                     .map(WorksitePoi::position)
                     .forEach(building::addContainerPosition);
-            building.setBuildingLevel(isReady(updated.pois(), updated.type()) ? 1 : 0);
+            building.setBuildingLevel(updated.effectiveLevel());
         }
         building.markDirty();
         colony.markDirty();
-    }
-
-    private static boolean isReady(final List<WorksitePoi> points, final MarkerType markerType) {
-        return contains(points, WorksitePoiType.STORAGE)
-                && contains(points, WorksitePoiType.ENTRANCE)
-                && contains(points, WorksitePoiType.PASTURE)
-                && (markerType != MarkerType.STABLE || contains(points, WorksitePoiType.STALL));
-    }
-
-    private static boolean contains(final List<WorksitePoi> points, final WorksitePoiType type) {
-        return points.stream().anyMatch(point -> point.type() == type);
     }
 
     private static Owner owner(final SurvivalAnimalPenBuilding building, final ServerLevel level) {

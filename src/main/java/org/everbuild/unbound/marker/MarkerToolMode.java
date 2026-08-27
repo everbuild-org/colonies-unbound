@@ -15,6 +15,7 @@ public enum MarkerToolMode {
     ENTRANCE("entrance", WorksitePoiType.ENTRANCE),
     INTERACTION("interaction", WorksitePoiType.INTERACTION),
     STALL("stall", WorksitePoiType.STALL),
+    BUILDING_LEVEL("building_level", null),
     PATROL_ROUTE("patrol_route", WorksitePoiType.PATROL);
 
     private static final String MODE_KEY = "coloniesunbound_tool_mode";
@@ -36,7 +37,7 @@ public enum MarkerToolMode {
     }
 
     public boolean isAreaMode() {
-        return poiType == null;
+        return this == RESIDENCE_AREA;
     }
 
     public MarkerToolMode next() {

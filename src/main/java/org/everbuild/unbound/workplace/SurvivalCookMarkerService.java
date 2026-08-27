@@ -63,13 +63,17 @@ public final class SurvivalCookMarkerService {
                         .filter(poi -> bounds.contains(poi.position()))
                         .toList();
         final List<WorksitePoi> updatedPois = mergeFurnacePois(retainedPois, discoveredFurnaces);
+        final int configuredLevel = cookTile.committedMark() == null
+                ? 1
+                : cookTile.committedMark().configuredLevel();
         synchronize(
                 level,
                 colony,
                 cookBuilding,
                 cookTile,
                 cookTile.committedMark() == null ? List.of() : cookTile.committedMark().pois(),
-                new CommittedWorksiteMark(markerId, MarkerType.RESTAURANT, bounds, updatedPois));
+                new CommittedWorksiteMark(
+                        markerId, MarkerType.RESTAURANT, bounds, updatedPois, configuredLevel));
         return RegistrationResult.SAVED;
     }
 
@@ -135,7 +139,7 @@ public final class SurvivalCookMarkerService {
                 owner.building(),
                 owner.tile(),
                 current.pois(),
-                new CommittedWorksiteMark(current.id(), current.type(), current.bounds(), pois));
+                current.withPois(pois));
         return new ResidenceMarkerService.PointEditOutcome(
                 remove
                         ? ResidenceMarkerService.PointEditResult.REMOVED
@@ -162,7 +166,9 @@ public final class SurvivalCookMarkerService {
         }
 
         final List<WorksitePoi> updatedPois = mergeFurnacePois(current.pois(), inspection.furnacePositions());
-        if (Set.copyOf(updatedPois).equals(Set.copyOf(current.pois()))) {
+        final CommittedWorksiteMark updatedMark = current.withPois(updatedPois);
+        if (Set.copyOf(updatedPois).equals(Set.copyOf(current.pois()))
+                && building.getBuildingLevel() == updatedMark.effectiveLevel()) {
             return ReconcileResult.UNCHANGED;
         }
         final IColony colony = IColonyManager.getInstance().getColonyByPosFromWorld(level, tile.getBlockPos());
@@ -175,7 +181,7 @@ public final class SurvivalCookMarkerService {
                 building,
                 tile,
                 current.pois(),
-                new CommittedWorksiteMark(current.id(), current.type(), current.bounds(), updatedPois));
+                updatedMark);
         return ReconcileResult.UPDATED;
     }
 
@@ -246,7 +252,7 @@ public final class SurvivalCookMarkerService {
                     .filter(poi -> poi.type() == WorksitePoiType.STORAGE)
                     .map(WorksitePoi::position)
                     .forEach(building::addContainerPosition);
-            building.setBuildingLevel(WorkplacePointSummary.from(updatedMark.pois()).isReady() ? 1 : 0);
+            building.setBuildingLevel(updatedMark.effectiveLevel());
         }
         building.markDirty();
         colony.markDirty();

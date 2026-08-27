@@ -31,6 +31,7 @@ import org.everbuild.unbound.marker.MarkerType;
 import org.everbuild.unbound.marker.PatrolRouteSelection;
 import org.everbuild.unbound.marker.MarkerToolMode;
 import org.everbuild.unbound.minecolonies.SurvivalResidenceTileEntity;
+import org.everbuild.unbound.minecolonies.SurvivalBuildingLevelService;
 import org.everbuild.unbound.minecolonies.SurvivalGuardTileEntity;
 import org.everbuild.unbound.guard.GuardInspection;
 import org.everbuild.unbound.guard.GuardInspector;
@@ -98,6 +99,9 @@ public final class WorksiteMarkerItem extends Item {
             return InteractionResult.PASS;
         }
         final MarkerToolMode mode = MarkerToolMode.read(stack);
+        if (mode == MarkerToolMode.BUILDING_LEVEL) {
+            return useBuildingLevelMode(context);
+        }
         if (mode == MarkerToolMode.PATROL_ROUTE) {
             return usePatrolMode(context, stack);
         }
@@ -223,6 +227,51 @@ public final class WorksiteMarkerItem extends Item {
             selectCorner(context, stack);
         }
         return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
+    }
+
+    private static InteractionResult useBuildingLevelMode(final UseOnContext context) {
+        if (!context.getLevel().isClientSide
+                && context.getLevel() instanceof ServerLevel serverLevel
+                && context.getPlayer() instanceof ServerPlayer serverPlayer) {
+            final SurvivalBuildingLevelService.LevelEditOutcome outcome =
+                    SurvivalBuildingLevelService.adjust(
+                            serverLevel,
+                            serverPlayer,
+                            context.getClickedPos(),
+                            serverPlayer.isShiftKeyDown());
+            serverPlayer.displayClientMessage(buildingLevelReport(outcome), true);
+        }
+        return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
+    }
+
+    private static Component buildingLevelReport(
+            final SurvivalBuildingLevelService.LevelEditOutcome outcome) {
+        return switch (outcome.result()) {
+            case UPDATED -> Component.translatable(
+                            outcome.effectiveLevel() > 0
+                                    ? "message.coloniesunbound.level.updated"
+                                    : "message.coloniesunbound.level.updated_inactive",
+                            outcome.configuredLevel())
+                    .withStyle(ChatFormatting.GREEN);
+            case UNCHANGED -> Component.translatable(
+                            "message.coloniesunbound.level.unchanged", outcome.configuredLevel())
+                    .withStyle(ChatFormatting.YELLOW);
+            case AT_MINIMUM -> Component.translatable("message.coloniesunbound.level.minimum")
+                    .withStyle(ChatFormatting.YELLOW);
+            case AT_MAXIMUM -> Component.translatable(
+                            "message.coloniesunbound.level.maximum", outcome.maximumLevel())
+                    .withStyle(ChatFormatting.YELLOW);
+            case FIXED_LEVEL -> Component.translatable("message.coloniesunbound.level.fixed")
+                    .withStyle(ChatFormatting.YELLOW);
+            case NO_COMMITTED_MARK -> Component.translatable("message.coloniesunbound.marker.no_committed_mark")
+                    .withStyle(ChatFormatting.RED);
+            case OUTSIDE_COLONY -> Component.translatable("message.coloniesunbound.inspection.outside_colony")
+                    .withStyle(ChatFormatting.RED);
+            case NO_PERMISSION -> Component.translatable("message.coloniesunbound.inspection.no_permission")
+                    .withStyle(ChatFormatting.RED);
+            case BUILDING_UNAVAILABLE -> Component.translatable("message.coloniesunbound.level.building_unavailable")
+                    .withStyle(ChatFormatting.RED);
+        };
     }
 
     private static void selectCorner(final UseOnContext context, final ItemStack stack) {

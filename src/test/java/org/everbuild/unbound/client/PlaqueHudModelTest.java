@@ -22,6 +22,8 @@ class PlaqueHudModelTest {
         final PlaqueHudModel model = PlaqueHudModel.from(MarkerType.RESIDENCE, null);
 
         assertEquals(PlaqueHudModel.State.UNCONFIGURED, model.state());
+        assertEquals(0, model.configuredLevel());
+        assertEquals(0, model.effectiveLevel());
         assertEquals(0, model.satisfiedRequiredCount());
         assertEquals(1, model.requiredCount());
         assertFalse(model.requirements().getFirst().satisfied());
@@ -34,7 +36,20 @@ class PlaqueHudModelTest {
                 new WorksitePoi(WorksitePoiType.BED, BlockPos.ZERO)));
 
         assertEquals(PlaqueHudModel.State.ACTIVE, model.state());
+        assertEquals(1, model.configuredLevel());
+        assertEquals(1, model.effectiveLevel());
         assertEquals(1, model.satisfiedRequiredCount());
+    }
+
+    @Test
+    void selectedLevelRemainsVisibleWhileRequirementsDeactivateBuilding() {
+        final PlaqueHudModel draft = PlaqueHudModel.from(
+                MarkerType.BLACKSMITH,
+                new CommittedWorksiteMark(UUID.randomUUID(), MarkerType.BLACKSMITH, BOUNDS, List.of(), 4));
+
+        assertEquals(PlaqueHudModel.State.DRAFT, draft.state());
+        assertEquals(4, draft.configuredLevel());
+        assertEquals(0, draft.effectiveLevel());
     }
 
     @Test

@@ -39,7 +39,12 @@ The Worksite Marker provides the first area-selection vertical slice:
 - Residence bounds, beds, ownership, and inspection time are also stored per dimension.
 - Saving requires MineColonies' `MANAGE_HUTS` permission and an area wholly inside one colony.
 - Sneak-use it on a block to clear the current selection, or on a residence plaque to remove its committed mark.
-- Use it in air to cycle Residence Area, Storage, Worksite, Entrance, and Interaction editing modes.
+- Use it in air to cycle area, point, Building Level, and Patrol Route editing modes.
+- Building Level mode manually advances a committed survival plaque from level 1 through 5;
+  sneak-use lowers it. Infrastructure controllers that MineColonies does not level remain fixed at 1.
+- A selected level persists independently from operational readiness. Missing required POIs temporarily
+  deactivate the native building at level 0, then restore its selected level when requirements return.
+- Looking at a plaque shows both its selected and currently active levels in the inspector HUD.
 - In a point mode, use inside a committed volume to add a point and sneak-use the same block to remove it.
 - Point-mode clicks take priority over block menus; storage, furnace worksite, and entrance targets are validated.
 - A minimal workplace draft becomes ready once it has at least one Storage, Worksite, and Entrance point.

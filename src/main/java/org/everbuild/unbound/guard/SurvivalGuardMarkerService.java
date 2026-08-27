@@ -57,11 +57,14 @@ public final class SurvivalGuardMarkerService {
         final List<WorksitePoi> retained = tile.committedMark() == null
                 ? List.of()
                 : tile.committedMark().pois();
+        final int configuredLevel = tile.committedMark() == null
+                ? 1
+                : tile.committedMark().configuredLevel();
         synchronize(
                 colony,
                 building,
                 tile,
-                new CommittedWorksiteMark(markerId, MarkerType.GUARD, bounds, retained));
+                new CommittedWorksiteMark(markerId, MarkerType.GUARD, bounds, retained, configuredLevel));
         colony.getServerBuildingManager().guardBuildingChangedAt(building, 1);
         return RegistrationResult.SAVED;
     }
@@ -123,8 +126,7 @@ public final class SurvivalGuardMarkerService {
             points.add(edited);
         }
 
-        synchronize(colony, building, tile, new CommittedWorksiteMark(
-                current.id(), current.type(), current.bounds(), points));
+        synchronize(colony, building, tile, current.withPois(points));
         return new RouteEditOutcome(
                 remove ? RouteEditResult.NODE_REMOVED : RouteEditResult.NODE_ADDED,
                 patrolCount(points));
@@ -167,7 +169,7 @@ public final class SurvivalGuardMarkerService {
                 .filter(point -> point.type() == WorksitePoiType.PATROL)
                 .map(WorksitePoi::position)
                 .forEach(building::addPatrolTarget);
-        building.setBuildingLevel(1);
+        building.setBuildingLevel(mark.effectiveLevel());
         building.markDirty();
         colony.markDirty();
     }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.everbuild.unbound.marker.AreaBounds;
 import org.everbuild.unbound.marker.CommittedWorksiteMark;
 import org.everbuild.unbound.marker.MarkerType;
+import org.everbuild.unbound.marker.SurvivalBuildingLevels;
 import org.everbuild.unbound.marker.WorksitePoi;
 import org.everbuild.unbound.marker.WorksitePoiType;
 
@@ -13,6 +14,8 @@ public record PlaqueHudModel(
         MarkerType type,
         State state,
         AreaBounds bounds,
+        int configuredLevel,
+        int effectiveLevel,
         List<Requirement> requirements) {
     public PlaqueHudModel {
         requirements = List.copyOf(requirements);
@@ -20,14 +23,19 @@ public record PlaqueHudModel(
 
     public static PlaqueHudModel from(final MarkerType plaqueType, final CommittedWorksiteMark mark) {
         if (mark == null) {
-            return new PlaqueHudModel(plaqueType, State.UNCONFIGURED, null, requirementsFor(plaqueType, List.of()));
+            return new PlaqueHudModel(
+                    plaqueType, State.UNCONFIGURED, null, 0, 0, requirementsFor(plaqueType, List.of()));
         }
 
         final List<Requirement> requirements = requirementsFor(plaqueType, mark.pois());
-        final boolean ready = requirements.stream()
-                .filter(requirement -> !requirement.optional())
-                .allMatch(Requirement::satisfied);
-        return new PlaqueHudModel(plaqueType, ready ? State.ACTIVE : State.DRAFT, mark.bounds(), requirements);
+        final boolean ready = SurvivalBuildingLevels.isReady(mark.type(), mark.pois());
+        return new PlaqueHudModel(
+                plaqueType,
+                ready ? State.ACTIVE : State.DRAFT,
+                mark.bounds(),
+                mark.configuredLevel(),
+                mark.effectiveLevel(),
+                requirements);
     }
 
     public int satisfiedRequiredCount() {

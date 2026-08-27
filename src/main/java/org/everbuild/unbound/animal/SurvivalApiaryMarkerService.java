@@ -65,7 +65,8 @@ public final class SurvivalApiaryMarkerService {
                         markerId,
                         MarkerType.APIARY,
                         bounds,
-                        mergeHivePois(retained, inspection.hivePositions())));
+                        mergeHivePois(retained, inspection.hivePositions()),
+                        tile.committedMark() == null ? 1 : tile.committedMark().configuredLevel()));
         return RegistrationResult.SAVED;
     }
 
@@ -120,7 +121,7 @@ public final class SurvivalApiaryMarkerService {
                 owner.building(),
                 owner.tile(),
                 current.pois(),
-                new CommittedWorksiteMark(current.id(), current.type(), current.bounds(), points));
+                current.withPois(points));
         return outcome(remove
                 ? ResidenceMarkerService.PointEditResult.REMOVED
                 : ResidenceMarkerService.PointEditResult.ADDED);
@@ -143,7 +144,8 @@ public final class SurvivalApiaryMarkerService {
             return ReconcileResult.MARK_UNAVAILABLE;
         }
         final List<WorksitePoi> updated = mergeHivePois(current.pois(), inspection.hivePositions());
-        final int desiredLevel = isReady(updated) ? 1 : 0;
+        final CommittedWorksiteMark updatedMark = current.withPois(updated);
+        final int desiredLevel = updatedMark.effectiveLevel();
         if (Set.copyOf(updated).equals(Set.copyOf(current.pois()))
                 && building.getBuildingLevel() == desiredLevel) {
             return ReconcileResult.UNCHANGED;
@@ -157,7 +159,7 @@ public final class SurvivalApiaryMarkerService {
                 building,
                 tile,
                 current.pois(),
-                new CommittedWorksiteMark(current.id(), current.type(), current.bounds(), updated));
+                updatedMark);
         return ReconcileResult.UPDATED;
     }
 
@@ -220,15 +222,10 @@ public final class SurvivalApiaryMarkerService {
                     .filter(point -> point.type() == WorksitePoiType.STORAGE)
                     .map(WorksitePoi::position)
                     .forEach(building::addContainerPosition);
-            building.setBuildingLevel(isReady(updated.pois()) ? 1 : 0);
+            building.setBuildingLevel(updated.effectiveLevel());
         }
         building.markDirty();
         colony.markDirty();
-    }
-
-    private static boolean isReady(final List<WorksitePoi> points) {
-        return points.stream().anyMatch(point -> point.type() == WorksitePoiType.STORAGE)
-                && points.stream().anyMatch(point -> point.type() == WorksitePoiType.HIVE);
     }
 
     private static Owner owner(final ServerLevel level, final SurvivalApiaryBuilding building) {
