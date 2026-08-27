@@ -161,15 +161,7 @@ public final class SurvivalResidenceRenderer<T extends MarkedBuildingTileEntity>
             final double z,
             final float scale) {
         final Minecraft minecraft = Minecraft.getInstance();
-        final String textureIconId = switch (iconId) {
-            case "sheep_pen", "chicken_pen", "pig_pen", "rabbit_hutch", "stable", "stall" -> "animal_pen";
-            case "apiary", "hive" -> "farm";
-            case "blacksmith", "sawmill", "stonemason", "fletcher", "mechanic",
-                    "concrete_mixer", "crusher", "sifter", "bakery", "kitchen", "smeltery",
-                    "stone_smelter", "glassblower", "dyer", "alchemist", "farmer", "plantation",
-                    "fisherman", "lumberjack", "florist", "composter" -> "worksite";
-            default -> iconId;
-        };
+        final String textureIconId = MarkerIconCatalog.textureId(iconId);
         final ResourceLocation iconTexture = ResourceLocation.fromNamespaceAndPath(
                 ColoniesUnbound.MOD_ID,
                 "textures/marker/icons/" + textureIconId + ".png");
