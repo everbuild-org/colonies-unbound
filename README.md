@@ -26,6 +26,9 @@ MineColonies integration will intentionally be version-pinned because some requi
 The Worksite Marker provides the first area-selection vertical slice:
 
 - Craft it from a MineColonies Clipboard and a Feather, obtain it from the Tools & Utilities creative tab, or use `/give @s coloniesunbound:worksite_marker`.
+- Convert any matching MineColonies hut, controller, Post Box, or Stash plus a Feather into its
+  Colonies Unbound survival plaque. This preserves the native building's progression cost while
+  replacing its schematic-bound anchor.
 - Place one Survival Residence Plaque inside the candidate house from the Functional Blocks tab.
 - Use it on two blocks to select the inclusive corners of a volume.
 - Hold it to see a live cyan preview, committed residence outlines, and yaw-facing typed flags.
