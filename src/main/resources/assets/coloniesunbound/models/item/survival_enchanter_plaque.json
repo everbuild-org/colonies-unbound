@@ -1,1 +1,3 @@
-{ "parent": "coloniesunbound:block/survival_enchanter_plaque" }
+{
+  "parent": "minecolonies:item/blockhutenchanter"
+}

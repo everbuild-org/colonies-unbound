@@ -1,1 +1,3 @@
-{ "parent": "minecraft:block/cube_all", "textures": { "all": "minecraft:block/target_top" } }
+{
+  "parent": "minecolonies:block/blockhutarchery"
+}

@@ -2,6 +2,7 @@ package org.everbuild.unbound.recipe;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -96,6 +97,32 @@ class PlaqueRecipeCoverageTest {
                         type::name);
                 assertEquals(1, recipe.getAsJsonObject("result").get("count").getAsInt(), type::name);
             }
+        }
+    }
+
+    @Test
+    void everyPlaqueUsesItsMatchingMineColoniesModels() throws Exception {
+        for (final MarkerType type : MarkerType.values()) {
+            final RecipeSpec spec = RECIPES.get(type);
+            final JsonObject blockModel = readJson(
+                    "/assets/coloniesunbound/models/block/" + spec.output() + ".json");
+            final JsonObject itemModel = readJson(
+                    "/assets/coloniesunbound/models/item/" + spec.output() + ".json");
+            final JsonObject blockState = readJson(
+                    "/assets/coloniesunbound/blockstates/" + spec.output() + ".json");
+
+            assertEquals("minecolonies:block/" + spec.input(),
+                    blockModel.get("parent").getAsString(), type::name);
+            assertEquals("minecolonies:item/" + spec.input(),
+                    itemModel.get("parent").getAsString(), type::name);
+            assertTrue(blockState.toString().contains("minecolonies:block/" + spec.input()), type::name);
+        }
+    }
+
+    private static JsonObject readJson(final String path) throws Exception {
+        try (InputStream stream = PlaqueRecipeCoverageTest.class.getResourceAsStream(path)) {
+            assertNotNull(stream, path);
+            return JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonObject();
         }
     }
 

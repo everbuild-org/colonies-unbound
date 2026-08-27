@@ -1,8 +1,20 @@
 {
   "variants": {
-    "facing=north": { "model": "coloniesunbound:block/survival_fisherman_plaque" },
-    "facing=east": { "model": "coloniesunbound:block/survival_fisherman_plaque", "y": 90 },
-    "facing=south": { "model": "coloniesunbound:block/survival_fisherman_plaque", "y": 180 },
-    "facing=west": { "model": "coloniesunbound:block/survival_fisherman_plaque", "y": 270 }
+    "facing=east": {
+      "model": "minecolonies:block/blockhutfisherman",
+      "y": 0
+    },
+    "facing=south": {
+      "model": "minecolonies:block/blockhutfisherman",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "minecolonies:block/blockhutfisherman",
+      "y": 180
+    },
+    "facing=north": {
+      "model": "minecolonies:block/blockhutfisherman",
+      "y": 270
+    }
   }
 }

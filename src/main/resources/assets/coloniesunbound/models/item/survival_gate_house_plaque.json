@@ -1,1 +1,3 @@
-{ "parent": "coloniesunbound:block/survival_gate_house_plaque" }
+{
+  "parent": "minecolonies:item/blockhutgatehouse"
+}

@@ -1,1 +1,3 @@
-{ "parent": "coloniesunbound:block/survival_plantation_plaque" }
+{
+  "parent": "minecolonies:item/blockhutplantation"
+}

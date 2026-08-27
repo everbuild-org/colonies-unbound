@@ -1,1 +1,3 @@
-{ "parent": "coloniesunbound:block/survival_miner_plaque" }
+{
+  "parent": "minecolonies:item/blockhutminer"
+}

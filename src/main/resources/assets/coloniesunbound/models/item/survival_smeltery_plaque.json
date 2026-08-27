@@ -1,1 +1,3 @@
-{ "parent": "coloniesunbound:block/survival_smeltery_plaque" }
+{
+  "parent": "minecolonies:item/blockhutsmeltery"
+}

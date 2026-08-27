@@ -1,12 +1,3 @@
 {
-  "parent": "minecraft:block/cube",
-  "textures": {
-    "down": "minecraft:block/stripped_oak_log_top",
-    "up": "minecraft:block/stripped_oak_log_top",
-    "north": "minecraft:block/oak_planks",
-    "south": "minecraft:block/oak_planks",
-    "west": "minecraft:block/oak_planks",
-    "east": "minecraft:block/oak_planks",
-    "particle": "minecraft:block/oak_planks"
-  }
+  "parent": "minecolonies:block/blockhutcitizen"
 }

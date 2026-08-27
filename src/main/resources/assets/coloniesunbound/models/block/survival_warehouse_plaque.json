@@ -1,1 +1,3 @@
-{ "parent": "minecraft:block/cube_all", "textures": { "all": "minecraft:block/stripped_oak_log" } }
+{
+  "parent": "minecolonies:block/blockhutwarehouse"
+}

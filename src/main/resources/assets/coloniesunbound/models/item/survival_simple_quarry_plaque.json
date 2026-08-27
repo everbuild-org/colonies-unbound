@@ -1,1 +1,3 @@
-{ "parent": "coloniesunbound:block/survival_simple_quarry_plaque" }
+{
+  "parent": "minecolonies:item/simplequarry"
+}

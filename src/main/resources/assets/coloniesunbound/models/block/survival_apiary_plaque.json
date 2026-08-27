@@ -1,4 +1,3 @@
 {
-  "parent": "minecraft:block/cube_all",
-  "textures": { "all": "minecraft:block/beehive_side" }
+  "parent": "minecolonies:block/blockhutbeekeeper"
 }

@@ -1,1 +1,3 @@
-{ "parent": "coloniesunbound:block/survival_sawmill_plaque" }
+{
+  "parent": "minecolonies:item/blockhutsawmill"
+}

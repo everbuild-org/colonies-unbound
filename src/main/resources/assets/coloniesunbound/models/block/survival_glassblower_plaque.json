@@ -1,1 +1,3 @@
-{ "parent": "minecraft:block/cube_all", "textures": { "all": "minecraft:block/cyan_stained_glass" } }
+{
+  "parent": "minecolonies:block/blockhutglassblower"
+}
