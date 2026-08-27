@@ -49,6 +49,11 @@ public abstract class MarkedBuildingTileEntity extends TileEntityColonyBuilding 
                 mark.bounds().max().subtract(worldPosition));
 
         final Map<BlockPos, List<String>> positionedTags = new LinkedHashMap<>();
+        if (mark.type() == org.everbuild.unbound.marker.MarkerType.SIMPLE_QUARRY
+                || mark.type() == org.everbuild.unbound.marker.MarkerType.MEDIUM_QUARRY) {
+            positionedTags.put(BlockPos.ZERO, new ArrayList<>(List.of(
+                    "shaft=infrastructure/mineshafts/" + mark.type().id().replace("_", "") + "shaft1.blueprint")));
+        }
         for (final WorksitePoi poi : mark.pois()) {
             final String tag = schematicTag(poi.type());
             if (tag != null) {

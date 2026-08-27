@@ -186,6 +186,43 @@ class PlaqueHudModelTest {
         }
     }
 
+    @Test
+    void waveSixStructuralWorkplacesUseSpecificPhysicalRequirements() {
+        for (final MarkerType type : List.of(
+                MarkerType.ARCHERY, MarkerType.COMBAT_ACADEMY, MarkerType.BARRACKS_TOWER,
+                MarkerType.GATE_HOUSE, MarkerType.BUILDER, MarkerType.MINER)) {
+            final PlaqueHudModel active = PlaqueHudModel.from(type, mark(
+                    type,
+                    new WorksitePoi(WorksitePoiType.WORKSITE, BlockPos.ZERO),
+                    new WorksitePoi(WorksitePoiType.STORAGE, new BlockPos(1, 0, 0))));
+            assertEquals(PlaqueHudModel.State.ACTIVE, active.state(), type::name);
+            assertEquals(2, active.requiredCount(), type::name);
+        }
+    }
+
+    @Test
+    void waveSixNetworkAndSupportReadinessMatchesNativeTopology() {
+        final PlaqueHudModel warehouse = PlaqueHudModel.from(MarkerType.WAREHOUSE, mark(
+                MarkerType.WAREHOUSE, new WorksitePoi(WorksitePoiType.WORKSITE, BlockPos.ZERO)));
+        assertEquals(PlaqueHudModel.State.ACTIVE, warehouse.state());
+        assertEquals(1, warehouse.requiredCount());
+
+        for (final MarkerType type : List.of(MarkerType.DELIVERYMAN, MarkerType.BARRACKS)) {
+            final PlaqueHudModel active = PlaqueHudModel.from(type, mark(
+                    type, new WorksitePoi(WorksitePoiType.STORAGE, BlockPos.ZERO)));
+            assertEquals(PlaqueHudModel.State.ACTIVE, active.state(), type::name);
+            assertEquals(1, active.requiredCount(), type::name);
+        }
+
+        for (final MarkerType type : List.of(
+                MarkerType.POST_BOX, MarkerType.SIMPLE_QUARRY, MarkerType.MEDIUM_QUARRY,
+                MarkerType.TOWN_HALL, MarkerType.STASH, MarkerType.MYSTICAL_SITE)) {
+            final PlaqueHudModel active = PlaqueHudModel.from(type, mark(type));
+            assertEquals(PlaqueHudModel.State.ACTIVE, active.state(), type::name);
+            assertEquals(0, active.requiredCount(), type::name);
+        }
+    }
+
     private static CommittedWorksiteMark mark(final MarkerType type, final WorksitePoi... points) {
         return new CommittedWorksiteMark(UUID.randomUUID(), type, BOUNDS, List.of(points));
     }

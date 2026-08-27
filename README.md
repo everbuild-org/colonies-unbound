@@ -69,6 +69,9 @@ The Worksite Marker provides the first area-selection vertical slice:
 - Wave 5 adds Hospital, School, Library, University, Tavern, Graveyard, Enchanter, and Nether Worker
   plaques. Their beds, classroom seats, bookshelves, graves, enchanting tables, and live portals are
   scanner-owned; the Enchanter also links all operational worker buildings as native draining targets.
+- Wave 6 completes the pinned facility roster with logistics, defense complexes, training buildings,
+  Builder/Miner structural jobs, quarry controllers, Town Hall, Stash, and Mystical Site. Warehouses
+  expose scanned MineColonies racks to native couriers, while Barracks and Towers link automatically.
 
 Temporary selection data is synchronized as item data. Committed volumes are owned and synchronized
 by their residence plaque, so removing that building anchor also removes the mark.

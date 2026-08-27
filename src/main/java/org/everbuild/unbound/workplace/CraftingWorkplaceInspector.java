@@ -43,7 +43,8 @@ public final class CraftingWorkplaceInspector {
             }
         }
         return new CraftingWorkplaceInspection(
-                workstations.isEmpty() ? CraftingWorkplaceInspection.Status.NO_WORKSTATION
+                workstations.isEmpty() && selected.requiresWorkstation()
+                        ? CraftingWorkplaceInspection.Status.NO_WORKSTATION
                         : CraftingWorkplaceInspection.Status.VALID,
                 bounds, plaques, workstations, selected);
     }

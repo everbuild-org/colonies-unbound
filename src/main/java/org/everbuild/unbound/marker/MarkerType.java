@@ -42,7 +42,22 @@ public enum MarkerType {
     TAVERN("tavern"),
     GRAVEYARD("graveyard"),
     ENCHANTER("enchanter"),
-    NETHER_WORKER("nether_worker");
+    NETHER_WORKER("nether_worker"),
+    ARCHERY("archery"),
+    COMBAT_ACADEMY("combat_academy"),
+    WAREHOUSE("warehouse"),
+    POST_BOX("post_box"),
+    DELIVERYMAN("deliveryman"),
+    BARRACKS("barracks"),
+    BARRACKS_TOWER("barracks_tower"),
+    GATE_HOUSE("gate_house"),
+    BUILDER("builder"),
+    MINER("miner"),
+    SIMPLE_QUARRY("simple_quarry"),
+    MEDIUM_QUARRY("medium_quarry"),
+    TOWN_HALL("town_hall"),
+    STASH("stash"),
+    MYSTICAL_SITE("mystical_site");
 
     private final String id;
 

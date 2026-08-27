@@ -107,7 +107,7 @@ public final class SurvivalCraftingMarkerService {
             return ReconcileResult.MARK_UNAVAILABLE;
         }
         final List<WorksitePoi> updated = mergeWorkstations(current.pois(), inspection.workstationPositions());
-        final int desiredLevel = isReady(updated) ? 1 : 0;
+        final int desiredLevel = isReady(current.type(), updated) ? 1 : 0;
         if (Set.copyOf(updated).equals(Set.copyOf(current.pois())) && building.getBuildingLevel() == desiredLevel) {
             return ReconcileResult.UNCHANGED;
         }
@@ -155,7 +155,7 @@ public final class SurvivalCraftingMarkerService {
             tile.setCommittedMark(updated);
             building.setCorners(updated.bounds().min(), updated.bounds().max());
             building.configureWorkArea(updated.bounds());
-            building.setBuildingLevel(isReady(updated.pois()) ? 1 : 0);
+            building.setBuildingLevel(isReady(updated.type(), updated.pois()) ? 1 : 0);
             updated.pois().stream().filter(point -> point.type() == WorksitePoiType.STORAGE)
                     .map(WorksitePoi::position).forEach(building::addContainerPosition);
             updated.pois().stream().filter(point -> point.type() == WorksitePoiType.WORKSITE)
@@ -165,9 +165,13 @@ public final class SurvivalCraftingMarkerService {
         colony.markDirty();
     }
 
-    private static boolean isReady(final List<WorksitePoi> points) {
-        return points.stream().anyMatch(point -> point.type() == WorksitePoiType.STORAGE)
-                && points.stream().anyMatch(point -> point.type() == WorksitePoiType.WORKSITE);
+    private static boolean isReady(final org.everbuild.unbound.marker.MarkerType type, final List<WorksitePoi> points) {
+        final CraftingWorkplaceDefinition definition = CraftingWorkplaceDefinition.all().stream()
+                .filter(candidate -> candidate.markerType() == type).findFirst().orElseThrow();
+        return (!definition.requiresStorage()
+                        || points.stream().anyMatch(point -> point.type() == WorksitePoiType.STORAGE))
+                && (!definition.requiresWorkstation()
+                        || points.stream().anyMatch(point -> point.type() == WorksitePoiType.WORKSITE));
     }
 
     private static Owner owner(final ServerLevel level, final SurvivalCraftingBuilding building) {

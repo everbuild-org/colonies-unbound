@@ -325,6 +325,67 @@ public final class MineColoniesIntegration {
             "nether_worker", () -> MineColoniesIntegration.SURVIVAL_NETHER_WORKER.get());
     public static final DeferredItem<BlockItem> SURVIVAL_NETHER_WORKER_ITEM = ITEMS.registerSimpleBlockItem(
             SURVIVAL_NETHER_WORKER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_ARCHERY_BLOCK = naturalPlaqueBlock(
+            "archery", () -> MineColoniesIntegration.SURVIVAL_ARCHERY.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_ARCHERY_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_ARCHERY_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_COMBAT_ACADEMY_BLOCK = naturalPlaqueBlock(
+            "combat_academy", () -> MineColoniesIntegration.SURVIVAL_COMBAT_ACADEMY.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_COMBAT_ACADEMY_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_COMBAT_ACADEMY_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_WAREHOUSE_BLOCK = naturalPlaqueBlock(
+            "warehouse", () -> MineColoniesIntegration.SURVIVAL_WAREHOUSE.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_WAREHOUSE_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_WAREHOUSE_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_POST_BOX_BLOCK = naturalPlaqueBlock(
+            "post_box", () -> MineColoniesIntegration.SURVIVAL_POST_BOX.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_POST_BOX_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_POST_BOX_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_DELIVERYMAN_BLOCK = naturalPlaqueBlock(
+            "deliveryman", () -> MineColoniesIntegration.SURVIVAL_DELIVERYMAN.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_DELIVERYMAN_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_DELIVERYMAN_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_BARRACKS_BLOCK = naturalPlaqueBlock(
+            "barracks", () -> MineColoniesIntegration.SURVIVAL_BARRACKS.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_BARRACKS_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_BARRACKS_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_BARRACKS_TOWER_BLOCK = naturalPlaqueBlock(
+            "barracks_tower", () -> MineColoniesIntegration.SURVIVAL_BARRACKS_TOWER.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_BARRACKS_TOWER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_BARRACKS_TOWER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_GATE_HOUSE_BLOCK = naturalPlaqueBlock(
+            "gate_house", () -> MineColoniesIntegration.SURVIVAL_GATE_HOUSE.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_GATE_HOUSE_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_GATE_HOUSE_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_BUILDER_BLOCK = naturalPlaqueBlock(
+            "builder", () -> MineColoniesIntegration.SURVIVAL_BUILDER.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_BUILDER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_BUILDER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_MINER_BLOCK = naturalPlaqueBlock(
+            "miner", () -> MineColoniesIntegration.SURVIVAL_MINER.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_MINER_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_MINER_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_SIMPLE_QUARRY_BLOCK = naturalPlaqueBlock(
+            "simple_quarry", () -> MineColoniesIntegration.SURVIVAL_SIMPLE_QUARRY.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_SIMPLE_QUARRY_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_SIMPLE_QUARRY_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_MEDIUM_QUARRY_BLOCK = naturalPlaqueBlock(
+            "medium_quarry", () -> MineColoniesIntegration.SURVIVAL_MEDIUM_QUARRY.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_MEDIUM_QUARRY_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_MEDIUM_QUARRY_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_TOWN_HALL_BLOCK = naturalPlaqueBlock(
+            "town_hall", () -> MineColoniesIntegration.SURVIVAL_TOWN_HALL.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_TOWN_HALL_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_TOWN_HALL_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_STASH_BLOCK = naturalPlaqueBlock(
+            "stash", () -> MineColoniesIntegration.SURVIVAL_STASH.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_STASH_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_STASH_BLOCK, new Item.Properties().stacksTo(1));
+    public static final DeferredBlock<SurvivalCraftingBlock> SURVIVAL_MYSTICAL_SITE_BLOCK = naturalPlaqueBlock(
+            "mystical_site", () -> MineColoniesIntegration.SURVIVAL_MYSTICAL_SITE.get());
+    public static final DeferredItem<BlockItem> SURVIVAL_MYSTICAL_SITE_ITEM = ITEMS.registerSimpleBlockItem(
+            SURVIVAL_MYSTICAL_SITE_BLOCK, new Item.Properties().stacksTo(1));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SurvivalCraftingTileEntity>>
             SURVIVAL_CRAFTING_TILE = BLOCK_ENTITIES.register(
                     "survival_crafting_plaque",
@@ -358,7 +419,22 @@ public final class MineColoniesIntegration {
                             SURVIVAL_TAVERN_BLOCK.get(),
                             SURVIVAL_GRAVEYARD_BLOCK.get(),
                             SURVIVAL_ENCHANTER_BLOCK.get(),
-                            SURVIVAL_NETHER_WORKER_BLOCK.get())
+                            SURVIVAL_NETHER_WORKER_BLOCK.get(),
+                            SURVIVAL_ARCHERY_BLOCK.get(),
+                            SURVIVAL_COMBAT_ACADEMY_BLOCK.get(),
+                            SURVIVAL_WAREHOUSE_BLOCK.get(),
+                            SURVIVAL_POST_BOX_BLOCK.get(),
+                            SURVIVAL_DELIVERYMAN_BLOCK.get(),
+                            SURVIVAL_BARRACKS_BLOCK.get(),
+                            SURVIVAL_BARRACKS_TOWER_BLOCK.get(),
+                            SURVIVAL_GATE_HOUSE_BLOCK.get(),
+                            SURVIVAL_BUILDER_BLOCK.get(),
+                            SURVIVAL_MINER_BLOCK.get(),
+                            SURVIVAL_SIMPLE_QUARRY_BLOCK.get(),
+                            SURVIVAL_MEDIUM_QUARRY_BLOCK.get(),
+                            SURVIVAL_TOWN_HALL_BLOCK.get(),
+                            SURVIVAL_STASH_BLOCK.get(),
+                            SURVIVAL_MYSTICAL_SITE_BLOCK.get())
                             .build(null));
 
 
@@ -768,6 +844,120 @@ public final class MineColoniesIntegration {
                     .addBuildingModuleProducer(BuildingModules.NETHERMINER_MENU).addBuildingModuleProducer(BuildingModules.CRAFT_TASK_VIEW)
                     .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
                     .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_ARCHERY = BUILDINGS.register(
+            "survival_archery", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_archery"))
+                    .setBuildingBlock(SURVIVAL_ARCHERY_BLOCK.get()).setBuildingProducer(SurvivalArcheryBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.ARCHERY_WORK_HOME).addBuildingModuleProducer(BuildingModules.BED)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_COMBAT_ACADEMY = BUILDINGS.register(
+            "survival_combat_academy", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_combat_academy"))
+                    .setBuildingBlock(SURVIVAL_COMBAT_ACADEMY_BLOCK.get()).setBuildingProducer(SurvivalCombatAcademyBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.KNIGHT_TRAINING).addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.BED).addBuildingModuleProducer(BuildingModules.STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_WAREHOUSE = BUILDINGS.register(
+            "survival_warehouse", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_warehouse"))
+                    .setBuildingBlock(SURVIVAL_WAREHOUSE_BLOCK.get()).setBuildingProducer(SurvivalWarehouseBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.WAREHOUSE_COURIERS).addBuildingModuleProducer(BuildingModules.WAREHOUSE_OPTIONS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.WAREHOUSE_REQUEST_QUEUE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_POST_BOX = BUILDINGS.register(
+            "survival_post_box", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_post_box"))
+                    .setBuildingBlock(SURVIVAL_POST_BOX_BLOCK.get()).setBuildingProducer(SurvivalPostBoxBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK_POSTBOX).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_DELIVERYMAN = BUILDINGS.register(
+            "survival_deliveryman", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_deliveryman"))
+                    .setBuildingBlock(SURVIVAL_DELIVERYMAN_BLOCK.get()).setBuildingProducer(SurvivalDeliverymanBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.COURIER_WORK).addBuildingModuleProducer(BuildingModules.COURIER_TASK_VIEW)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_BARRACKS = BUILDINGS.register(
+            "survival_barracks", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_barracks"))
+                    .setBuildingBlock(SURVIVAL_BARRACKS_BLOCK.get()).setBuildingProducer(SurvivalBarracksBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.BARRACKS_STATS_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_BARRACKS_TOWER = BUILDINGS.register(
+            "survival_barracks_tower", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_barracks_tower"))
+                    .setBuildingBlock(SURVIVAL_BARRACKS_TOWER_BLOCK.get()).setBuildingProducer(SurvivalBarracksTowerBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.KNIGHT_BARRACKS_WORK).addBuildingModuleProducer(BuildingModules.RANGER_BARRACKS_WORK)
+                    .addBuildingModuleProducer(BuildingModules.DRUID_BARRACKS_WORK).addBuildingModuleProducer(BuildingModules.HUSCARL_BARRACKS_WORK)
+                    .addBuildingModuleProducer(BuildingModules.MARKSMAN_BARRACKS_WORK).addBuildingModuleProducer(BuildingModules.GUARD_TOOL)
+                    .addBuildingModuleProducer(BuildingModules.GUARD_ENTITY_LIST).addBuildingModuleProducer(BuildingModules.GUARD_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.BED)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_GATE_HOUSE = BUILDINGS.register(
+            "survival_gate_house", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_gate_house"))
+                    .setBuildingBlock(SURVIVAL_GATE_HOUSE_BLOCK.get()).setBuildingProducer(SurvivalGateHouseBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.KNIGHT_GATE_WORK).addBuildingModuleProducer(BuildingModules.RANGER_GATE_WORK)
+                    .addBuildingModuleProducer(BuildingModules.GUARD_ENTITY_LIST).addBuildingModuleProducer(BuildingModules.GATE_GUARD_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.MIN_STOCK).addBuildingModuleProducer(BuildingModules.BED)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).addBuildingModuleProducer(BuildingModules.CONNECTION_MODULE)
+                    .createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_BUILDER = BUILDINGS.register(
+            "survival_builder", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_builder"))
+                    .setBuildingBlock(SURVIVAL_BUILDER_BLOCK.get()).setBuildingProducer(SurvivalBuilderBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.BUILDER_WORK).addBuildingModuleProducer(BuildingModules.BUILDER_CRAFT)
+                    .addBuildingModuleProducer(BuildingModules.BUILDING_RESOURCES).addBuildingModuleProducer(BuildingModules.BUILDER_SETTINGS)
+                    .addBuildingModuleProducer(BuildingModules.WORKORDER_VIEW).addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_MINER = BUILDINGS.register(
+            "survival_miner", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_miner"))
+                    .setBuildingBlock(SURVIVAL_MINER_BLOCK.get()).setBuildingProducer(SurvivalMinerBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.MINER_WORK).addBuildingModuleProducer(BuildingModules.QUARRIER_WORK)
+                    .addBuildingModuleProducer(BuildingModules.MINER_CRAFT).addBuildingModuleProducer(BuildingModules.MINER_LEVELS)
+                    .addBuildingModuleProducer(BuildingModules.MINER_SETTINGS).addBuildingModuleProducer(BuildingModules.MINER_GUARD_ASSIGN)
+                    .addBuildingModuleProducer(BuildingModules.BUILDING_RESOURCES).addBuildingModuleProducer(BuildingModules.MIN_STOCK)
+                    .addBuildingModuleProducer(BuildingModules.STATS_MODULE).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_SIMPLE_QUARRY = BUILDINGS.register(
+            "survival_simple_quarry", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_simple_quarry"))
+                    .setBuildingBlock(SURVIVAL_SIMPLE_QUARRY_BLOCK.get())
+                    .setBuildingProducer((colony, position) -> new SurvivalQuarryBuilding(colony, position, "simplequarry"))
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.SIMPLE_QUARRY).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_MEDIUM_QUARRY = BUILDINGS.register(
+            "survival_medium_quarry", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_medium_quarry"))
+                    .setBuildingBlock(SURVIVAL_MEDIUM_QUARRY_BLOCK.get())
+                    .setBuildingProducer((colony, position) -> new SurvivalQuarryBuilding(colony, position, "mediumquarry"))
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.MEDIUM_QUARRY).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_TOWN_HALL = BUILDINGS.register(
+            "survival_town_hall", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_town_hall"))
+                    .setBuildingBlock(SURVIVAL_TOWN_HALL_BLOCK.get()).setBuildingProducer(SurvivalTownHallBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new)
+                    .addBuildingModuleProducer(BuildingModules.TOWNHALL_SETTINGS).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_STASH = BUILDINGS.register(
+            "survival_stash", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_stash"))
+                    .setBuildingBlock(SURVIVAL_STASH_BLOCK.get()).setBuildingProducer(SurvivalStashBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new).createBuildingEntry());
+    public static final DeferredHolder<BuildingEntry, BuildingEntry> SURVIVAL_MYSTICAL_SITE = BUILDINGS.register(
+            "survival_mystical_site", () -> new BuildingEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(ColoniesUnbound.MOD_ID, "survival_mystical_site"))
+                    .setBuildingBlock(SURVIVAL_MYSTICAL_SITE_BLOCK.get()).setBuildingProducer(SurvivalMysticalSiteBuilding::new)
+                    .setBuildingViewProducer(() -> EmptyView::new).createBuildingEntry());
 
 
     private MineColoniesIntegration() {
@@ -834,6 +1024,21 @@ public final class MineColoniesIntegration {
             event.accept(SURVIVAL_GRAVEYARD_ITEM);
             event.accept(SURVIVAL_ENCHANTER_ITEM);
             event.accept(SURVIVAL_NETHER_WORKER_ITEM);
+            event.accept(SURVIVAL_ARCHERY_ITEM);
+            event.accept(SURVIVAL_COMBAT_ACADEMY_ITEM);
+            event.accept(SURVIVAL_WAREHOUSE_ITEM);
+            event.accept(SURVIVAL_POST_BOX_ITEM);
+            event.accept(SURVIVAL_DELIVERYMAN_ITEM);
+            event.accept(SURVIVAL_BARRACKS_ITEM);
+            event.accept(SURVIVAL_BARRACKS_TOWER_ITEM);
+            event.accept(SURVIVAL_GATE_HOUSE_ITEM);
+            event.accept(SURVIVAL_BUILDER_ITEM);
+            event.accept(SURVIVAL_MINER_ITEM);
+            event.accept(SURVIVAL_SIMPLE_QUARRY_ITEM);
+            event.accept(SURVIVAL_MEDIUM_QUARRY_ITEM);
+            event.accept(SURVIVAL_TOWN_HALL_ITEM);
+            event.accept(SURVIVAL_STASH_ITEM);
+            event.accept(SURVIVAL_MYSTICAL_SITE_ITEM);
         }
     }
 }

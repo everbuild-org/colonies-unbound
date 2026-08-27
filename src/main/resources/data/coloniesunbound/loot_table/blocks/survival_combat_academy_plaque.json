@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:block",
+  "pools": [{ "rolls": 1, "entries": [{ "type": "minecraft:item", "name": "coloniesunbound:survival_combat_academy_plaque" }],
+    "conditions": [{ "condition": "minecraft:survives_explosion" }] }],
+  "random_sequence": "coloniesunbound:blocks/survival_combat_academy_plaque"
+}

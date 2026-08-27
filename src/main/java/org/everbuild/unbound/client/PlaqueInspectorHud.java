@@ -127,6 +127,14 @@ public final class PlaqueInspectorHud {
             case GRAVEYARD -> 0xFF68717C;
             case ENCHANTER -> 0xFF8754B8;
             case NETHER_WORKER -> 0xFF7440A0;
+            case ARCHERY -> 0xFF668B55;
+            case COMBAT_ACADEMY -> 0xFF9B4B45;
+            case WAREHOUSE, POST_BOX, DELIVERYMAN, STASH -> 0xFFB2864D;
+            case BARRACKS, BARRACKS_TOWER, GATE_HOUSE -> 0xFF5F6570;
+            case BUILDER -> 0xFFD39A4A;
+            case MINER, SIMPLE_QUARRY, MEDIUM_QUARRY -> 0xFF6C7077;
+            case TOWN_HALL -> 0xFF4D79A8;
+            case MYSTICAL_SITE -> 0xFF7651A8;
             case RESIDENCE -> 0xFF4E83EE;
         };
 
@@ -231,6 +239,21 @@ public final class PlaqueInspectorHud {
             case GRAVEYARD -> "hud.coloniesunbound.plaque.graveyard";
             case ENCHANTER -> "hud.coloniesunbound.plaque.enchanter";
             case NETHER_WORKER -> "hud.coloniesunbound.plaque.nether_worker";
+            case ARCHERY -> "hud.coloniesunbound.plaque.archery";
+            case COMBAT_ACADEMY -> "hud.coloniesunbound.plaque.combat_academy";
+            case WAREHOUSE -> "hud.coloniesunbound.plaque.warehouse";
+            case POST_BOX -> "hud.coloniesunbound.plaque.post_box";
+            case DELIVERYMAN -> "hud.coloniesunbound.plaque.deliveryman";
+            case BARRACKS -> "hud.coloniesunbound.plaque.barracks";
+            case BARRACKS_TOWER -> "hud.coloniesunbound.plaque.barracks_tower";
+            case GATE_HOUSE -> "hud.coloniesunbound.plaque.gate_house";
+            case BUILDER -> "hud.coloniesunbound.plaque.builder";
+            case MINER -> "hud.coloniesunbound.plaque.miner";
+            case SIMPLE_QUARRY -> "hud.coloniesunbound.plaque.simple_quarry";
+            case MEDIUM_QUARRY -> "hud.coloniesunbound.plaque.medium_quarry";
+            case TOWN_HALL -> "hud.coloniesunbound.plaque.town_hall";
+            case STASH -> "hud.coloniesunbound.plaque.stash";
+            case MYSTICAL_SITE -> "hud.coloniesunbound.plaque.mystical_site";
             case RESIDENCE -> "hud.coloniesunbound.plaque.residence";
         });
     }

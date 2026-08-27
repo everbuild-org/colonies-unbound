@@ -57,6 +57,19 @@ public record PlaqueHudModel(
             requirements.add(new Requirement("hud.coloniesunbound.plaque.hives", count(points, WorksitePoiType.HIVE), 1, false));
             return requirements;
         }
+        if (type == MarkerType.WAREHOUSE) {
+            requirements.add(new Requirement("hud.coloniesunbound.plaque.racks", count(points, WorksitePoiType.WORKSITE), 1, false));
+            return requirements;
+        }
+        if (type == MarkerType.POST_BOX || type == MarkerType.SIMPLE_QUARRY
+                || type == MarkerType.MEDIUM_QUARRY || type == MarkerType.TOWN_HALL
+                || type == MarkerType.STASH || type == MarkerType.MYSTICAL_SITE) {
+            return requirements;
+        }
+        if (type == MarkerType.DELIVERYMAN || type == MarkerType.BARRACKS) {
+            requirements.add(new Requirement("hud.coloniesunbound.plaque.storage", count(points, WorksitePoiType.STORAGE), 1, false));
+            return requirements;
+        }
         if (type == MarkerType.BLACKSMITH || type == MarkerType.SAWMILL
                 || type == MarkerType.STONEMASON || type == MarkerType.FLETCHER
                 || type == MarkerType.MECHANIC || type == MarkerType.CONCRETE_MIXER
@@ -88,6 +101,22 @@ public record PlaqueHudModel(
             requirements.add(new Requirement(
                     resourceKey,
                     count(points, WorksitePoiType.WORKSITE), 1, false));
+            return requirements;
+        }
+        if (type == MarkerType.ARCHERY || type == MarkerType.COMBAT_ACADEMY
+                || type == MarkerType.BARRACKS_TOWER || type == MarkerType.GATE_HOUSE
+                || type == MarkerType.BUILDER || type == MarkerType.MINER) {
+            requirements.add(new Requirement("hud.coloniesunbound.plaque.storage", count(points, WorksitePoiType.STORAGE), 1, false));
+            final String key = switch (type) {
+                case ARCHERY -> "hud.coloniesunbound.plaque.archery_targets";
+                case COMBAT_ACADEMY -> "hud.coloniesunbound.plaque.training_dummies";
+                case BARRACKS_TOWER -> "hud.coloniesunbound.plaque.beds";
+                case GATE_HOUSE -> "hud.coloniesunbound.plaque.guard_posts";
+                case BUILDER -> "hud.coloniesunbound.plaque.workbenches";
+                case MINER -> "hud.coloniesunbound.plaque.shaft_ladders";
+                default -> throw new IllegalStateException("Handled Wave 6 type");
+            };
+            requirements.add(new Requirement(key, count(points, WorksitePoiType.WORKSITE), 1, false));
             return requirements;
         }
         if (type == MarkerType.ANIMAL_PEN

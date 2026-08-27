@@ -582,11 +582,16 @@ public final class WorksiteMarkerItem extends Item {
                 serverLevel, serverPlayer, selection, inspection);
         if (result == SurvivalCraftingMarkerService.RegistrationResult.SAVED) MarkerSelection.clear(stack);
         return switch (result) {
-            case SAVED -> Component.translatable(
+            case SAVED -> (inspection.definition().requiresWorkstation() && inspection.definition().requiresStorage()
+                    ? Component.translatable(
                             "message.coloniesunbound.crafting.saved",
                             Component.translatable("hud.coloniesunbound.plaque." + inspection.definition().id()),
                             inspection.bounds().sizeX(), inspection.bounds().sizeY(), inspection.bounds().sizeZ(),
                             inspection.workstationPositions().size())
+                    : Component.translatable(
+                            "message.coloniesunbound.infrastructure.saved",
+                            Component.translatable("hud.coloniesunbound.plaque." + inspection.definition().id()),
+                            inspection.bounds().sizeX(), inspection.bounds().sizeY(), inspection.bounds().sizeZ()))
                     .withStyle(ChatFormatting.GREEN);
             case OUTSIDE_COLONY -> Component.translatable("message.coloniesunbound.inspection.outside_colony")
                     .withStyle(ChatFormatting.RED);
