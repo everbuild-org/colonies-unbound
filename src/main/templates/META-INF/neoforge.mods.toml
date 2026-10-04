@@ -34,3 +34,6 @@ versionRange="[1.1.1374,1.1.1375)"
 ordering="AFTER"
 side="BOTH"
 
+
+[[mixins]]
+config="coloniesunbound.mixins.json"
